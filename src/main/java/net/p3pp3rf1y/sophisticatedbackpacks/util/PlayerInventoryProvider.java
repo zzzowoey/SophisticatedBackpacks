@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class PlayerInventoryProvider {
 	private static final PlayerInventoryProvider clientProvider = new PlayerInventoryProvider();
 
 	public static PlayerInventoryProvider get() {
-		if (FMLEnvironment.dist == Dist.CLIENT) {
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
 			return clientProvider;
 		} else {
 			return serverProvider;

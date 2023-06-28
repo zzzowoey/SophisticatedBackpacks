@@ -1,10 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.api;
 
-import net.minecraftforge.energy.IEnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 import javax.annotation.Nullable;
 
 public interface IEnergyStorageUpgradeWrapper {
 	@Nullable
-	IEnergyStorage wrapStorage(@Nullable IEnergyStorage energyStorage);
+	EnergyStorage wrapStorage(@Nullable EnergyStorage energyStorage);
 }

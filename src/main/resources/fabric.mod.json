@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "sophisticatedbackpacks",
+  "version": "${version}",
+
+  "name": "Sophisticated Backpacks",
+  "description": "Fancy and functional backpacks.",
+
+  "license": "GNU General Public License v3.0",
+  "icon": "logo.png",
+  "authors": [
+    "P3pp3rF1y",
+    "Ridanisaurus",
+    "Salandora"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks",
+    "issues": "https://github.com/P3pp3rF1y/SophisticatedBackpacks/issues",
+    "sources": "https://github.com/P3pp3rF1y/SophisticatedBackpacks/"
+  },
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks"
+    ],
+    "client": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksClient"
+    ],
+    "fabric-datagen": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksData"
+    ],
+    "jei_mod_plugin": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin"
+    ],
+    "cardinal-components": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents"
+    ]
+  },
+
+  "mixins": [ "sophisticatedbackpacks.mixins.json" ],
+  "accessWidener": "sophisticatedbackpacks.accesswidener",
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": ">=${fabric_version}",
+    "minecraft": "${minecraft_version}"
+  },
+
+  "custom": {
+    "cardinal-components": [
+      "sophisticatedbackpacks:backpackWrapperComponent"
+    ],
+    "loom:injected_interfaces": {
+    }
+  }
+}

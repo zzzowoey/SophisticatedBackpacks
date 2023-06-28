@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -12,8 +13,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.Collection;
@@ -34,12 +35,12 @@ public class GiveCommand {
 
 	private static int giveBackpack(CommandSourceStack source, UUID backpackUuid, Collection<ServerPlayer> players) {
 		BackpackAccessLogger.getBackpackLog(backpackUuid).ifPresent(alr -> {
-			Item item = ForgeRegistries.ITEMS.getValue(alr.getBackpackItemRegistryName());
+			Item item = BuiltInRegistries.ITEM.get(alr.getBackpackItemRegistryName());
 			ItemStack backpack = new ItemStack(item);
 			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
 				backpack.setHoverName(Component.literal(alr.getBackpackName()));
 			}
-			backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+			IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
 				backpackWrapper.setColumnsTaken(alr.getColumnsTaken(), false);
 				backpackWrapper.setContentsUuid(backpackUuid);
@@ -71,7 +72,7 @@ public class GiveCommand {
 			ItemEntity itementity = p.drop(backpack, false);
 			if (itementity != null) {
 				itementity.setNoPickUpDelay();
-				itementity.setOwner(p.getUUID());
+				itementity.setThrower(p.getUUID());
 			}
 		}
 

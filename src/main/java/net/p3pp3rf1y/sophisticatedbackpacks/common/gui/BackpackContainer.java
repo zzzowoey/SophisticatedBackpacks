@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,7 +11,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -68,7 +68,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			CompoundTag settingsNbt = storageWrapper.getSettingsHandler().getNbt();
 			if (!settingsNbt.isEmpty()) {
 				settingsContents.put(BackpackSettingsHandler.SETTINGS_TAG, settingsNbt);
-				SBPPacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
+				SBPPacketHandler.sendToClient((ServerPlayer) player, new BackpackContentsMessage(uuid, settingsContents));
 			}
 		});
 	}
@@ -97,7 +97,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			sendToServer(data -> data.putString(ACTION_TAG, "openSettings"));
 			return;
 		}
-		NetworkHooks.openScreen((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
+
+		NetworkUtil.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
 				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), backpackContext::toBuffer);
 	}
 
@@ -134,6 +135,6 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	protected boolean shouldSlotItemBeDroppedFromStorage(Slot slot) {
 		return slot.getItem().getItem() instanceof BackpackItem &&
-				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItem());
+				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItemVariant(), slot.getItem().getCount());
 	}
 }

@@ -3,7 +3,10 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Tuple;
@@ -14,9 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.IRegistryDataLoader;
 import net.p3pp3rf1y.sophisticatedcore.util.RegistryHelper;
@@ -40,8 +40,8 @@ public class ToolRegistry {
 
 	private static final Set<String> modsWithMapping = new HashSet<>();
 
-	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.BLOCKS, BlockContext::getBlock);
-	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(ForgeRegistries.ENTITY_TYPES, Entity::getType);
+	private static final ToolMapping<Block, BlockContext> BLOCK_TOOL_MAPPING = new ToolMapping<>(BuiltInRegistries.BLOCK, BlockContext::getBlock);
+	private static final ToolMapping<EntityType<?>, Entity> ENTITY_TOOL_MAPPING = new ToolMapping<>(BuiltInRegistries.ENTITY_TYPE, Entity::getType);
 
 	public static boolean isToolForBlock(ItemStack stack, Block block, Level world, BlockState blockState, BlockPos pos) {
 		return BLOCK_TOOL_MAPPING.isToolFor(stack, block, () -> new BlockContext(world, blockState, block, pos));
@@ -54,12 +54,12 @@ public class ToolRegistry {
 	private abstract static class ToolsLoaderBase<V, C> implements IRegistryDataLoader {
 		private final List<IMatcherFactory<C>> objectMatcherFactories;
 		private final ToolMapping<V, C> toolMapping;
-		private final IForgeRegistry<V> registry;
+		private final Registry<V> registry;
 		private final Function<ResourceLocation, Optional<V>> getObjectFromRegistry;
 		private final String name;
 		private final String objectJsonArrayName;
 
-		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, IForgeRegistry<V> registry, Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
+		public ToolsLoaderBase(List<IMatcherFactory<C>> objectMatcherFactories, ToolMapping<V, C> toolMapping, Registry<V> registry, Function<ResourceLocation, Optional<V>> getObjectFromRegistry, String name, String objectJsonArrayName) {
 			this.objectMatcherFactories = objectMatcherFactories;
 			this.toolMapping = toolMapping;
 			this.registry = registry;
@@ -150,7 +150,7 @@ public class ToolRegistry {
 
 		private void parseModTools(Map.Entry<String, JsonElement> property) {
 			String modId = property.getKey();
-			if (!ModList.get().isLoaded(modId)) {
+			if (!FabricLoader.getInstance().isModLoaded(modId)) {
 				SophisticatedBackpacks.LOGGER.debug("{} mod isn't loaded, skipping ... {} ", modId, property);
 				return;
 			}
@@ -187,10 +187,10 @@ public class ToolRegistry {
 		for (JsonElement jsonElement : toolArray) {
 			if (jsonElement.isJsonPrimitive()) {
 				ResourceLocation itemName = new ResourceLocation(jsonElement.getAsString());
-				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
+				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
-				Item item = ForgeRegistries.ITEMS.getValue(itemName);
+				Item item = BuiltInRegistries.ITEM.get(itemName);
 				items.add(item);
 			} else if (jsonElement.isJsonObject()) {
 				Matchers.getItemMatcher(jsonElement).ifPresent(itemPredicates::add);
@@ -201,13 +201,13 @@ public class ToolRegistry {
 
 	public static class BlockToolsLoader extends ToolsLoaderBase<Block, BlockContext> {
 		public BlockToolsLoader() {
-			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, ForgeRegistries.BLOCKS, rn -> Optional.ofNullable(ForgeRegistries.BLOCKS.getValue(rn)), "block_tools", "blocks");
+			super(Matchers.getBlockMatcherFactories(), BLOCK_TOOL_MAPPING, BuiltInRegistries.BLOCK, rn -> Optional.of(BuiltInRegistries.BLOCK.get(rn)), "block_tools", "blocks");
 		}
 	}
 
 	public static class EntityToolsLoader extends ToolsLoaderBase<EntityType<?>, Entity> {
 		public EntityToolsLoader() {
-			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, ForgeRegistries.ENTITY_TYPES, rn -> Optional.ofNullable(ForgeRegistries.ENTITY_TYPES.getValue(rn)), "entity_tools", "entities");
+			super(Matchers.getEntityMatcherFactories(), ENTITY_TOOL_MAPPING, BuiltInRegistries.ENTITY_TYPE, rn -> Optional.of(BuiltInRegistries.ENTITY_TYPE.get(rn)), "entity_tools", "entities");
 		}
 	}
 
@@ -216,7 +216,7 @@ public class ToolRegistry {
 	}
 
 	private static class ToolMapping<V, C> {
-		private final IForgeRegistry<V> registry;
+		private final Registry<V> registry;
 		private final Function<C, V> getObjectFromContext;
 		private final Map<V, Set<Item>> notToolCache = new HashMap<>();
 
@@ -225,7 +225,7 @@ public class ToolRegistry {
 		private final Map<Predicate<C>, Set<Item>> objectPredicateTools = new HashMap<>();
 		private final Map<Predicate<C>, Set<Predicate<ItemStack>>> objectPredicateToolPredicates = new HashMap<>();
 
-		public ToolMapping(IForgeRegistry<V> registry, Function<C, V> getObjectFromContext) {
+		public ToolMapping(Registry<V> registry, Function<C, V> getObjectFromContext) {
 			this.registry = registry;
 			this.getObjectFromContext = getObjectFromContext;
 		}
@@ -290,7 +290,7 @@ public class ToolRegistry {
 		private boolean isNoMappingModAndNonStackableItemFromSameMod(ItemStack stack, V object) {
 			return RegistryHelper.getRegistryName(registry, object).map(rn ->
 					!rn.getNamespace().equals("minecraft")
-							&& !modsWithMapping.contains(rn.getNamespace()) && RegistryHelper.getRegistryName(ForgeRegistries.ITEMS, stack.getItem()).map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false)
+							&& !modsWithMapping.contains(rn.getNamespace()) && RegistryHelper.getRegistryName(BuiltInRegistries.ITEM, stack.getItem()).map(itemRegistryName -> itemRegistryName.getNamespace().equals(rn.getNamespace())).orElse(false)
 			).orElse(false) && stack.getMaxStackSize() == 1;
 		}
 

@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
@@ -10,8 +10,8 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.*;
 public class ModBlockColors {
 	private ModBlockColors() {}
 
-	public static void registerBlockColorHandlers(RegisterColorHandlersEvent.Block event) {
-		event.register((state, blockDisplayReader, pos, tintIndex) -> {
+	public static void registerBlockColorHandlers() {
+		ColorProviderRegistry.BLOCK.register((state, blockDisplayReader, pos, tintIndex) -> {
 			if (tintIndex < 0 || tintIndex > 1 || pos == null) {
 				return -1;
 			}

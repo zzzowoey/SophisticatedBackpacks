@@ -1,16 +1,15 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -34,13 +33,13 @@ public class InventoryInteractionHelper {
 
 		return WorldHelper.getBlockEntity(world, pos)
 				.map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
-						.map(itemHandler -> player.level.isClientSide || backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+						.map(itemHandler -> player.level.isClientSide || IBackpackWrapper.maybeGet(backpack)
 								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))
 								.orElse(false)).orElse(false)
 				).orElse(false);
 	}
 
-	private static boolean tryRunningInteractionWrappers(IItemHandler itemHandler, IStorageWrapper wrapper, Player player) {
+	private static boolean tryRunningInteractionWrappers(SlotExposedStorage itemHandler, IStorageWrapper wrapper, Player player) {
 		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;

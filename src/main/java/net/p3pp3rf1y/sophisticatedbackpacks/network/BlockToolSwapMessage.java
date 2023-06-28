@@ -4,34 +4,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
-public class BlockToolSwapMessage {
+public class BlockToolSwapMessage extends SimplePacketBase {
 	private final BlockPos pos;
 
 	public BlockToolSwapMessage(BlockPos pos) {
 		this.pos = pos;
 	}
 
-	public static void encode(BlockToolSwapMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeLong(msg.pos.asLong());
+	public BlockToolSwapMessage(FriendlyByteBuf buffer) { this(buffer.readBlockPos()); }
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeBlockPos(this.pos);
 	}
 
-	public static BlockToolSwapMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BlockToolSwapMessage(BlockPos.of(packetBuffer.readLong()));
-	}
-
-	static void onMessage(BlockToolSwapMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
-		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> handleMessage(msg, context.getSender()));
-		context.setPacketHandled(true);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> handleMessage(this, context.getSender()));
+		return true;
 	}
 
 	private static void handleMessage(BlockToolSwapMessage msg, @Nullable ServerPlayer sender) {
@@ -40,7 +38,7 @@ public class BlockToolSwapMessage {
 		}
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 				.map(backpackWrapper -> {
 							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IBlockToolSwapUpgrade.class)
 									.forEach(upgrade -> {

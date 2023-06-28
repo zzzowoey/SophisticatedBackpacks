@@ -1,35 +1,30 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
+import io.github.fabricators_of_create.porting_lib.event.common.*;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
+import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingSpawnEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -39,11 +34,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMes
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.event.ItemEntityEvents;
 import net.p3pp3rf1y.sophisticatedcore.network.PacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.network.SyncPlayerSettingsMessage;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,30 +52,34 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CommonEventHandler {
 	public void registerHandlers() {
-		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-		ModItems.registerHandlers(modBus);
-		ModBlocks.registerHandlers(modBus);
-		IEventBus eventBus = MinecraftForge.EVENT_BUS;
-		eventBus.addListener(this::onItemPickup);
-		eventBus.addListener(this::onLivingSpecialSpawn);
-		eventBus.addListener(this::onLivingDrops);
-		eventBus.addListener(this::onEntityMobGriefing);
-		eventBus.addListener(this::onEntityLeaveWorld);
-		eventBus.addListener(ServerStorageSoundHandler::tick);
-		eventBus.addListener(this::onBlockClick);
-		eventBus.addListener(this::onAttackEntity);
-		eventBus.addListener(EntityBackpackAdditionHandler::onLivingUpdate);
-		eventBus.addListener(this::onPlayerLoggedIn);
-		eventBus.addListener(this::onPlayerChangedDimension);
-		eventBus.addListener(this::onPlayerRespawn);
-		eventBus.addListener(this::onWorldTick);
-		eventBus.addListener(this::interactWithEntity);
+		ModItems.registerHandlers();
+		ModBlocks.registerHandlers();
+
+
+		ItemEntityEvents.PICKUP.register(this::onItemPickup);
+
+		MobSpawnEvents.FINALIZE_SPAWN.register(this::onLivingSpecialSpawn);
+		LivingEntityEvents.DROPS.register(EntityBackpackAdditionHandler::handleBackpackDrop);
+
+		// TODO: Reimplement
+		//eventBus.addListener(this::onEntityMobGriefing);
+
+		EntityTrackingEvents.STOP_TRACKING.register(this::onEntityLeaveWorld);
+		ServerTickEvents.END_WORLD_TICK.register(ServerStorageSoundHandler::tick);
+		PlayerInteractionEvents.LEFT_CLICK_BLOCK.register(this::onBlockClick);
+		AttackEntityCallback.EVENT.register(this::onAttackEntity);
+		LivingEntityEvents.TICK.register(EntityBackpackAdditionHandler::onLivingUpdate);
+		PlayerEvents.LOGGED_IN.register(this::onPlayerLoggedIn);
+		ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register(this::onPlayerChangedDimension);
+		ServerPlayerEvents.AFTER_RESPAWN.register(this::onPlayerRespawn);
+		ServerTickEvents.END_WORLD_TICK.register(this::onWorldTick);
+		PlayerInteractionEvents.ENTITY_INTERACT.register(this::interactWithEntity);
 	}
 
 	private static final int BACKPACK_CHECK_COOLDOWN = 40;
 	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
-	private void interactWithEntity(PlayerInteractEvent.EntityInteractSpecific event) {
+	private void interactWithEntity(PlayerInteractionEvents.EntityInteract event) {
 		if (!(event.getTarget() instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return;
 		}
@@ -86,7 +87,7 @@ public class CommonEventHandler {
 		Player sourcePlayer = event.getEntity();
 		Vec3 targetPlayerViewVector = Vec3.directionFromRotation(new Vec2(targetPlayer.getXRot(), targetPlayer.yBodyRot));
 
-		Vec3 hitVector = event.getLocalPos();
+		Vec3 hitVector = event.getPos().getCenter();
 		Vec3 vec31 = sourcePlayer.position().vectorTo(targetPlayer.position()).normalize();
 		vec31 = new Vec3(vec31.x, 0.0D, vec31.z);
 		boolean isPointingAtBody = hitVector.y >= 0.9D && hitVector.y < 1.6D;
@@ -96,31 +97,30 @@ public class CommonEventHandler {
 		}
 		if (targetPlayer.level.isClientSide) {
 			event.setCancellationResult(InteractionResult.SUCCESS);
-			SBPPacketHandler.INSTANCE.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
+			SBPPacketHandler.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
 		}
 	}
 
-	private void onWorldTick(TickEvent.LevelTickEvent event) {
-		ResourceLocation dimensionKey = event.level.dimension().location();
+	private void onWorldTick(ServerLevel level) {
+		ResourceLocation dimensionKey = level.dimension().location();
 		boolean runSlownessLogic = Boolean.TRUE.equals(Config.SERVER.nerfsConfig.tooManyBackpacksSlowness.get());
 		boolean runDedupeLogic = Boolean.FALSE.equals(Config.SERVER.tickDedupeLogicDisabled.get());
-		if (event.phase != TickEvent.Phase.END
-				|| (!runSlownessLogic && !runDedupeLogic)
-				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > event.level.getGameTime()) {
+		if ((!runSlownessLogic && !runDedupeLogic)
+				|| nextBackpackCheckTime.getOrDefault(dimensionKey, 0L) > level.getGameTime()) {
 			return;
 		}
-		nextBackpackCheckTime.put(dimensionKey, event.level.getGameTime() + BACKPACK_CHECK_COOLDOWN);
+		nextBackpackCheckTime.put(dimensionKey, level.getGameTime() + BACKPACK_CHECK_COOLDOWN);
 
 		Set<UUID> backpackIds = new HashSet<>();
 
-		event.level.players().forEach(player -> {
+		level.players().forEach(player -> {
 			AtomicInteger numberOfBackpacks = new AtomicInteger(0);
 			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, handlerName, identifier, slot) -> {
 				if (runSlownessLogic) {
 					numberOfBackpacks.incrementAndGet();
 				}
 				if (runDedupeLogic) {
-					backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper ->
+					IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper ->
 							addBackpackIdIfUniqueOrDedupe(backpackIds, backpackWrapper));
 				}
 				return false;
@@ -146,31 +146,30 @@ public class CommonEventHandler {
 		});
 	}
 
-	private void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-		sendPlayerSettingsToClient(event.getEntity());
+	private void onPlayerChangedDimension(ServerPlayer player, ServerLevel origin, ServerLevel destination) {
+		sendPlayerSettingsToClient(player);
 	}
 
-	private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		Player player = event.getEntity();
+	private void onPlayerLoggedIn(Player player) {
 		sendPlayerSettingsToClient(player);
 	}
 
 	private void sendPlayerSettingsToClient(Player player) {
 		String playerTagName = BackpackMainSettingsCategory.SOPHISTICATED_BACKPACK_SETTINGS_PLAYER_TAG;
-		PacketHandler.INSTANCE.sendToClient((ServerPlayer) player, new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
+		PacketHandler.sendToClient((ServerPlayer) player, new SyncPlayerSettingsMessage(playerTagName, SettingsManager.getPlayerSettingsTag(player, playerTagName)));
 	}
 
-	private void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-		sendPlayerSettingsToClient(event.getEntity());
+	private void onPlayerRespawn(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean alive) {
+		sendPlayerSettingsToClient(newPlayer);
 	}
 
-	private void onBlockClick(PlayerInteractEvent.LeftClickBlock event) {
+	private void onBlockClick(PlayerInteractionEvents.LeftClickBlock event) {
 		if (event.getLevel().isClientSide) {
 			return;
 		}
 		Player player = event.getEntity();
 		BlockPos pos = event.getPos();
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
@@ -181,12 +180,11 @@ public class CommonEventHandler {
 				}).orElse(false));
 	}
 
-	private void onAttackEntity(AttackEntityEvent event) {
-		Player player = event.getEntity();
+	private InteractionResult onAttackEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
 		if (player.level.isClientSide) {
-			return;
+			return InteractionResult.PASS;
 		}
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
@@ -195,42 +193,42 @@ public class CommonEventHandler {
 					}
 					return false;
 				}).orElse(false));
+
+		return InteractionResult.PASS;
 	}
 
-	private void onLivingSpecialSpawn(LivingSpawnEvent.SpecialSpawn event) {
+	private void onLivingSpecialSpawn(MobSpawnEvents.FinalizeSpawn event) {
 		Entity entity = event.getEntity();
 		if (entity instanceof Monster monster && monster.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
 			EntityBackpackAdditionHandler.addBackpack(monster, event.getLevel());
 		}
 	}
 
-	private void onLivingDrops(LivingDropsEvent event) {
-		EntityBackpackAdditionHandler.handleBackpackDrop(event);
-	}
 
-	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
+	// TODO: Reimplement
+/*	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
 		if (event.getEntity() instanceof Creeper creeper) {
 			EntityBackpackAdditionHandler.removeBeneficialEffects(creeper);
 		}
-	}
+	}*/
 
-	private void onEntityLeaveWorld(EntityLeaveLevelEvent event) {
-		if (!(event.getEntity() instanceof Monster)) {
+	private void onEntityLeaveWorld(Entity trackedEntity, ServerPlayer player) {
+		if (!(trackedEntity instanceof Monster monster)) {
 			return;
 		}
-		EntityBackpackAdditionHandler.removeBackpackUuid((Monster) event.getEntity(), event.getLevel());
+		EntityBackpackAdditionHandler.removeBackpackUuid(monster, player.getLevel());
 	}
 
-	private void onItemPickup(EntityItemPickupEvent event) {
+	private void onItemPickup(ItemEntityEvents.ItemEntityPickupEvent event) {
 		ItemEntity itemEntity = event.getItem();
 		if (itemEntity.getItem().isEmpty()) {
 			return;
 		}
 
 		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
-		Player player = event.getEntity();
+		Player player = event.getPlayer();
 		Level world = player.getCommandSenderWorld();
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 				.map(wrapper -> {
 					remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), true));
 					return remainingStackSimulated.get().isEmpty();
@@ -239,7 +237,7 @@ public class CommonEventHandler {
 
 		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
 			AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
-			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 							.map(wrapper -> {
 								remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), false));
 								return remainingStack.get().isEmpty();

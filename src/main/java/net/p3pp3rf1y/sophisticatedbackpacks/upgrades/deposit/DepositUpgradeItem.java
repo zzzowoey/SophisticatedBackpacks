@@ -11,7 +11,7 @@ public class DepositUpgradeItem extends UpgradeItemBase<DepositUpgradeWrapper> {
 	private final IntSupplier filterSlotCount;
 
 	public DepositUpgradeItem(IntSupplier filterSlotCount) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.filterSlotCount = filterSlotCount;
 	}
 

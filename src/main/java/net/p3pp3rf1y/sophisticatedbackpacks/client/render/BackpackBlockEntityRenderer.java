@@ -1,12 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
@@ -27,10 +27,10 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 		RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
-		poseStack.mulPose(Vector3f.YN.rotationDegrees(facing.toYRot()));
+		poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
 		poseStack.pushPose();
 		poseStack.scale(6 / 10f, 6 / 10f, 6 / 10f);
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(180));
+		poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 		poseStack.translate(0, -2.5, 0);
 		IBackpackModel model = BackpackModelManager.getBackpackModel(backpackWrapper.getBackpack().getItem());
 		if (showLeftTank) {
@@ -56,7 +56,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			renderInfo.getBatteryRenderInfo().ifPresent(batteryRenderInfo -> {
 				if (batteryRenderInfo.getChargeRatio() > 0.1f) {
 					poseStack.pushPose();
-					poseStack.mulPose(Vector3f.XN.rotationDegrees(180));
+					poseStack.mulPose(Axis.XN.rotationDegrees(180));
 					poseStack.translate(0, -1.5, 0);
 					model.renderBatteryCharge(poseStack, buffer, combinedLight, batteryRenderInfo.getChargeRatio());
 					poseStack.popPose();
@@ -72,9 +72,9 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 			poseStack.pushPose();
 			poseStack.translate(0, 0.6, 0.25);
 			poseStack.scale(0.5f, 0.5f, 0.5f);
-			poseStack.mulPose(Vector3f.XN.rotationDegrees(180));
-			poseStack.mulPose(Vector3f.ZP.rotationDegrees(180f + displayItem.getRotation()));
-			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemTransforms.TransformType.FIXED, combinedLight, combinedOverlay, poseStack, buffer, 0);
+			poseStack.mulPose(Axis.XN.rotationDegrees(180));
+			poseStack.mulPose(Axis.ZP.rotationDegrees(180f + displayItem.getRotation()));
+			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, Minecraft.getInstance().level, 0);
 			poseStack.popPose();
 		});
 	}

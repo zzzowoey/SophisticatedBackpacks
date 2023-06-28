@@ -5,34 +5,32 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
-public class EntityToolSwapMessage {
+public class EntityToolSwapMessage extends SimplePacketBase {
 	private final int entityId;
 
 	public EntityToolSwapMessage(int entityId) {
 		this.entityId = entityId;
 	}
 
-	public static void encode(EntityToolSwapMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeInt(msg.entityId);
+	public EntityToolSwapMessage(FriendlyByteBuf buffer) { this(buffer.readInt()); }
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeInt(this.entityId);
 	}
 
-	public static EntityToolSwapMessage decode(FriendlyByteBuf packetBuffer) {
-		return new EntityToolSwapMessage(packetBuffer.readInt());
-	}
-
-	static void onMessage(EntityToolSwapMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
-		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> handleMessage(msg, context.getSender()));
-		context.setPacketHandled(true);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> handleMessage(this, context.getSender()));
+		return true;
 	}
 
 	private static void handleMessage(EntityToolSwapMessage msg, @Nullable ServerPlayer sender) {
@@ -49,7 +47,7 @@ public class EntityToolSwapMessage {
 
 		AtomicBoolean result = new AtomicBoolean(false);
 		AtomicBoolean anyUpgradeCanInteract = new AtomicBoolean(false);
-		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
 				.map(backpackWrapper -> {
 							backpackWrapper.getUpgradeHandler().getWrappersThatImplement(IEntityToolSwapUpgrade.class)
 									.forEach(upgrade -> {

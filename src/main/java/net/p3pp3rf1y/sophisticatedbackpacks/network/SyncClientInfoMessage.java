@@ -5,14 +5,13 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
-public class SyncClientInfoMessage {
+public class SyncClientInfoMessage extends SimplePacketBase {
 	private final int slotIndex;
 	@Nullable
 	private final CompoundTag renderInfoNbt;
@@ -24,20 +23,19 @@ public class SyncClientInfoMessage {
 		this.columnsTaken = columnsTaken;
 	}
 
-	public static void encode(SyncClientInfoMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeInt(msg.slotIndex);
-		packetBuffer.writeNbt(msg.renderInfoNbt);
-		packetBuffer.writeInt(msg.columnsTaken);
+	public SyncClientInfoMessage(FriendlyByteBuf buffer) { this(buffer.readInt(), buffer.readNbt(), buffer.readInt()); }
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeInt(this.slotIndex);
+		buffer.writeNbt(this.renderInfoNbt);
+		buffer.writeInt(this.columnsTaken);
 	}
 
-	public static SyncClientInfoMessage decode(FriendlyByteBuf packetBuffer) {
-		return new SyncClientInfoMessage(packetBuffer.readInt(), packetBuffer.readNbt(), packetBuffer.readInt());
-	}
-
-	static void onMessage(SyncClientInfoMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
-		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> handleMessage(msg));
-		context.setPacketHandled(true);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> handleMessage(this));
+		return true;
 	}
 
 	private static void handleMessage(SyncClientInfoMessage msg) {
@@ -46,7 +44,7 @@ public class SyncClientInfoMessage {
 			return;
 		}
 		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
+		IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper -> {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		});

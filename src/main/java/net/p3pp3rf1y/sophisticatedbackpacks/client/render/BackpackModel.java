@@ -3,7 +3,12 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
+import io.github.fabricators_of_create.porting_lib.util.FluidStack;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.EntityModel;
@@ -18,6 +23,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
@@ -27,9 +33,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
@@ -422,12 +425,14 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 			return;
 		}
 
-		IClientFluidTypeExtensions renderProperties = IClientFluidTypeExtensions.of(fluidStack.getFluid());
-		ResourceLocation texture = renderProperties.getStillTexture(fluidStack);
-		TextureAtlasSprite still = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
+		FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidStack.getFluid());
+
+
+		FluidVariant fluidVariant = FluidVariant.of(fluidStack.getFluid());
+		TextureAtlasSprite still = FluidVariantRendering.getSprite(fluidVariant);
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
 		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
-		int color = renderProperties.getTintColor(fluidStack);
+		int color = FluidVariantRendering.getColor(fluidVariant);
 		float red = (color >> 16 & 255) / 255.0F;
 		float green = (color >> 8 & 255) / 255.0F;
 		float blue = (color & 255) / 255.0F;
@@ -435,8 +440,8 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	private ModelPart getFluidBar(TextureAtlasSprite still, int fill, boolean left) {
-		int atlasWidth = (int) (still.getWidth() / (still.getU1() - still.getU0()));
-		int atlasHeight = (int) (still.getHeight() / (still.getV1() - still.getV0()));
+		int atlasWidth = (int) (still.getX() / (still.getU1() - still.getU0()));
+		int atlasHeight = (int) (still.getY() / (still.getV1() - still.getV0()));
 		int u = (int) (still.getU0() * atlasWidth);
 		int v = (int) (still.getV0() * atlasHeight);
 		FluidBarCacheKey key = new FluidBarCacheKey(u, v, fill);
@@ -463,10 +468,10 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	public <L extends LivingEntity, M extends EntityModel<L>> void translateRotateAndScale(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, boolean wearsArmor) {
 		if (livingEntity.isCrouching()) {
 			matrixStack.translate(0D, 0.2D, 0D);
-			matrixStack.mulPose(Vector3f.XP.rotationDegrees(90F / (float) Math.PI));
+			matrixStack.mulPose(Axis.XP.rotationDegrees(90F / (float) Math.PI));
 		}
 
-		matrixStack.mulPose(Vector3f.YP.rotationDegrees(180));
+		matrixStack.mulPose(Axis.YP.rotationDegrees(180));
 		float zOffset = wearsArmor ? -0.35f : -0.3f;
 		float yOffset = -0.75f;
 
@@ -516,7 +521,7 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 	private static String getTierPartName(Item backpackItem, String partNamePrefix) {
 		//noinspection ConstantConditions - by this point backpack items are registered
-		return partNamePrefix + ForgeRegistries.ITEMS.getKey(backpackItem).getPath();
+		return partNamePrefix + BuiltInRegistries.ITEM.getKey(backpackItem).getPath();
 	}
 
 	private static void addLeftPouchesClips(PartDefinition partDefinition, Item backpackItem, int yTextureOffset) {

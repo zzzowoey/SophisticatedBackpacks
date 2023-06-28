@@ -1,20 +1,19 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
+import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
-public class BackpackOpenMessage {
+public class BackpackOpenMessage extends SimplePacketBase {
 	private static final int CHEST_SLOT = 38;
 	private static final int OFFHAND_SLOT = 40;
 	private final int slotIndex;
@@ -33,19 +32,18 @@ public class BackpackOpenMessage {
 		this.identifier = identifier;
 	}
 
-	public static void encode(BackpackOpenMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeInt(msg.slotIndex);
-		packetBuffer.writeUtf(msg.identifier);
+	public BackpackOpenMessage(FriendlyByteBuf buffer) { this(buffer.readInt(), buffer.readUtf()); }
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeInt(this.slotIndex);
+		buffer.writeUtf(this.identifier);
 	}
 
-	public static BackpackOpenMessage decode(FriendlyByteBuf packetBuffer) {
-		return new BackpackOpenMessage(packetBuffer.readInt(), packetBuffer.readUtf());
-	}
-
-	static void onMessage(BackpackOpenMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
-		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> handleMessage(context.getSender(), msg));
-		context.setPacketHandled(true);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> handleMessage(context.getSender(), this));
+		return true;
 	}
 
 	private static void handleMessage(@Nullable ServerPlayer player, BackpackOpenMessage msg) {
@@ -83,14 +81,12 @@ public class BackpackOpenMessage {
 	private static void findAndOpenFirstBackpack(ServerPlayer player) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
-			NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()),
-					backpackContext::toBuffer);
+			NetworkUtil.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()), backpackContext::toBuffer);
 			return true;
 		});
 	}
 
 	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
-		NetworkHooks.openScreen(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)),
-				backpackContext::toBuffer);
+		NetworkUtil.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)), backpackContext::toBuffer);
 	}
 }

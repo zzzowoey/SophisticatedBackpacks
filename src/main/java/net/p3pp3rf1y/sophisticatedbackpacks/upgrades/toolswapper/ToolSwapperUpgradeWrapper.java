@@ -2,8 +2,14 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
+import io.github.fabricators_of_create.porting_lib.common.util.ToolAction;
+import io.github.fabricators_of_create.porting_lib.common.util.ToolActions;
+import me.alphamode.forgetags.Tags;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -24,11 +30,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.IForgeShearable;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
@@ -42,6 +43,7 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import javax.annotation.Nullable;
@@ -55,7 +57,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static net.minecraftforge.common.ToolActions.*;
+import static io.github.fabricators_of_create.porting_lib.common.util.ToolActions.*;
+
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
@@ -121,18 +124,20 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			}
 		});
 		ItemStack tool = selectedTool.get();
-		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItem, tool, selectedSlot.get())) {
-			player.setItemInHand(InteractionHand.MAIN_HAND, backpackInventory.extractItem(selectedSlot.get(), 1, false));
-			backpackInventory.insertItem(mainHandItem, false);
+		ItemVariant mainHandItemResource = ItemVariant.of(mainHandItem);
+		ItemVariant resource = ItemVariant.of(tool);
+		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItemResource, mainHandItem.getCount(), tool, selectedSlot.get())) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack((int) backpackInventory.extractSlot(selectedSlot.get(), resource, 1, null)));
+			backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), null);
 			return true;
 		}
 
 		return false;
 	}
 
-	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemStack mainHandItem, ItemStack tool, int selectedSlot) {
-		return (backpackInventory.insertItem(mainHandItem, true).isEmpty())
-				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
+	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemVariant mainHandItem, int mainHandItemCount, ItemStack tool, int selectedSlot) {
+		return (backpackInventory.simulateInsert(mainHandItem, mainHandItemCount, null) == 0)
+				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem, mainHandItemCount));
 	}
 
 	private boolean isAllowedAndGoodAtBreakingBlock(BlockState state, ItemStack stack) {
@@ -253,14 +258,17 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return true;
 		}
 
-		InventoryHelper.extractFromInventory(sword, backpackInventory, false);
-		if (backpackInventory.insertItem(mainHandItem, true).isEmpty()) {
-			player.setItemInHand(InteractionHand.MAIN_HAND, sword);
-			backpackInventory.insertItem(mainHandItem, false);
-			return true;
-		} else {
-			backpackInventory.insertItem(sword, false);
-			return false;
+		InventoryHelper.extractFromInventory(sword, backpackInventory, null);
+		try(Transaction ctx = Transaction.openOuter()) {
+			long inserted = backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), ctx);
+			if (inserted == 0) {
+				player.setItemInHand(InteractionHand.MAIN_HAND, sword);
+				ctx.commit();
+				return true;
+			} else {
+				backpackInventory.insert(ItemVariant.of(sword), sword.getCount(), null);
+				return false;
+			}
 		}
 	}
 
@@ -297,7 +305,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		return tryToSwapTool(player, stack -> itemWorksOnEntity(stack, entity), ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()));
+		return tryToSwapTool(player, stack -> itemWorksOnEntity(stack, entity), BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()));
 	}
 
 	private boolean itemWorksOnEntity(ItemStack stack, Entity entity) {
@@ -313,7 +321,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		return tryToSwapTool(player, stack -> itemWorksOnBlock(world, pos, blockState, player, stack), ForgeRegistries.BLOCKS.getKey(blockState.getBlock()));
+		return tryToSwapTool(player, stack -> itemWorksOnBlock(world, pos, blockState, player, stack), BuiltInRegistries.BLOCK.getKey(blockState.getBlock()));
 	}
 
 	private boolean tryToSwapTool(Player player, Predicate<ItemStack> isToolValid, @Nullable ResourceLocation targetRegistryName) {
@@ -329,7 +337,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		boolean itemInHandIsValid = isToolValid.test(mainHandStack);
 
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryForUpgradeProcessing();
-		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStack.isSameIgnoreDurability(st, mainHandStack))) {
+		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStackHelper.areItemStackTagsEqualIgnoreDurability(st, mainHandStack))) {
 			toolCache.offer(mainHandStack);
 		}
 		ItemStack tool = findToolToSwap(backpackInventory, isToolValid);
@@ -340,9 +348,9 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 		tool = tool.copy().split(1);
 
-		if ((tool.getCount() == 1 || backpackInventory.insertItem(mainHandStack, true).isEmpty())) {
-			player.setItemInHand(InteractionHand.MAIN_HAND, InventoryHelper.extractFromInventory(tool, backpackInventory, false));
-			backpackInventory.insertItem(mainHandStack, false);
+		if ((tool.getCount() == 1 || backpackInventory.simulateInsert(ItemVariant.of(mainHandStack), mainHandStack.getCount(), null) == 0)) {
+			player.setItemInHand(InteractionHand.MAIN_HAND, InventoryHelper.extractFromInventory(tool, backpackInventory, null));
+			backpackInventory.insert(ItemVariant.of(mainHandStack), mainHandStack.getCount(), null);
 			toolCache.offer(tool);
 		}
 		return true;
@@ -379,7 +387,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private boolean hasEquivalentItem(Collection<ItemStack> alreadyGivenBefore, ItemStack stack) {
 		for (ItemStack givenTool : alreadyGivenBefore) {
-			if (ItemStack.isSameIgnoreDurability(givenTool, stack)) {
+			if (ItemStackHelper.areItemStackTagsEqualIgnoreDurability(givenTool, stack)) {
 				return true;
 			}
 		}

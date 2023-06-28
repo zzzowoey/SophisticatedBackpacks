@@ -1,7 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import io.github.fabricators_of_create.porting_lib.block.ChunkUnloadListeningBlockEntity;
+import io.github.fabricators_of_create.porting_lib.block.CustomDataPacketHandlingBlockEntity;
+import io.github.fabricators_of_create.porting_lib.extensions.extensions.BlockEntityExtensions;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -9,14 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -26,8 +24,8 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
+import team.reborn.energy.api.EnergyStorage;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,7 +33,7 @@ import java.util.Optional;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
+public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, BlockEntityExtensions, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -44,18 +42,19 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private boolean chunkBeingUnloaded = false;
 
 	@Nullable
-	private LazyOptional<IItemHandler> itemHandlerCap;
+	private SlotExposedStorage itemHandlerCap;
+	// TODO: Reimplement
+	/*@Nullable
+	private LazyOptional<IFluidHandler> fluidHandlerCap;*/
 	@Nullable
-	private LazyOptional<IFluidHandler> fluidHandlerCap;
-	@Nullable
-	private LazyOptional<IEnergyStorage> energyStorageCap;
+	private EnergyStorage energyStorageCap;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).orElse(IBackpackWrapper.Noop.INSTANCE);
+		backpackWrapper = IBackpackWrapper.maybeGet(backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
 		backpackWrapper.setSaveHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
@@ -79,9 +78,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		WorldHelper.notifyBlockUpdate(this);
 	}
 
+
+
 	@Override
 	public void onLoad() {
-		super.onLoad();
 		registerWithControllerOnLoad();
 	}
 
@@ -98,7 +98,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	private void writeBackpack(CompoundTag ret) {
 		ItemStack backpackCopy = backpackWrapper.getBackpack().copy();
-		backpackCopy.setTag(backpackCopy.getItem().getShareTag(backpackCopy));
+		backpackCopy.setTag(backpackCopy.getTag());
 		ret.put("backpackData", backpackCopy.save(new CompoundTag()));
 	}
 
@@ -134,6 +134,30 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		return backpackWrapper;
 	}
 
+	@Override
+	public <C extends Component> C getComponent(ComponentKey<C> key) {
+		if (key == ForgeCapabilities.ITEM_HANDLER) {
+			if (itemHandlerCap == null) {
+				itemHandlerCap = getBackpackWrapper().getInventoryForInputOutput();
+			}
+			return itemHandlerCap;
+			// TODO: Reimplement
+/*		} else if (cap == ForgeCapabilities.FLUID_HANDLER) {
+			if (fluidHandlerCap == null) {
+				fluidHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
+			}
+			return fluidHandlerCap.cast();*/
+		} else if (key == ForgeCapabilities.ENERGY) {
+			if (energyStorageCap == null) {
+				energyStorageCap = getBackpackWrapper().getEnergyStorage().map(EnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE);
+			}
+			return energyStorageCap;
+		}
+		return super.getComponent(key);
+	}
+
+	// TODO: Capabilities
+/*
 	@Nonnull
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
@@ -142,39 +166,43 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 				itemHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getInventoryForInputOutput());
 			}
 			return itemHandlerCap.cast();
-		} else if (cap == ForgeCapabilities.FLUID_HANDLER) {
+		// TODO: Reimplement
+*/
+/*		} else if (cap == ForgeCapabilities.FLUID_HANDLER) {
 			if (fluidHandlerCap == null) {
 				fluidHandlerCap = LazyOptional.of(() -> getBackpackWrapper().getFluidHandler().map(IFluidHandler.class::cast).orElse(EmptyFluidHandler.INSTANCE));
 			}
-			return fluidHandlerCap.cast();
+			return fluidHandlerCap.cast();*//*
+
 		} else if (cap == ForgeCapabilities.ENERGY) {
 			if (energyStorageCap == null) {
-				energyStorageCap = LazyOptional.of(() -> getBackpackWrapper().getEnergyStorage().map(IEnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
+				energyStorageCap = LazyOptional.of(() -> getBackpackWrapper().getEnergyStorage().map(EnergyStorage.class::cast).orElse(EmptyEnergyStorage.INSTANCE));
 			}
 			return energyStorageCap.cast();
 		}
 		return super.getCapability(cap, side);
 	}
+*/
 
 	@Override
 	public void invalidateCaps() {
-		super.invalidateCaps();
 		invalidateBackpackCaps();
 	}
 
 	private void invalidateBackpackCaps() {
 		if (itemHandlerCap != null) {
-			LazyOptional<IItemHandler> tempItemHandlerCap = itemHandlerCap;
+			LazyOptional<SlotExposedStorage> tempItemHandlerCap = itemHandlerCap;
 			itemHandlerCap = null;
 			tempItemHandlerCap.invalidate();
 		}
-		if (fluidHandlerCap != null) {
+		// TODO: Reimplement
+/*		if (fluidHandlerCap != null) {
 			LazyOptional<IFluidHandler> tempFluidHandlerCap = fluidHandlerCap;
 			fluidHandlerCap = null;
 			tempFluidHandlerCap.invalidate();
-		}
+		}*/
 		if (energyStorageCap != null) {
-			LazyOptional<IEnergyStorage> tempEnergyStorageCap = energyStorageCap;
+			LazyOptional<EnergyStorage> tempEnergyStorageCap = energyStorageCap;
 			energyStorageCap = null;
 			tempEnergyStorageCap.invalidate();
 		}
@@ -258,7 +286,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	@Override
 	public void onChunkUnloaded() {
-		super.onChunkUnloaded();
 		chunkBeingUnloaded = true;
 	}
 

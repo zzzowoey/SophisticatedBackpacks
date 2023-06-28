@@ -2,7 +2,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -14,9 +16,6 @@ import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
@@ -37,7 +36,7 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				String tagName = GsonHelper.getAsString(jsonObject, "tag");
-				TagKey<Item> tag = TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(tagName));
+				TagKey<Item> tag = TagKey.create(Registries.ITEM, new ResourceLocation(tagName));
 				return Optional.of(new ItemTagMatcher(tag));
 			}
 		});
@@ -46,10 +45,10 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<ItemStack>> getPredicateFromObject(JsonObject jsonObject) {
 				ResourceLocation itemName = new ResourceLocation(GsonHelper.getAsString(jsonObject, "item"));
-				if (!ForgeRegistries.ITEMS.containsKey(itemName)) {
+				if (!BuiltInRegistries.ITEM.containsKey(itemName)) {
 					SophisticatedBackpacks.LOGGER.debug("{} isn't loaded in item registry, skipping ...", itemName);
 				}
-				Item item = ForgeRegistries.ITEMS.getValue(itemName);
+				Item item = BuiltInRegistries.ITEM.get(itemName);
 				return Optional.of(st -> st.getItem() == item && (st.getTag() == null || st.getTag().isEmpty()));
 			}
 		});
@@ -63,12 +62,12 @@ public class Matchers {
 			@Override
 			public Optional<Predicate<BlockContext>> getPredicate(JsonElement jsonElement) {
 				String modId = jsonElement.getAsString();
-				if (!ModList.get().isLoaded(modId)) {
+				if (!FabricLoader.getInstance().isModLoaded(modId)) {
 					SophisticatedBackpacks.LOGGER.debug("{} mod isn't loaded, skipping ...", modId);
 					return Optional.empty();
 				}
 
-				return Optional.of(new ModMatcher<>(ForgeRegistries.BLOCKS, modId, BlockContext::getBlock));
+				return Optional.of(new ModMatcher<>(BuiltInRegistries.BLOCK, modId, BlockContext::getBlock));
 			}
 		});
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("all") {

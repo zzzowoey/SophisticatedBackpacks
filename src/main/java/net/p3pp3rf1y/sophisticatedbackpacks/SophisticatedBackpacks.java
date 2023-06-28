@@ -1,27 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.ClientEventHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.KeybindHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
+import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.data.DataGenerators;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPBlockLootProvider;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPLootInjectProvider;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPRecipeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
@@ -30,57 +20,37 @@ import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(SophisticatedBackpacks.MOD_ID)
 public class SophisticatedBackpacks {
 	public static final String MOD_ID = "sophisticatedbackpacks";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-	public static final CreativeModeTab ITEM_GROUP = new SBItemGroup();
+	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(getRL("item_group"))
+			.icon(() -> new ItemStack(ModItems.BACKPACK.get()))
+			.build();
 
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
 
 	@SuppressWarnings("java:S1118") //needs to be public for mod to work
 	public SophisticatedBackpacks() {
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SERVER_SPEC);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_SPEC);
+		Config.register();
+
 		commonEventHandler.registerHandlers();
-		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-		if (FMLEnvironment.dist == Dist.CLIENT) {
-			ClientEventHandler.registerHandlers();
-			modBus.addListener(KeybindHandler::registerKeyMappings);
-			modBus.addListener(SophisticatedBackpacks::registerTooltipComponent);
-		}
+		setup();
 
-		modBus.addListener(SophisticatedBackpacks::setup);
-		modBus.addListener(DataGenerators::gatherData);
-		modBus.addListener(Config.SERVER::onConfigReload);
-		modBus.addListener(CapabilityBackpackWrapper::onRegister);
-		modBus.addListener(SophisticatedBackpacks::clientSetup);
-		ModLoot.init(modBus);
-		SBPCommand.init(modBus);
+		ModLoot.init();
+		SBPCommand.init();
 
-		IEventBus eventBus = MinecraftForge.EVENT_BUS;
-		eventBus.addListener(this::onAddReloadListener);
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(registryLoader);
 	}
 
-	private static void setup(FMLCommonSetupEvent event) {
-		SBPPacketHandler.INSTANCE.init();
+	private static void setup() {
+		SBPPacketHandler.init();
+
 		ModCompat.initCompats();
-		event.enqueueWork(ModItems::registerDispenseBehavior);
+		ModItems.registerDispenseBehavior();
 		ModItems.registerCauldronInteractions();
-	}
-
-	private static void clientSetup(FMLClientSetupEvent event) {
-		KeybindHandler.register();
-	}
-
-	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
-		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
-	}
-
-	private void onAddReloadListener(AddReloadListenerEvent event) {
-		event.addListener(registryLoader);
+		ModItems.registerItemGroup();
 	}
 
 	public static ResourceLocation getRL(String regName) {
@@ -89,5 +59,12 @@ public class SophisticatedBackpacks {
 
 	public static String getRegistryName(String regName) {
 		return MOD_ID + ":" + regName;
+	}
+
+	public static void gatherData(FabricDataGenerator gen) {
+		FabricDataGenerator.Pack pack = gen.createPack();
+		pack.addProvider(SBPBlockLootProvider::new);
+		pack.addProvider(SBPRecipeProvider::new);
+		pack.addProvider(SBPLootInjectProvider::new);
 	}
 }

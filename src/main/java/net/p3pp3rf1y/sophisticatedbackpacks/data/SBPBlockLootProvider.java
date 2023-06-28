@@ -1,9 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootTables;
@@ -20,26 +23,23 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SBPBlockLootProvider implements DataProvider {
-	private final DataGenerator generator;
-
-	SBPBlockLootProvider(DataGenerator generator) {
-		this.generator = generator;
+public class SBPBlockLootProvider extends FabricBlockLootTableProvider {
+	public SBPBlockLootProvider(FabricDataOutput dataOutput) {
+		super(dataOutput);
 	}
 
 	@Override
-	public void run(CachedOutput cache) throws IOException {
-		Map<ResourceLocation, LootTable.Builder> tables = new HashMap<>();
+	public void generate() {
+		Map<Block, LootTable.Builder> tables = new HashMap<>();
 
-		tables.put(ModBlocks.BACKPACK.getId(), getBackpack(ModItems.BACKPACK.get()));
-		tables.put(ModBlocks.IRON_BACKPACK.getId(), getBackpack(ModItems.IRON_BACKPACK.get()));
-		tables.put(ModBlocks.GOLD_BACKPACK.getId(), getBackpack(ModItems.GOLD_BACKPACK.get()));
-		tables.put(ModBlocks.DIAMOND_BACKPACK.getId(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));
-		tables.put(ModBlocks.NETHERITE_BACKPACK.getId(), getBackpack(ModItems.NETHERITE_BACKPACK.get()));
+		tables.put(ModBlocks.BACKPACK.get(), getBackpack(ModItems.BACKPACK.get()));
+		tables.put(ModBlocks.IRON_BACKPACK.get(), getBackpack(ModItems.IRON_BACKPACK.get()));
+		tables.put(ModBlocks.GOLD_BACKPACK.get(), getBackpack(ModItems.GOLD_BACKPACK.get()));
+		tables.put(ModBlocks.DIAMOND_BACKPACK.get(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));
+		tables.put(ModBlocks.NETHERITE_BACKPACK.get(), getBackpack(ModItems.NETHERITE_BACKPACK.get()));
 
-		for (Map.Entry<ResourceLocation, LootTable.Builder> e : tables.entrySet()) {
-			Path path = getPath(generator.getOutputFolder(), e.getKey());
-			DataProvider.saveStable(cache, LootTables.serialize(e.getValue().setParamSet(LootContextParamSets.BLOCK).build()), path);
+		for (Map.Entry<Block, LootTable.Builder> e : tables.entrySet()) {
+			add(e.getKey(), e.getValue());
 		}
 	}
 
@@ -48,13 +48,9 @@ public class SBPBlockLootProvider implements DataProvider {
 		return "SophisticatedBackpacks block loot tables";
 	}
 
-	private static Path getPath(Path root, ResourceLocation id) {
-		return root.resolve("data/" + id.getNamespace() + "/loot_tables/blocks/" + id.getPath() + ".json");
-	}
-
 	private static LootTable.Builder getBackpack(BackpackItem item) {
 		LootPoolEntryContainer.Builder<?> entry = LootItem.lootTableItem(item);
 		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantValue.exactly(1)).add(entry).apply(CopyBackpackDataFunction.builder());
-		return LootTable.lootTable().withPool(pool);
+		return LootTable.lootTable().withPool(pool).setParamSet(LootContextParamSets.BLOCK);
 	}
 }

@@ -1,5 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
+import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
+import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
+import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
+import net.fabricmc.api.EnvType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,10 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -38,19 +39,8 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullLazy;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.network.NetworkHooks;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
@@ -67,7 +57,6 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
-import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import javax.annotation.Nonnull;
@@ -82,7 +71,7 @@ import java.util.function.UnaryOperator;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
-public class BackpackItem extends ItemBase implements IStashStorageItem {
+public class BackpackItem extends Item implements IStashStorageItem {
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -92,7 +81,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, UnaryOperator<Properties> updateProperties) {
-		super(updateProperties.apply(new Properties().stacksTo(1)), SophisticatedBackpacks.ITEM_GROUP);
+		super(updateProperties.apply(new Properties().stacksTo(1)));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
@@ -140,7 +129,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 		if (flagIn == TooltipFlag.Default.ADVANCED) {
-			stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+			IBackpackWrapper.maybeGet(stack)
 					.ifPresent(w -> w.getContentsUuid().ifPresent(uuid -> tooltip.add(Component.literal("UUID: " + uuid).withStyle(ChatFormatting.DARK_GRAY))));
 		}
 		if (!Screen.hasShiftDown()) {
@@ -154,7 +143,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	@Override
 	public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
 		AtomicReference<TooltipComponent> ret = new AtomicReference<>(null);
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+		EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
 			Minecraft mc = Minecraft.getInstance();
 			if (Screen.hasShiftDown() || (mc.player != null && !mc.player.containerMenu.getCarried().isEmpty())) {
 				ret.set(new BackpackContentsTooltip(stack));
@@ -169,7 +158,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	private boolean hasEverlastingUpgrade(ItemStack stack) {
-		return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
+		return IBackpackWrapper.maybeGet(stack).map(w -> !w.getUpgradeHandler().getTypeWrappers(EverlastingUpgradeItem.TYPE).isEmpty()).orElse(false);
 	}
 
 	@Nullable
@@ -263,7 +252,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 	}
 
 	private static void stopBackpackSounds(ItemStack backpack, Level world, BlockPos pos) {
-		backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
+		IBackpackWrapper.maybeGet(backpack).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
 				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid))
 		);
 	}
@@ -272,7 +261,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		if (player == null || !player.isCreative()) {
 			return backpack.copy();
 		}
-		return backpack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance())
+		return IBackpackWrapper.maybeGet(backpack)
 				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
 	}
 
@@ -290,12 +279,14 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 			String handlerName = hand == InteractionHand.MAIN_HAND ? PlayerInventoryProvider.MAIN_INVENTORY : PlayerInventoryProvider.OFFHAND_INVENTORY;
 			int slot = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : 0;
 			BackpackContext.Item context = new BackpackContext.Item(handlerName, slot);
-			NetworkHooks.openScreen(serverPlayer, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getHoverName()),
+			NetworkUtil.openGui(serverPlayer, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, context), stack.getHoverName()),
 					context::toBuffer);
 		}
 		return InteractionResultHolder.success(stack);
 	}
 
+
+	// TODO: Capabilities
 	@Override
 	public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
 		return new ICapabilityProvider() {
@@ -309,7 +300,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 				}
 
 				initWrapper();
-				if (cap == CapabilityBackpackWrapper.getCapabilityInstance()) {
+				if (cap == IBackpackWrapper.BACKPACK_WRAPPER_COMPONENT) {
 					return LazyOptional.of(() -> wrapper).cast();
 				} else if (cap == ForgeCapabilities.ITEM_HANDLER) {
 					return LazyOptional.of(() -> wrapper.getInventoryForInputOutput()).cast();
@@ -329,24 +320,25 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 		};
 	}
 
-	@Override
+	// TODO: ???
+/*	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
 		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
 			return;
 		}
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
+		IBackpackWrapper.maybeGet(stack).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
 						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
 		);
 		super.onArmorTick(stack, level, player);
-	}
+	}*/
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
 		if (level.isClientSide || !(entityIn instanceof Player player) || player.isSpectator() || player.isDeadOrDying() || (Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get() && itemSlot > -1)) {
 			return;
 		}
-		stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(
+		IBackpackWrapper.maybeGet(stack).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
 						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
 		);
@@ -389,12 +381,12 @@ public class BackpackItem extends ItemBase implements IStashStorageItem {
 
 	@Override
 	public ItemStack stash(ItemStack storageStack, ItemStack stack) {
-		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, false)).orElse(stack);
+		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, false)).orElse(stack);
 	}
 
 	@Override
 	public boolean isItemStashable(ItemStack storageStack, ItemStack stack) {
-		return storageStack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() != stack.getCount()).orElse(false);
+		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().insertItem(stack, true).getCount() != stack.getCount()).orElse(false);
 	}
 
 	public record BackpackContentsTooltip(ItemStack backpack) implements TooltipComponent {

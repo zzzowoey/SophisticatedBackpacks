@@ -22,6 +22,6 @@ public class BackToBackpackTab extends Tab {
 
 	@Override
 	protected void onTabIconClicked(int button) {
-		SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage());
+		SBPPacketHandler.sendToServer(new BackpackOpenMessage());
 	}
 }

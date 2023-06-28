@@ -1,59 +1,50 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
+import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
+import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.fml.config.ModConfig;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCore;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilteredUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.magnet.MagnetUpgradeConfig;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
+//import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
+//import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeConfig;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
+//import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("java:S1192") //don't complain about repeated config names if two upgrades happen to have the same setting
 public class Config {
+	private static final Map<ModConfig.Type, BaseConfig> CONFIGS = new EnumMap<>(ModConfig.Type.class);
 
-	private Config() {}
+	public static Server SERVER;
 
-	public static final Server SERVER;
-	public static final ForgeConfigSpec SERVER_SPEC;
+	public static Common COMMON;
 
-	public static final Common COMMON;
-	public static final ForgeConfigSpec COMMON_SPEC;
 
-	static {
-		final Pair<Server, ForgeConfigSpec> serverSpec = new ForgeConfigSpec.Builder().configure(Server::new);
-		SERVER_SPEC = serverSpec.getRight();
-		SERVER = serverSpec.getLeft();
+	public static class BaseConfig {
+		public ForgeConfigSpec specification;
 
-		final Pair<Common, ForgeConfigSpec> commonSpec = new ForgeConfigSpec.Builder().configure(Common::new);
-		COMMON_SPEC = commonSpec.getRight();
-		COMMON = commonSpec.getLeft();
+		public void onLoad() { }
+		public void onReload() { }
 	}
 
-	public static class Server {
+	public static class Server extends BaseConfig {
 		public final DisallowedItems disallowedItems;
 		public final NoInteractionBlocks noInteractionBlocks;
 		public final BackpackConfig leatherBackpack;
@@ -92,15 +83,14 @@ public class Config {
 		public final ForgeConfigSpec.BooleanValue itemDisplayDisabled;
 		public final ForgeConfigSpec.BooleanValue tickDedupeLogicDisabled;
 		public final FilteredUpgradeConfig toolSwapperUpgrade;
-		public final TankUpgradeConfig tankUpgrade;
+/*		public final TankUpgradeConfig tankUpgrade;*/
 		public final BatteryUpgradeConfig batteryUpgrade;
 		public final StackUpgradeConfig stackUpgrade;
-		public final PumpUpgradeConfig pumpUpgrade;
-		public final XpPumpUpgradeConfig xpPumpUpgrade;
+/*		public final PumpUpgradeConfig pumpUpgrade;
+		public final XpPumpUpgradeConfig xpPumpUpgrade;*/
 		public final NerfsConfig nerfsConfig;
 
-		@SuppressWarnings("unused") //need the Event parameter for forge reflection to understand what event this listens to
-		public void onConfigReload(ModConfigEvent.Reloading event) {
+		public void onReload() {
 			disallowedItems.initialized = false;
 			stackUpgrade.clearNonStackableItems();
 		}
@@ -144,10 +134,10 @@ public class Config {
 			autoBlastingUpgrade = new AutoCookingUpgradeConfig(builder, "Auto-Blasting Upgrade", "autoBlastingUpgrade");
 			inceptionUpgrade = new InceptionUpgradeConfig(builder);
 			toolSwapperUpgrade = new FilteredUpgradeConfig(builder, "Tool Swapper Upgrade", "toolSwapperUpgrade", 8, 4);
-			tankUpgrade = new TankUpgradeConfig(builder);
+			//tankUpgrade = new TankUpgradeConfig(builder);
 			batteryUpgrade = new BatteryUpgradeConfig(builder);
-			pumpUpgrade = new PumpUpgradeConfig(builder);
-			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);
+			/*pumpUpgrade = new PumpUpgradeConfig(builder);
+			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);*/
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 			nerfsConfig = new NerfsConfig(builder);
 
@@ -236,7 +226,7 @@ public class Config {
 					String entityRegistryName = entityLoot[0];
 					String lootTableName = entityLoot[1];
 
-					EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityRegistryName));
+					EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(new ResourceLocation(entityRegistryName));
 					if (entityType != null) {
 						entityLootTables.put(entityType, lootTableName.equals("null") ? null : new ResourceLocation(lootTableName));
 					}
@@ -251,7 +241,7 @@ public class Config {
 			}
 
 			private List<String> getDefaultEntityLootTableList() {
-				return getDefaultEntityLootMapping().entrySet().stream().map(e -> ForgeRegistries.ENTITY_TYPES.getKey(e.getKey()) + "|" + e.getValue()).collect(Collectors.toList());
+				return getDefaultEntityLootMapping().entrySet().stream().map(e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getKey()) + "|" + e.getValue()).collect(Collectors.toList());
 			}
 
 			private Map<EntityType<?>, ResourceLocation> getDefaultEntityLootMapping() {
@@ -313,7 +303,7 @@ public class Config {
 			}
 
 			public boolean isBlockInteractionDisallowed(Block block) {
-				if (!SERVER_SPEC.isLoaded()) {
+				if (!SERVER.specification.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {
@@ -328,8 +318,8 @@ public class Config {
 
 				for (String disallowedItemName : noInteractionBlocksList.get()) {
 					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
-					if (ForgeRegistries.BLOCKS.containsKey(registryName)) {
-						noInteractionBlocksSet.add(ForgeRegistries.BLOCKS.getValue(registryName));
+					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
+						noInteractionBlocksSet.add(BuiltInRegistries.BLOCK.get(registryName));
 					}
 				}
 			}
@@ -345,7 +335,7 @@ public class Config {
 			}
 
 			public boolean isItemDisallowed(Item item) {
-				if (!SERVER_SPEC.isLoaded()) {
+				if (!SERVER.specification.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {
@@ -360,21 +350,56 @@ public class Config {
 
 				for (String disallowedItemName : disallowedItemsList.get()) {
 					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
-					if (ForgeRegistries.ITEMS.containsKey(registryName)) {
-						disallowedItemsSet.add(ForgeRegistries.ITEMS.getValue(registryName));
+					if (BuiltInRegistries.ITEM.containsKey(registryName)) {
+						disallowedItemsSet.add(BuiltInRegistries.ITEM.get(registryName));
 					}
 				}
 			}
 		}
 	}
 
-	public static class Common {
+	public static class Common extends BaseConfig {
 		public final ForgeConfigSpec.BooleanValue chestLootEnabled;
+
 		Common(ForgeConfigSpec.Builder builder) {
 			builder.comment("Common Settings").push("common");
 
 			chestLootEnabled = builder.comment("Turns on/off loot added to various vanilla chest loot tables").define("chestLootEnabled", true);
 			builder.pop();
 		}
+	}
+
+
+	private static <T extends BaseConfig> T register(Function<ForgeConfigSpec.Builder, T> factory, ModConfig.Type side) {
+		Pair<T, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(factory);
+
+		T config = specPair.getLeft();
+		config.specification = specPair.getRight();
+		CONFIGS.put(side, config);
+		return config;
+	}
+
+	public static void register() {
+		COMMON = register(Common::new, ModConfig.Type.CLIENT);
+		SERVER = register(Server::new, ModConfig.Type.SERVER);
+
+		for (Map.Entry<ModConfig.Type, BaseConfig> pair : CONFIGS.entrySet()) {
+			ForgeConfigRegistry.INSTANCE.register(SophisticatedCore.ID, pair.getKey(), pair.getValue().specification);
+		}
+
+		ModConfigEvents.loading(SophisticatedCore.ID).register(Config::onLoad);
+		ModConfigEvents.reloading(SophisticatedCore.ID).register(Config::onReload);
+	}
+
+	public static void onLoad(ModConfig modConfig) {
+		for (Config.BaseConfig config : CONFIGS.values())
+			if (config.specification == modConfig.getSpec())
+				config.onLoad();
+	}
+
+	public static void onReload(ModConfig modConfig) {
+		for (Config.BaseConfig config : CONFIGS.values())
+			if (config.specification == modConfig.getSpec())
+				config.onReload();
 	}
 }

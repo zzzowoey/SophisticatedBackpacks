@@ -26,6 +26,6 @@ public class BackpackSettingsScreen extends SettingsScreen {
 
 	@Override
 	protected void sendStorageInventoryScreenOpenMessage() {
-		SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage());
+		SBPPacketHandler.sendToServer(new BackpackOpenMessage());
 	}
 }

@@ -4,12 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.fml.ModList;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
@@ -22,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class RegistryLoader extends SimpleJsonResourceReloadListener {
+public class RegistryLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 	private static final Map<String, IRegistryDataLoader> loaders = new HashMap<>();
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
@@ -40,6 +41,11 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener {
 
 	public RegistryLoader() {
 		super(GSON, "registry");
+	}
+
+	@Override
+	public ResourceLocation getFabricId() {
+		return SophisticatedBackpacks.getRL("registryLoader");
 	}
 
 	private final List<DependentFile> loadLater = new ArrayList<>();
@@ -110,7 +116,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener {
 			modId = GsonHelper.getAsString(json, "mod");
 		}
 
-		if (isDisabled(json) || (modId != null && !ModList.get().isLoaded(modId))) {
+		if (isDisabled(json) || (modId != null && !FabricLoader.getInstance().isModLoaded(modId))) {
 			return;
 		}
 

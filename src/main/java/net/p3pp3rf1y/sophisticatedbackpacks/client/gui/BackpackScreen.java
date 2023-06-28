@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,6 +12,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
+import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
+
+import java.util.Optional;
 
 public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 	public static BackpackScreen constructScreen(BackpackContainer screenContainer, Inventory inv, Component title) {
@@ -23,13 +27,13 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.isActiveAndMatches(InputConstants.getKey(keyCode, scanCode))) {
+		if (keyCode == 256 || KeybindHandler.BACKPACK_OPEN_KEYBIND.matches(keyCode, scanCode)) {
 			if (getMenu().isFirstLevelStorage() && getMenu().getBackpackContext().wasOpenFromInventory() && mouseNotOverBackpack()) {
-				getMinecraft().player.closeContainer();
-				getMinecraft().setScreen(new InventoryScreen(getMinecraft().player));
+				minecraft.player.closeContainer();
+				minecraft.setScreen(new InventoryScreen(minecraft.player));
 				return true;
 			} else if (!getMenu().isFirstLevelStorage()) {
-				SBPPacketHandler.INSTANCE.sendToServer(new BackpackOpenMessage());
+				SBPPacketHandler.sendToServer(new BackpackOpenMessage());
 				return true;
 			}
 		}
@@ -37,8 +41,8 @@ public class BackpackScreen extends StorageScreenBase<BackpackContainer> {
 	}
 
 	private boolean mouseNotOverBackpack() {
-		Slot selectedSlot = getSlotUnderMouse();
-		return selectedSlot == null || !(selectedSlot.getItem().getItem() instanceof BackpackItem);
+		Optional<Slot> selectedSlot = GuiHelper.getSlotUnderMouse(this);
+		return selectedSlot.isEmpty() || !(selectedSlot.get().getItem().getItem() instanceof BackpackItem);
 	}
 
 	@Override

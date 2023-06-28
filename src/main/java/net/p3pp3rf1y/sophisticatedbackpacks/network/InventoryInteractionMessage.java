@@ -5,14 +5,13 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraftforge.network.NetworkEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
+import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
-import java.util.function.Supplier;
 
-public class InventoryInteractionMessage {
+public class InventoryInteractionMessage extends SimplePacketBase {
 	private final BlockPos pos;
 	private final Direction face;
 
@@ -21,19 +20,18 @@ public class InventoryInteractionMessage {
 		this.face = face;
 	}
 
-	public static void encode(InventoryInteractionMessage msg, FriendlyByteBuf packetBuffer) {
-		packetBuffer.writeLong(msg.pos.asLong());
-		packetBuffer.writeEnum(msg.face);
+	public InventoryInteractionMessage(FriendlyByteBuf buffer) { this(buffer.readBlockPos(), buffer.readEnum(Direction.class)); }
+
+	@Override
+	public void write(FriendlyByteBuf buffer) {
+		buffer.writeLong(this.pos.asLong());
+		buffer.writeEnum(this.face);
 	}
 
-	public static InventoryInteractionMessage decode(FriendlyByteBuf packetBuffer) {
-		return new InventoryInteractionMessage(BlockPos.of(packetBuffer.readLong()), packetBuffer.readEnum(Direction.class));
-	}
-
-	static void onMessage(InventoryInteractionMessage msg, Supplier<NetworkEvent.Context> contextSupplier) {
-		NetworkEvent.Context context = contextSupplier.get();
-		context.enqueueWork(() -> handleMessage(msg, context.getSender()));
-		context.setPacketHandled(true);
+	@Override
+	public boolean handle(Context context) {
+		context.enqueueWork(() -> handleMessage(this, context.getSender()));
+		return true;
 	}
 
 	private static void handleMessage(InventoryInteractionMessage msg, @Nullable ServerPlayer sender) {
