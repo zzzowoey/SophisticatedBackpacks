@@ -129,7 +129,8 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	private void invalidateBackpackCaps() {
 		getComponent(ITEM_HANDLER).invalidate();
-		getComponent(FLUID_HANDLER_ITEM).invalidate();
+		// TODO: Reimplement
+		//getComponent(FLUID_HANDLER_ITEM).invalidate();
 		getComponent(ENERGY).invalidate();
 	}
 
