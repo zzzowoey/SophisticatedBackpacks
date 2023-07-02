@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "${archivesBaseName}-refmap.json",
   "mixins": [
-    "PlayerInventory"
+    "PlayerInventory",
+    "PiglinAiMixin"
   ],
   "client": [
 
