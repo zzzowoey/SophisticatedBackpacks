@@ -226,8 +226,7 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 		return InteractionResultHolder.success(stack);
 	}
 
-	// TODO: ???
-/*	@Override
+	@Override
 	public void onArmorTick(ItemStack stack, Level level, Player player) {
 		if (level.isClientSide || player.isSpectator() || player.isDeadOrDying() || Boolean.FALSE.equals(Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get())) {
 			return;
@@ -237,7 +236,7 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 						.forEach(upgrade -> upgrade.tick(player, player.level, player.blockPosition()))
 		);
 		super.onArmorTick(stack, level, player);
-	}*/
+	}
 
 	@Override
 	public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected) {
@@ -259,10 +258,10 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 		return numberOfUpgradeSlots.getAsInt();
 	}
 
-	/*@Override
-	public EquipmentSlot getEquipmentSlot(ItemStack stack) {
+	@Override
+	public EquipmentSlot getEquipmentSlot() {
 		return EquipmentSlot.CHEST;
-	}*/
+	}
 
 	@Override
 	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {

@@ -2,11 +2,11 @@
   "required": true,
   "priority": 1100,
   "minVersion": "0.8",
-  "package": "net.p3pp3rf1y.sophisticatedcore.mixin",
+  "package": "net.p3pp3rf1y.sophisticatedbackpacks.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "${archivesBaseName}-refmap.json",
   "mixins": [
-
+    "PlayerInventory"
   ],
   "client": [
 
