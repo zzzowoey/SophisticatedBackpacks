@@ -158,32 +158,4 @@ public class QuadBakingVertexConsumer implements VertexConsumer
     {
         this.sprite = sprite;
     }
-/*
-    public void setShade(boolean shade)
-    {
-        this.shade = shade;
-    }
-
-    public static class Buffered extends QuadBakingVertexConsumer
-    {
-        private final BakedQuad[] output;
-
-        public Buffered()
-        {
-            this(new BakedQuad[1]);
-        }
-
-        private Buffered(BakedQuad[] output)
-        {
-            super(q -> output[0] = q);
-            this.output = output;
-        }
-
-        public BakedQuad getQuad()
-        {
-            var quad = Preconditions.checkNotNull(output[0], "No quad has been emitted. Vertices in buffer: " + vertexIndex);
-            output[0] = null;
-            return quad;
-        }
-    }*/
 }

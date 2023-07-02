@@ -238,11 +238,6 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
 						return super.isItemValid(slot, resource, amount) && (amount > 0 || SophisticatedBackpacks.ID.equals(BuiltInRegistries.ITEM.getKey(resource.getItem()).getNamespace()) || resource.toStack().is(ModItems.BACKPACK_UPGRADE_TAG));
 					}
-					/*@Override
-					public boolean isItemValid(int slot, ItemStack stack) {
-						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
-						return super.isItemValid(slot, stack) && (stack.isEmpty() || SophisticatedBackpacks.MOD_ID.equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).getNamespace()) || stack.is(ModItems.BACKPACK_UPGRADE_TAG));
-					}*/
 				};
 			} else {
 				upgradeHandler = Noop.INSTANCE.getUpgradeHandler();

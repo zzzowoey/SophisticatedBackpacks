@@ -37,15 +37,6 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		return Collections.emptyList();
 	}
 
-/*	private static void addToTooltip(ItemTooltipEvent event) {
-		if (!additionalTooltip.isEmpty()) {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null && player.containerMenu instanceof BackpackContainer) {
-				event.getToolTip().addAll(additionalTooltip);
-			}
-		}
-	}*/
-
 	protected RefillUpgradeTab(RefillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsInRow, String upgradeName) {
 		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade(upgradeName), SBPTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
 

@@ -250,36 +250,4 @@ public class CommonEventHandler {
 			}
 		}
 	}
-
-/*  	private void onItemPickup(ItemEntityEvents.ItemEntityPickupEvent event) {
-		ItemEntity itemEntity = event.getItem();
-		if (itemEntity.getItem().isEmpty()) {
-			return;
-		}
-
-		AtomicReference<ItemStack> remainingStackSimulated = new AtomicReference<>(itemEntity.getItem().copy());
-		Player player = event.getPlayer();
-		Level world = player.getCommandSenderWorld();
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
-				.map(wrapper -> {
-					try(Transaction ctx = Transaction.openOuter()) {
-						remainingStackSimulated.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStackSimulated.get(), ctx));
-						return remainingStackSimulated.get().isEmpty();
-					}
-				}).orElse(false), Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
-		);
-
-		if (remainingStackSimulated.get().getCount() != itemEntity.getItem().getCount()) {
-			AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
-			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
-							.map(wrapper -> {
-								remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, player, wrapper.getUpgradeHandler(), remainingStack.get(), null));
-								return remainingStack.get().isEmpty();
-							}).orElse(false)
-					, Config.SERVER.nerfsConfig.onlyWornBackpackTriggersUpgrades.get()
-			);
-			itemEntity.setItem(remainingStack.get());
-			event.setCanceled(true); //cancelling even when the stack isn't empty at this point to prevent full stack from before pickup to be picked up by player
-		}
-	}*/
 }

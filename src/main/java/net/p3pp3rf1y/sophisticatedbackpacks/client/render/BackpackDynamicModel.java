@@ -264,17 +264,6 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			return overrideList;
 		}
 
-/*		@Override
-		public BakedModel applyTransform(ItemTransforms.TransformType transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
-			if (transformType == ItemTransforms.TransformType.NONE) {
-				return this;
-			}
-
-			ITEM_TRANSFORMS.getTransform(transformType).apply(applyLeftHandTransform, poseStack);
-
-			return this;
-		}*/
-
 		@SuppressWarnings("deprecation")
 		@Override
 		public ItemTransforms getTransforms() {

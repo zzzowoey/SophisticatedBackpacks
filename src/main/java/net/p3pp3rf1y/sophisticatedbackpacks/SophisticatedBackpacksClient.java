@@ -28,9 +28,4 @@ public class SophisticatedBackpacksClient implements ClientModInitializer {
 		}
 		return null;
 	}
-
-/*	private static void registerTooltipComponent(RegisterClientTooltipComponentFactoriesEvent event) {
-		event.register(BackpackItem.BackpackContentsTooltip.class, ClientBackpackContentsTooltip::new);
-
-	}*/
 }

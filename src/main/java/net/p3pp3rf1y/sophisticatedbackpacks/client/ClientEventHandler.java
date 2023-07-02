@@ -98,23 +98,6 @@ public class ClientEventHandler {
 	}
 
 	public static ItemStack handleBlockPick(Player player, HitResult result, ItemStack stack) {
-/*		Minecraft mc = Minecraft.getInstance();
-		if (player.isCreative() || mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK) {
-			return stack;
-		}
-		HitResult target = mc.hitResult;
-		Level level = player.level;
-		BlockPos pos = ((BlockHitResult)target).getBlockPos();
-		BlockState state = level.getBlockState(pos);
-
-		if (state.isAir()) {
-			return stack;
-		}
-
-		if (stack.isEmpty() || player.getInventory().findSlotMatchingItem(stack) > -1) {
-			return stack;
-		}*/
-
 		SBPPacketHandler.sendToServer(new BlockPickMessage(stack));
 		return stack;
 	}

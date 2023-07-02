@@ -259,6 +259,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 	}
 
+	// TODO: Reimplement
 /*	@Override
 	public boolean canEntityDestroy(BlockState state, BlockGetter world, BlockPos pos, Entity entity) {
 		if (hasEverlastingUpgrade(world, pos)) {
