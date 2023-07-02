@@ -110,34 +110,26 @@ def dependencies(DependencyHandler deps) {
 }
 
 def compat(DependencyHandler deps) {
-//    deps.compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-//    deps.runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-//    deps.compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-//    deps.runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-//    deps.compileOnly fg.deobf("curse.maven:autoreglib-250363:${autoreglib_cf_file_id}")
-//    deps.compileOnly fg.deobf("curse.maven:quark-243121:${quark_cf_file_id}")
-//    deps.runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-
-
-    /*compileOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    //runtimeOnly fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api")
-    //runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
-    compileOnly fg.deobf("vazkii.botania:Botania:${botania_version}:api")
-    //runtimeOnly fg.deobf("vazkii.botania:Botania:${botania_version}")
-    compileOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}:api")
-    //runtimeOnly fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}")
-    compileOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-    //runtimeOnly fg.deobf("curse.maven:balm-531761:${balm_cf_file_id}")
-    compileOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-    //runtimeOnly fg.deobf("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")*/
+//    deps.modCompileOnly("curse.maven:autoreglib-250363:${autoreglib_cf_file_id}")
+//    deps.modCompileOnly("curse.maven:balm-531761:${balm_cf_file_id}")
+//    deps.modLocalRuntime("curse.maven:balm-531761:${balm_cf_file_id}")
+//    deps.modCompileOnly("vazkii.botania:Botania:${botania_version}:api")
+//    deps.modLocalRuntime("vazkii.botania:Botania:${botania_version}")
+//    deps.modCompileOnly("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+//    deps.modLocalRuntime("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
+//    deps.modCompileOnly("top.theillusivec4.curios:curios-fabric:${curios_version}:api")
+//    deps.modLocalRuntime("top.theillusivec4.curios:curios-fabric:${curios_version}")
+//    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}:api")
+//    deps.modLocalRuntime("vazkii.patchouli:Patchouli:${patchouli_version}")
+//    deps.modCompileOnly("curse.maven:quark-243121:${quark_cf_file_id}")
+//    deps.modLocalRuntime("curse.maven:quark-243121:${quark_cf_file_id}")
 
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version")
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-block:$cca_version")
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version")
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-item:$cca_version")
 
-    //recipeViewers(deps)
+    recipeViewers(deps)
 }
 
 def recipeViewers(DependencyHandler deps) {
@@ -152,7 +144,7 @@ def recipeViewers(DependencyHandler deps) {
     switch (recipe_viewer.toLowerCase(Locale.ROOT)) {
         case "emi": deps.modLocalRuntime("dev.emi:emi-fabric:$emi_version"); break
         case "jei": deps.modLocalRuntime("mezz.jei:jei-$minecraft_version-fabric:$jei_version"); break
-        case "rei": deps.modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"); break
+        //case "rei": deps.modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"); break
         case "disabled": break
         default: println("Unknown recipe viewer specified: $recipe_viewer. Must be JEI, REI, EMI, or disabled.")
     }
@@ -166,8 +158,8 @@ def testing(DependencyHandler deps) {
 }
 
 loom {
-    if(file("src/main/resources/${project.mod_id}.accesswidener").exists()){
-        accessWidenerPath = file("src/main/resources/${project.mod_id}.accesswidener")
+    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
+        accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
     }
     sourceSets {
         main {
@@ -190,6 +182,7 @@ loom {
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
             vmArg "-Dfabric-api.datagen.modid=$mod_id"
+            runDir "run/test_client"
 
             mods {
                 if (findProject(':SophisticatedCore') != null) {

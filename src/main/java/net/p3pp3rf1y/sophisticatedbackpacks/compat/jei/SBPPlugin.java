@@ -1,4 +1,3 @@
-/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.jei;
 
 import mezz.jei.api.IModPlugin;
@@ -41,7 +40,7 @@ import java.util.List;
 public class SBPPlugin implements IModPlugin {
 	@Override
 	public ResourceLocation getPluginUid() {
-		return new ResourceLocation(SophisticatedBackpacks.MOD_ID, "default");
+		return SophisticatedBackpacks.getRL("default");
 	}
 
 	@Override
@@ -88,7 +87,7 @@ public class SBPPlugin implements IModPlugin {
 	}
 
 	private LegacyUpgradeRecipe copyUpgradeRecipe(LegacyUpgradeRecipe recipe) {
-		return new LegacyUpgradeRecipe(recipe.getId(), recipe.base, recipe.addition, recipe.getResultItem());
+		return new LegacyUpgradeRecipe(recipe.getId(), recipe.base, recipe.addition, recipe.getResultItem(null));
 	}
 
 	@Override
@@ -109,4 +108,4 @@ public class SBPPlugin implements IModPlugin {
 	}
 
 }
-*/
+
