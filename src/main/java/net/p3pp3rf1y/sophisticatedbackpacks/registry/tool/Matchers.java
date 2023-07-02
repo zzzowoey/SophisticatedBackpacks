@@ -17,13 +17,15 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents;
+import net.p3pp3rf1y.sophisticatedcore.common.compontents.Components;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
 
 public class Matchers {
 	private Matchers() {}
@@ -87,7 +89,7 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
 				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(),
-						blockContext.getPos()).map(te -> SophisticatedCoreComponents.ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false));
+						blockContext.getPos()).map(te -> ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false));
 			}
 		});
 		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {

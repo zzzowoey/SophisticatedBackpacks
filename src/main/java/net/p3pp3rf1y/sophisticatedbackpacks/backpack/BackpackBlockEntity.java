@@ -1,11 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import dev.onyxstudios.cca.api.v3.component.Component;
-import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import io.github.fabricators_of_create.porting_lib.block.ChunkUnloadListeningBlockEntity;
 import io.github.fabricators_of_create.porting_lib.block.CustomDataPacketHandlingBlockEntity;
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.BlockEntityExtensions;
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -14,10 +11,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.EmptyEnergyStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
@@ -33,8 +28,8 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
-import static net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents.*;
-import static net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents.ITEM_HANDLER;
+import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.*;
+import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
 
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, BlockEntityExtensions, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
 	@Nullable

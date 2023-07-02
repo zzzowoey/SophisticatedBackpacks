@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.compontents.IComponentWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;

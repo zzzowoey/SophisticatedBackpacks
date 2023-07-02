@@ -31,7 +31,7 @@
       "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksData"
     ],
     "cardinal-components": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents"
+      "net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components"
     ]
   },
 

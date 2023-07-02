@@ -13,7 +13,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents.BACKPACK_WRAPPER;
+import static net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components.BACKPACK_WRAPPER;
 
 public interface IBackpackWrapper extends IStorageWrapper, Component {
 	static IBackpackWrapper get(Object provider) {

@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
@@ -43,7 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents.BACKPACK_WRAPPER;
+import static net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components.BACKPACK_WRAPPER;
 
 public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
