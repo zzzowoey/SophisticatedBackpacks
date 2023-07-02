@@ -33,7 +33,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
@@ -49,7 +49,7 @@ public class EntityBackpackAdditionHandler {
 	private EntityBackpackAdditionHandler() {}
 
 	private static final String SPAWNED_WITH_BACKPACK = "spawnedWithBackpack";
-	private static final String SPAWNED_WITH_JUKEBOX_UPGRADE = SophisticatedBackpacks.MOD_ID + ":jukebox";
+	private static final String SPAWNED_WITH_JUKEBOX_UPGRADE = SophisticatedBackpacks.ID + ":jukebox";
 
 	private static final List<WeightedElement<Item>> HELMET_CHANCES = List.of(
 			new WeightedElement<>(1, Items.NETHERITE_HELMET),

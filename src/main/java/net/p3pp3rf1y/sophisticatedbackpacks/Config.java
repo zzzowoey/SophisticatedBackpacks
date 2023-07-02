@@ -384,11 +384,11 @@ public class Config {
 		SERVER = register(Server::new, ModConfig.Type.SERVER);
 
 		for (Map.Entry<ModConfig.Type, BaseConfig> pair : CONFIGS.entrySet()) {
-			ForgeConfigRegistry.INSTANCE.register(SophisticatedCore.ID, pair.getKey(), pair.getValue().specification);
+			ForgeConfigRegistry.INSTANCE.register(SophisticatedBackpacks.ID, pair.getKey(), pair.getValue().specification);
 		}
 
-		ModConfigEvents.loading(SophisticatedCore.ID).register(Config::onLoad);
-		ModConfigEvents.reloading(SophisticatedCore.ID).register(Config::onReload);
+		ModConfigEvents.loading(SophisticatedBackpacks.ID).register(Config::onLoad);
+		ModConfigEvents.reloading(SophisticatedBackpacks.ID).register(Config::onReload);
 	}
 
 	public static void onLoad(ModConfig modConfig) {

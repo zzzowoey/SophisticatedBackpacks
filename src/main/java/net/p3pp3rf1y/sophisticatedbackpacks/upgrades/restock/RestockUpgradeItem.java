@@ -11,7 +11,7 @@ public class RestockUpgradeItem extends UpgradeItemBase<RestockUpgradeWrapper> {
 	private final IntSupplier filterSlotCount;
 
 	public RestockUpgradeItem(IntSupplier filterSlotCount) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.filterSlotCount = filterSlotCount;
 	}
 

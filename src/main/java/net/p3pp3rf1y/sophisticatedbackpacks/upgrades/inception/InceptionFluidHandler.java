@@ -3,9 +3,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 
 import javax.annotation.Nonnull;
@@ -15,26 +12,25 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 public class InceptionFluidHandler implements IStorageFluidHandler {
-	@Nullable
+	/*@Nullable
 	private final IStorageFluidHandler wrappedFluidHandler;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 	private IStorageFluidHandler[] fluidHandlers;
 	protected int[] baseIndex;
 	protected int tankCount;
-	private final ItemStack backpack;
+	private final ItemStack backpack;*/
 
-	public InceptionFluidHandler(
-			@Nullable IStorageFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
-		this.wrappedFluidHandler = wrappedFluidHandler;
+	public InceptionFluidHandler(@Nullable IStorageFluidHandler wrappedFluidHandler, ItemStack backpack, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+		/*this.wrappedFluidHandler = wrappedFluidHandler;
 		this.backpack = backpack;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
 		subBackpacksHandler.addRefreshListener(sbs -> refreshHandlers());
-		refreshHandlers();
+		refreshHandlers();*/
 	}
 
-	private void refreshHandlers() {
+	/*private void refreshHandlers() {
 		List<IStorageFluidHandler> handlers = new ArrayList<>();
 		if (wrappedFluidHandler != null && inventoryOrder == InventoryOrder.MAIN_FIRST) {
 			handlers.add(wrappedFluidHandler);
@@ -194,5 +190,5 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 	@Override
 	public ItemStack getContainer() {
 		return backpack;
-	}
+	}*/
 }

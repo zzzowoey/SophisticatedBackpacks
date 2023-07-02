@@ -1,9 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
-import net.minecraftforge.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
-import net.p3pp3rf1y.sophisticatedbackpacks.compat.curios.CuriosCompat;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 
 import java.util.HashMap;
@@ -17,13 +15,13 @@ public class ModCompat {
 	private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
 
 	static {
-		compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
-		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new); //TODO readd Botania compat
+		//compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
+		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new); // TODO readd Botania compat
 	}
 
 	public static void initCompats() {
 		for (Map.Entry<String, Supplier<Callable<ICompat>>> entry : compatFactories.entrySet()) {
-			if (ModList.get().isLoaded(entry.getKey())) {
+			if (FabricLoader.getInstance().isModLoaded(entry.getKey())) {
 				try {
 					entry.getValue().get().call().setup();
 				}

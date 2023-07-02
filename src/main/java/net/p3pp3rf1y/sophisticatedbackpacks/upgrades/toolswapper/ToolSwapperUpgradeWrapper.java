@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
 import io.github.fabricators_of_create.porting_lib.common.util.ToolAction;
 import io.github.fabricators_of_create.porting_lib.common.util.ToolActions;
+import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import me.alphamode.forgetags.Tags;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -417,11 +418,11 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isShearInteractionBlock(Level world, BlockPos pos, ItemStack stack, Block block) {
-		return (block instanceof IForgeShearable shearable && shearable.isShearable(stack, world, pos)) || block instanceof BeehiveBlock;
+		return (block instanceof IShearable shearable && shearable.isShearable(stack, world, pos)) || block instanceof BeehiveBlock;
 	}
 
 	private boolean isShearableEntity(Entity entity, ItemStack stack) {
-		return entity instanceof IForgeShearable shearable && shearable.isShearable(stack, entity.level, entity.blockPosition());
+		return entity instanceof IShearable shearable && shearable.isShearable(stack, entity.level, entity.blockPosition());
 	}
 
 	@Override

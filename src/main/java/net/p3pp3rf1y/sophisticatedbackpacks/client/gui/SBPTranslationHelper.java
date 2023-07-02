@@ -7,6 +7,6 @@ public class SBPTranslationHelper extends TranslationHelper {
 	public static final SBPTranslationHelper INSTANCE = new SBPTranslationHelper();
 
 	private SBPTranslationHelper() {
-		super(SophisticatedBackpacks.MOD_ID);
+		super(SophisticatedBackpacks.ID);
 	}
 }

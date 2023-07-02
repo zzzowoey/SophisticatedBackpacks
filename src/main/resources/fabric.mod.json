@@ -30,9 +30,6 @@
     "fabric-datagen": [
       "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksData"
     ],
-    "jei_mod_plugin": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin"
-    ],
     "cardinal-components": [
       "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksComponents"
     ]
@@ -44,12 +41,15 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": ">=${fabric_version}",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${minecraft_version}",
+    "cardinal-components-base": "*",
+    "cardinal-components-block": "*",
+    "cardinal-components-item": "*"
   },
 
   "custom": {
     "cardinal-components": [
-      "sophisticatedbackpacks:backpackWrapperComponent"
+      "sophisticatedbackpacks:backpack_wrapper_component"
     ],
     "loom:injected_interfaces": {
     }

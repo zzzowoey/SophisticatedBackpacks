@@ -18,7 +18,7 @@ public class ToolSwapperUpgradeItem extends UpgradeItemBase<ToolSwapperUpgradeWr
 	private final boolean swapToolOnKeyPress;
 
 	public ToolSwapperUpgradeItem(boolean hasSettingsTab, boolean swapToolOnKeyPress) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.hasSettingsTab = hasSettingsTab;
 		this.swapToolOnKeyPress = swapToolOnKeyPress;
 	}

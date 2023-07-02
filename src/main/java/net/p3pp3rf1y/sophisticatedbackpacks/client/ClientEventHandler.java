@@ -23,14 +23,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlocks;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackLayerRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 
@@ -64,8 +63,8 @@ public class ClientEventHandler {
 			}
 		});
 
-		ModItemColors.registerItemColorHandlers();
-		ModBlockColors.registerBlockColorHandlers();
+		ModItems.register();
+		ModBlocks.register();
 	}
 
 	private static void onModelRegistry(Map<ResourceLocation, IGeometryLoader<?>> loaders) {
@@ -74,7 +73,6 @@ public class ClientEventHandler {
 
 	private static void registerEntityRenderers() {
 		EntityRendererRegistry.register(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), ItemEntityRenderer::new);
-		BlockEntityRenderers.register(ModBlocks.BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
 	}
 
 	public static void registerLayer() {

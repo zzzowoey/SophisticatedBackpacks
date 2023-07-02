@@ -45,7 +45,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener implements 
 
 	@Override
 	public ResourceLocation getFabricId() {
-		return SophisticatedBackpacks.getRL("registryLoader");
+		return SophisticatedBackpacks.getRL("registry_loader");
 	}
 
 	private final List<DependentFile> loadLater = new ArrayList<>();

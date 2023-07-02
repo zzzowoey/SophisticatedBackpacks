@@ -13,7 +13,7 @@ public class RefillUpgradeItem extends UpgradeItemBase<RefillUpgradeWrapper> {
 	private boolean supportsBlockPick;
 
 	public RefillUpgradeItem(IntSupplier filterSlotCount, boolean targetSlotSelection, boolean supportsBlockPick) {
-		super(SophisticatedBackpacks.ITEM_GROUP);
+		super();
 		this.filterSlotCount = filterSlotCount;
 		this.targetSlotSelection = targetSlotSelection;
 		this.supportsBlockPick = supportsBlockPick;

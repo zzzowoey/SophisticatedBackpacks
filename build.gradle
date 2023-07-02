@@ -1,3 +1,6 @@
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.language.jvm.tasks.ProcessResources
+
 //file:noinspection GroovyAssignabilityCheck
 //file:noinspection GroovyAccessibility
 //file:noinspection GradlePackageVersionRange
@@ -45,6 +48,14 @@ repositories {
     maven { url = "https://modmaven.dev" } // Jei
 }
 
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.module.name == "fabric-loader") {
+            useVersion(loader_version)
+        }
+    }
+}
+
 dependencies {
     setup(dependencies)
     devEnv(dependencies)
@@ -69,18 +80,20 @@ def devEnv(DependencyHandler deps) {
 }
 
 def dependencies(DependencyHandler deps) {
+    deps.modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+    deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:$project.port_lib_version+$project.minecraft_version") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+
     if (findProject(':SophisticatedCore') != null) {
-        deps.api deps.project(path: ":SophisticatedCore", configuration: "namedElements")
-        deps.testImplementation(project(':SophisticatedCore'))
+        deps.api(deps.project(path: ":SophisticatedCore", configuration: "namedElements")) {
+            exclude(group: "io.github.fabricators_of_create.Porting-Lib")
+            exclude(group: "net.fabricmc.fabric-api")
+            exclude(group: "dev.onyxstudios.cardinal-components-api")
+        }
     } else {
 /*        deps.modCompileOnly(deps.include("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}"))
         deps.modRuntimeOnly(deps.include("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}"))*/
-    }
-
-    deps.modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
-
-    deps.modApi(deps.include("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:$project.port_lib_version+$project.minecraft_version")) {
-        exclude(group: "net.fabricmc.fabric-api")
     }
 
 /*    deps.modApi(deps.include("com.electronwill.night-config:core:$night_config_version"))
@@ -194,7 +207,7 @@ loom {
             client()
             ideConfigGenerated = true
 
-            property "mixin.env.disableRefMap", "true"
+            //property "mixin.env.disableRefMap", "true"
             //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             runDir "run/test_client"
             mods {
@@ -207,7 +220,7 @@ loom {
             server()
             ideConfigGenerated = true
 
-            property "mixin.env.disableRefMap", "true"
+            //property "mixin.env.disableRefMap", "true"
             //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             runDir "run/test_server"
             mods {
@@ -237,6 +250,29 @@ task generateSources(type: Copy) {
     filter { line -> line.replaceAll('@MOD_VERSION@', '${project.version}') }
 }
 
+processResources {
+    // Exclude datagenerator .cache directory
+    exclude '.cache'
+
+    Map<String, String> properties = new HashMap<>()
+    properties.put("version", version)
+    properties.put("loader_version", loader_version)
+    properties.put("fabric_version", fabric_version)
+    properties.put("minecraft_version", minecraft_version)
+
+    properties.forEach((k, v) -> inputs.property(k, v))
+
+    filesMatching("fabric.mod.json") {
+        expand properties
+    }
+
+    filesMatching("${mod_id}.mixins.json") {
+        expand "archivesBaseName": archivesBaseName
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
     it.options.release = Integer.parseInt(sourceCompatibility)
@@ -259,17 +295,6 @@ jar {
                     "Implementation-Version"  : "${project.version}",
                     "Implementation-Vendor"   : "p3pp3rf1y",
                     "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
-    }
-}
-
-tasks.withType(ProcessResources).configureEach {
-    // Exclude datagenerator .cache directory
-    exclude '.cache'
-
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
     }
 }
 

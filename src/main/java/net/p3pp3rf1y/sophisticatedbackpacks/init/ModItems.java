@@ -7,6 +7,8 @@ import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSource;
@@ -29,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
@@ -40,7 +43,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
@@ -129,13 +132,19 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class ModItems {
 	private ModItems() {}
 
-	private static final LazyRegistrar<Item> ITEMS = LazyRegistrar.create(BuiltInRegistries.ITEM, SophisticatedBackpacks.MOD_ID);
-	private static final LazyRegistrar<MenuType<?>> MENU_TYPES = LazyRegistrar.create(BuiltInRegistries.MENU, SophisticatedBackpacks.MOD_ID);
-	private static final LazyRegistrar<EntityType<?>> ENTITY_TYPES = LazyRegistrar.create(BuiltInRegistries.ENTITY_TYPE, SophisticatedBackpacks.MOD_ID);
+	private static final LazyRegistrar<Item> ITEMS = LazyRegistrar.create(BuiltInRegistries.ITEM, SophisticatedBackpacks.ID);
+	private static final LazyRegistrar<MenuType<?>> MENU_TYPES = LazyRegistrar.create(BuiltInRegistries.MENU, SophisticatedBackpacks.ID);
+	private static final LazyRegistrar<EntityType<?>> ENTITY_TYPES = LazyRegistrar.create(BuiltInRegistries.ENTITY_TYPE, SophisticatedBackpacks.ID);
 
 	public static final RegistryObject<BackpackItem> BACKPACK = ITEMS.register("backpack",
 			() -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, ModBlocks.BACKPACK));
@@ -148,7 +157,7 @@ public class ModItems {
 	public static final RegistryObject<BackpackItem> NETHERITE_BACKPACK = ITEMS.register("netherite_backpack",
 			() -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get, ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
 
-	public static final ResourceLocation BACKPACK_UPGRADE_TAG_NAME = new ResourceLocation(SophisticatedBackpacks.MOD_ID, "upgrade");
+	public static final ResourceLocation BACKPACK_UPGRADE_TAG_NAME = new ResourceLocation(SophisticatedBackpacks.ID, "upgrade");
 
 	public static final TagKey<Item> BACKPACK_UPGRADE_TAG = TagKey.create(Registries.ITEM, BACKPACK_UPGRADE_TAG_NAME);
 
@@ -249,16 +258,16 @@ public class ModItems {
 	public static final RegistryObject<Item> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new Item(new Item.Properties().stacksTo(16)));
 	//public static final RegistryObject<ItemBase> UPGRADE_BASE = ITEMS.register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16), SophisticatedBackpacks.ITEM_GROUP));
 
-	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = MENU_TYPES.register("backpack", () -> menuTypeCreate(BackpackContainer::fromBuffer));
+	public static final RegistryObject<MenuType<BackpackContainer>> BACKPACK_CONTAINER_TYPE = MENU_TYPES.register("backpack", () -> new ExtendedScreenHandlerType<>(BackpackContainer::fromBuffer));
 
-	public static final RegistryObject<MenuType<BackpackSettingsContainerMenu>> SETTINGS_CONTAINER_TYPE = MENU_TYPES.register("settings", () -> menuTypeCreate(BackpackSettingsContainerMenu::fromBuffer));
+	public static final RegistryObject<MenuType<BackpackSettingsContainerMenu>> SETTINGS_CONTAINER_TYPE = MENU_TYPES.register("settings", () -> new ExtendedScreenHandlerType<>(BackpackSettingsContainerMenu::fromBuffer));
 
 	public static final RegistryObject<EntityType<EverlastingBackpackItemEntity>> EVERLASTING_BACKPACK_ITEM_ENTITY = ENTITY_TYPES.register(
 			"everlasting_backpack_item", () -> EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
 					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
 	);
 
-	private static final LazyRegistrar<RecipeSerializer<?>> RECIPE_SERIALIZERS = LazyRegistrar.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.MOD_ID);
+	private static final LazyRegistrar<RecipeSerializer<?>> RECIPE_SERIALIZERS = LazyRegistrar.create(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.ID);
 
 	public static final RegistryObject<SimpleCraftingRecipeSerializer<?>> BACKPACK_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_dye", () -> new SimpleCraftingRecipeSerializer<>(BackpackDyeRecipe::new));
 	public static final RegistryObject<RecipeSerializer<?>> BACKPACK_UPGRADE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
@@ -267,8 +276,39 @@ public class ModItems {
 
 	public static void registerItemGroup() {
 		ItemGroupEvents.modifyEntriesEvent(SophisticatedBackpacks.ITEM_GROUP).register(entries -> {
-			ITEMS.getEntries().forEach((entry) -> entries.prepend(entry.get()));
+			ITEMS.getEntries().stream().filter((item) -> !(item.get() instanceof BackpackItem)).forEach((entry) -> entries.prepend(entry.get()));
+
+			entries.acceptAll(coloredItems(ModItems.BACKPACK.get()));
+			entries.acceptAll(coloredItems(ModItems.IRON_BACKPACK.get()));
+			entries.acceptAll(coloredItems(ModItems.GOLD_BACKPACK.get()));
+			entries.acceptAll(coloredItems(ModItems.DIAMOND_BACKPACK.get()));
+			entries.acceptAll(coloredItems(ModItems.NETHERITE_BACKPACK.get()));
 		});
+	}
+
+	private static Collection<ItemStack> coloredItems(Item item) {
+		if (!net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(item)) {
+			return Collections.emptyList();
+		}
+
+		List<ItemStack> items = new ArrayList<>();
+		ItemStack stack = new ItemStack(item);
+		items.add(stack);
+
+		for (DyeColor color : DyeColor.values()) {
+			stack = new ItemStack(item);
+			new BackpackWrapper(stack).setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors()));
+			items.add(stack);
+		}
+
+		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME));
+		int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, List.of(DyeColor.BLUE, DyeColor.BLACK));
+
+		stack = new ItemStack(item);
+		new BackpackWrapper(stack).setColors(clothColor, trimColor);
+		items.add(stack);
+
+		return items;
 	}
 
 	public static void registerHandlers() {
@@ -277,9 +317,10 @@ public class ModItems {
 		ENTITY_TYPES.register();
 		RECIPE_SERIALIZERS.register();
 
-		ModItems.registerContainers();
+		registerContainers();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ModItems::onResourceReload);
 	}
+
 
 	private static void onResourceReload(MinecraftServer server, CloseableResourceManager resourceManager, boolean success) {
 		BackpackUpgradeRecipe.REGISTERED_RECIPES.clear();
@@ -471,19 +512,6 @@ public class ModItems {
 			}
 
 			return stack;
-		}
-	}
-
-	static <T extends AbstractContainerMenu> MenuType<T> menuTypeCreate(IContainerFactory<T> factory) {
-		return new MenuType<>(factory, FeatureFlags.DEFAULT_FLAGS);
-	}
-
-	public interface IContainerFactory<T extends AbstractContainerMenu> extends MenuType.MenuSupplier<T> {
-		T create(int windowId, Inventory inv, FriendlyByteBuf buffer);
-
-		@Override
-		default T create(int windowId, Inventory inv) {
-			return create(windowId, inv, null);
 		}
 	}
 }

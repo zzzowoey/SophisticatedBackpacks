@@ -6,8 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.StorageScreenBase;
@@ -18,6 +16,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogicControl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeContainer> {
@@ -27,18 +26,25 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 	private RefillUpgradeWrapper.TargetSlot targetSlotBeingChanged = null;
 
 	private static List<Component> additionalTooltip = new ArrayList<>();
-	static {
-		MinecraftForge.EVENT_BUS.addListener(RefillUpgradeTab::addToTooltip);
+
+	public static List<Component> getAdditionalTooltip() {
+		if (!additionalTooltip.isEmpty()) {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null && player.containerMenu instanceof BackpackContainer) {
+				return additionalTooltip;
+			}
+		}
+		return Collections.emptyList();
 	}
 
-	private static void addToTooltip(ItemTooltipEvent event) {
+/*	private static void addToTooltip(ItemTooltipEvent event) {
 		if (!additionalTooltip.isEmpty()) {
 			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null && player.containerMenu instanceof BackpackContainer) {
 				event.getToolTip().addAll(additionalTooltip);
 			}
 		}
-	}
+	}*/
 
 	protected RefillUpgradeTab(RefillUpgradeContainer upgradeContainer, Position position, StorageScreenBase<?> screen, int slotsInRow, String upgradeName) {
 		super(upgradeContainer, position, screen, SBPTranslationHelper.INSTANCE.translUpgrade(upgradeName), SBPTranslationHelper.INSTANCE.translUpgradeTooltip(upgradeName));
@@ -104,7 +110,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 		}
 
 		@Override
-		protected void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+		public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
 			super.renderWidget(poseStack, mouseX, mouseY, partialTicks);
 			if (!getContainer().allowsTargetSlotSelection()) {
 				return;

@@ -9,8 +9,10 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.compontents.IComponentWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
@@ -32,7 +34,7 @@ public class InventoryInteractionHelper {
 		}
 
 		return WorldHelper.getBlockEntity(world, pos)
-				.map(te -> te.getCapability(ForgeCapabilities.ITEM_HANDLER, face)
+				.map(te -> IComponentWrapper.<SlotExposedStorage>maybeGet(te).map(w -> w.get())
 						.map(itemHandler -> player.level.isClientSide || IBackpackWrapper.maybeGet(backpack)
 								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))
 								.orElse(false)).orElse(false)

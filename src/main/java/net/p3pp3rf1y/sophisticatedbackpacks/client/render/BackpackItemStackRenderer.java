@@ -4,31 +4,22 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 
-public class BackpackItemStackRenderer extends BlockEntityWithoutLevelRenderer {
-	private final Minecraft minecraft = Minecraft.getInstance();
-
-	public BackpackItemStackRenderer(BlockEntityRenderDispatcher blockEntityRenderDispatcher, EntityModelSet entityModelSet) {
-		super(blockEntityRenderDispatcher, entityModelSet);
-	}
-
-	@Override
-	public void renderByItem(ItemStack stack, ItemDisplayContext modelTransformationMode, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+public class BackpackItemStackRenderer  {
+	public static void renderByItem(ItemStack stack, ItemDisplayContext modelTransformationMode, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
 		//ItemRenderer.render does transformations that would need to be transformed against in complicated way so rather pop the pose here and push the new one with the same transforms
 		// applied in the correct order with the getModel
 		//poseStack.popPose();
 		//poseStack.pushPose();
+		Minecraft minecraft = Minecraft.getInstance();
 		ItemRenderer itemRenderer = minecraft.getItemRenderer();
 		BakedModel model = itemRenderer.getModel(stack, null, minecraft.player, 0);
 

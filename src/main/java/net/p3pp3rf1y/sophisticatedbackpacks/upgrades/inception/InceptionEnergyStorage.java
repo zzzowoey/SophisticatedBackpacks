@@ -1,20 +1,22 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import net.minecraftforge.energy.IEnergyStorage;
+
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import team.reborn.energy.api.EnergyStorage;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InceptionEnergyStorage implements IEnergyStorage {
+public class InceptionEnergyStorage implements EnergyStorage {
 	@Nullable
-	private final IEnergyStorage wrappedEnergyStorage;
+	private final EnergyStorage wrappedEnergyStorage;
 	private final InventoryOrder inventoryOrder;
 	private final SubBackpacksHandler subBackpacksHandler;
 
-	private IEnergyStorage[] energyStorages;
+	private EnergyStorage[] energyStorages;
 
-	public InceptionEnergyStorage(@Nullable IEnergyStorage wrappedEnergyStorage, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
+	public InceptionEnergyStorage(@Nullable EnergyStorage wrappedEnergyStorage, InventoryOrder inventoryOrder, SubBackpacksHandler subBackpacksHandler) {
 		this.wrappedEnergyStorage = wrappedEnergyStorage;
 		this.inventoryOrder = inventoryOrder;
 		this.subBackpacksHandler = subBackpacksHandler;
@@ -23,7 +25,7 @@ public class InceptionEnergyStorage implements IEnergyStorage {
 	}
 
 	private void refreshHandlers() {
-		List<IEnergyStorage> storages = new ArrayList<>();
+		List<EnergyStorage> storages = new ArrayList<>();
 		if (wrappedEnergyStorage != null && inventoryOrder == InventoryOrder.MAIN_FIRST) {
 			storages.add(wrappedEnergyStorage);
 		}
@@ -31,15 +33,16 @@ public class InceptionEnergyStorage implements IEnergyStorage {
 		if (wrappedEnergyStorage != null && inventoryOrder == InventoryOrder.INCEPTED_FIRST) {
 			storages.add(wrappedEnergyStorage);
 		}
-		energyStorages = storages.toArray(new IEnergyStorage[] {});
+		energyStorages = storages.toArray(new EnergyStorage[] {});
 	}
 
+
 	@Override
-	public int receiveEnergy(int maxReceive, boolean simulate) {
-		int totalReceived = 0;
-		for (IEnergyStorage storage : energyStorages) {
-			totalReceived += storage.receiveEnergy(maxReceive - totalReceived, simulate);
-			if (totalReceived == maxReceive) {
+	public long insert(long maxAmount, TransactionContext transaction) {
+		long totalReceived = 0;
+		for (EnergyStorage storage : energyStorages) {
+			totalReceived += storage.insert(maxAmount - totalReceived, transaction);
+			if (totalReceived == maxAmount) {
 				break;
 			}
 		}
@@ -48,11 +51,11 @@ public class InceptionEnergyStorage implements IEnergyStorage {
 	}
 
 	@Override
-	public int extractEnergy(int maxExtract, boolean simulate) {
-		int totalExtracted = 0;
-		for (IEnergyStorage storage : energyStorages) {
-			totalExtracted += storage.extractEnergy(maxExtract - totalExtracted, simulate);
-			if (totalExtracted == maxExtract) {
+	public long extract(long maxAmount, TransactionContext transaction) {
+		long totalExtracted = 0;
+		for (EnergyStorage storage : energyStorages) {
+			totalExtracted += storage.extract(maxAmount - totalExtracted, transaction);
+			if (totalExtracted == maxAmount) {
 				break;
 			}
 		}
@@ -61,36 +64,37 @@ public class InceptionEnergyStorage implements IEnergyStorage {
 	}
 
 	@Override
-	public int getEnergyStored() {
+	public long getAmount() {
 		int totalEnergyStored = 0;
-		for (IEnergyStorage storage : energyStorages) {
-			totalEnergyStored += storage.getEnergyStored();
+		for (EnergyStorage storage : energyStorages) {
+			totalEnergyStored += storage.getAmount();
 		}
 		return totalEnergyStored;
 	}
 
 	@Override
-	public int getMaxEnergyStored() {
+	public long getCapacity() {
 		int totalMaxEnergy = 0;
 
-		for (IEnergyStorage storage : energyStorages) {
-			if (totalMaxEnergy > Integer.MAX_VALUE - storage.getMaxEnergyStored()) {
+		for (EnergyStorage storage : energyStorages) {
+			if (totalMaxEnergy > Integer.MAX_VALUE - storage.getCapacity()) {
 				return Integer.MAX_VALUE;
 			}
 
-			totalMaxEnergy += storage.getMaxEnergyStored();
+			totalMaxEnergy += storage.getCapacity();
 		}
 
 		return totalMaxEnergy;
 	}
 
+
 	@Override
-	public boolean canExtract() {
+	public boolean supportsExtraction() {
 		return energyStorages.length > 0;
 	}
 
 	@Override
-	public boolean canReceive() {
+	public boolean supportsInsertion() {
 		return energyStorages.length > 0;
 	}
 }

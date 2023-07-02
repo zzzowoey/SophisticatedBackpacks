@@ -40,7 +40,7 @@ public class SBPPacketHandler {
 	}
 
 	public static <T extends SimplePacketBase> void registerMessage(Class<T> type, Function<FriendlyByteBuf, T> factory, NetworkDirection direction) {
-		PacketHandler.PacketType<T> packet = new PacketHandler.PacketType<>(type, factory, direction);
+		PacketType<T> packet = new PacketType<>(type, factory, direction);
 		packet.register();
 	}
 
@@ -61,5 +61,26 @@ public class SBPPacketHandler {
 	}
 	public static void sendToAllNear(ServerLevel world, Vec3 pos, int range, Object message) {
 		getChannel().sendToClientsAround((S2CPacket) message, world, pos, range);
+	}
+
+	public static class PacketType<T extends SimplePacketBase> {
+		private static int index = 0;
+
+		private Function<FriendlyByteBuf, T> decoder;
+		private Class<T> type;
+		private NetworkDirection direction;
+
+		public PacketType(Class<T> type, Function<FriendlyByteBuf, T> factory, NetworkDirection direction) {
+			decoder = factory;
+			this.type = type;
+			this.direction = direction;
+		}
+
+		public void register() {
+			switch (direction) {
+				case PLAY_TO_CLIENT -> getChannel().registerS2CPacket(type, index++, decoder);
+				case PLAY_TO_SERVER -> getChannel().registerC2SPacket(type, index++, decoder);
+			}
+		}
 	}
 }

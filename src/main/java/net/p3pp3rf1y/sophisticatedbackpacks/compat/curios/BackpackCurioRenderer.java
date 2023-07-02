@@ -1,3 +1,4 @@
+/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -28,3 +29,4 @@ public class BackpackCurioRenderer implements ICurioRenderer {
 		}
 	}
 }
+*/

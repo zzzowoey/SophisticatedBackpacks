@@ -1,3 +1,4 @@
+/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.curios;
 
 import net.minecraft.core.Direction;
@@ -103,3 +104,4 @@ public class CuriosCompat implements ICompat {
 		//noop
 	}
 }
+*/

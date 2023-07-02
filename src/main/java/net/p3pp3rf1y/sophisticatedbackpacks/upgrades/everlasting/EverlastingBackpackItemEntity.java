@@ -1,14 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
 
 @SuppressWarnings("java:S2160") //no need to override equals, the default implementation is good
 public class EverlastingBackpackItemEntity extends ItemEntity {
@@ -16,7 +14,8 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	public EverlastingBackpackItemEntity(EntityType<? extends ItemEntity> type, Level world) {
 		super(type, world);
-		lifespan = Integer.MAX_VALUE; //set to not despawn
+		setUnlimitedLifetime();
+		//lifespan = Integer.MAX_VALUE; //set to not despawn
 	}
 
 	@Override
@@ -67,8 +66,9 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 		//do nothing as the only thing that vanilla does here is remove entity from world, but it can't for this
 	}
 
-	@Override
-	public Packet<?> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
-	}
+	// TODO: Necessary?
+/*	@Override
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
+		return (Packet<ClientGamePacketListener>) SBPPacketHandler.getChannel().createVanillaPacket((S2CPacket) new SpawnEntity(this));
+	}*/
 }

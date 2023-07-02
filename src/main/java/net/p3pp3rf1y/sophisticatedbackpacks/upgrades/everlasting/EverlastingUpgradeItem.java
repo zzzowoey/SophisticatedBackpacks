@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 public class EverlastingUpgradeItem extends UpgradeItemBase<EverlastingUpgradeItem.Wrapper> {
 	public static final UpgradeType<Wrapper> TYPE = new UpgradeType<>(Wrapper::new);
 
-	public EverlastingUpgradeItem() {super(SophisticatedBackpacks.ITEM_GROUP);}
+	public EverlastingUpgradeItem() {super();}
 
 	@Override
 	public UpgradeType<Wrapper> getType() {

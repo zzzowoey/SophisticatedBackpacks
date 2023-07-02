@@ -32,7 +32,7 @@ public class ModLoot {
 	}
 
 	private static void registerLootFunction() {
-		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(SophisticatedBackpacks.MOD_ID, "copy_backpack_data"), COPY_BACKPACK_DATA);
+		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(SophisticatedBackpacks.ID, "copy_backpack_data"), COPY_BACKPACK_DATA);
 	}
 
 	public static void lootLoad(ResourceManager resourceManager, LootTables lootManager, ResourceLocation id, LootTable.Builder tableBuilder, LootTableSource source) {
@@ -54,6 +54,6 @@ public class ModLoot {
 	}
 
 	private static LootPoolEntryContainer.Builder<?> getInjectEntry(String name) {
-		return LootTableReference.lootTableReference(new ResourceLocation(SophisticatedBackpacks.MOD_ID, "inject/" + name)).setWeight(1);
+		return LootTableReference.lootTableReference(new ResourceLocation(SophisticatedBackpacks.ID, "inject/" + name)).setWeight(1);
 	}
 }

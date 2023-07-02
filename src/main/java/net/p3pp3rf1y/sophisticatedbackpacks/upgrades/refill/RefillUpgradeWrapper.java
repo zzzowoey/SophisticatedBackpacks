@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
 import com.google.common.collect.ImmutableMap;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -18,6 +19,8 @@ import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.CombinedInvWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
@@ -93,12 +96,17 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		if (entity == null /*not supported in block form*/ || isInCooldown(world)) {
 			return;
 		}
-		entity.getCapability(ForgeCapabilities.ITEM_HANDLER, null).ifPresent(playerInvHandler -> InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
-			if (filter.isEmpty()) {
-				return;
-			}
-			tryRefillFilter(entity, playerInvHandler, filter, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
-		}));
+		if (entity instanceof Player player) {
+
+			InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
+				if (filter.isEmpty()) {
+					return;
+				}
+
+				CombinedInvWrapper<ItemStackHandler> wrapper = new CombinedInvWrapper<>(new ItemStackHandler(player.getInventory().items.toArray(new ItemStack[0])), new ItemStackHandler(player.getInventory().armor.toArray(new ItemStack[0])), new ItemStackHandler(player.getInventory().offhand.toArray(new ItemStack[0])));
+				tryRefillFilter(entity, wrapper, filter, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
+			});
+		}
 		setCooldown(world, COOLDOWN);
 	}
 
@@ -270,6 +278,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			ItemStack fill(Player player, SlotExposedStorage playerInventory, ItemStack stackToAdd);
 		}
 
+		// TODO: refactor
 		private static ItemStack refillAnywhereInInventory(SlotExposedStorage playerInvHandler, ItemStack extracted) {
 			ItemVariant resource = ItemVariant.of(extracted);
 			AtomicReference<ItemVariant> atomicResource = new AtomicReference<>(resource);
@@ -284,13 +293,13 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			long remaining = maxAmount.get();
 			if (remaining > 0) {
 				try (Transaction ctx = Transaction.openOuter()) {
-					remaining -= InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, ctx);
-					if (remaining <= 0) {
+					long inserted = InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, ctx);
+					if (inserted <= 0) {
 						return resource.toStack((int) remaining);
 					}
 				}
 
-				return resource.toStack((int) InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, null));
+				return resource.toStack((int) (remaining - InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, null)));
 			}
 			return resource.toStack((int) remaining);
 		}

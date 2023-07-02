@@ -17,7 +17,7 @@ import java.util.Set;
 public class InceptionUpgradeItem extends UpgradeItemBase<InceptionUpgradeWrapper> {
 	public static final UpgradeType<InceptionUpgradeWrapper> TYPE = new UpgradeType<>(InceptionUpgradeWrapper::new);
 
-	public InceptionUpgradeItem() {super(SophisticatedBackpacks.ITEM_GROUP);}
+	public InceptionUpgradeItem() { super(); }
 
 	@Override
 	public UpgradeType<InceptionUpgradeWrapper> getType() {

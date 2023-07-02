@@ -1,9 +1,9 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit;
 
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.FilteredItemHandler;
@@ -30,7 +30,7 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 	}
 
 	@Override
-	public void onHandlerInteract(IItemHandler itemHandler, Player player) {
+	public void onHandlerInteract(SlotExposedStorage itemHandler, Player player) {
 		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
 			filterLogic.setInventory(itemHandler);
 		}
