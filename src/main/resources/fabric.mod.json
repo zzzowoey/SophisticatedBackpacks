@@ -25,10 +25,10 @@
       "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks"
     ],
     "client": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksClient"
+      "net.p3pp3rf1y.sophisticatedbackpacks.client.SophisticatedBackpacksClient"
     ],
     "fabric-datagen": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacksData"
+      "net.p3pp3rf1y.sophisticatedbackpacks.data.SophisticatedBackpacksData"
     ],
     "cardinal-components": [
       "net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components"
