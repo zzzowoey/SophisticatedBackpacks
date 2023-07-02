@@ -1,30 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:crafting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "condition": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:crafting_upgrade"
     }
   ],
-  "pattern": [
-    " T ",
-    "IBI",
-    " C "
-  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "key": {
     "B": {
       "item": "sophisticatedbackpacks:upgrade_base"
     },
     "C": {
-      "tag": "forge:chests"
+      "tag": "c:chests"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:iron_ingots"
     },
     "T": {
       "item": "minecraft:crafting_table"
     }
   },
+  "pattern": [
+    " T ",
+    "IBI",
+    " C "
+  ],
   "result": {
     "item": "sophisticatedbackpacks:crafting_upgrade"
   }

@@ -1,39 +1,40 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:tool_swapper_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "condition": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:tool_swapper_upgrade"
     }
   ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "minecraft:wooden_axe"
+    },
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "I": {
+      "tag": "c:iron_ingots"
+    },
+    "P": {
+      "item": "minecraft:wooden_pickaxe"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "item": "minecraft:wooden_shovel"
+    },
+    "W": {
+      "item": "minecraft:wooden_sword"
+    }
+  },
   "pattern": [
     "RWR",
     "PBA",
     "ISI"
   ],
-  "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "S": {
-      "item": "minecraft:wooden_shovel"
-    },
-    "P": {
-      "item": "minecraft:wooden_pickaxe"
-    },
-    "A": {
-      "item": "minecraft:wooden_axe"
-    },
-    "W": {
-      "item": "minecraft:wooden_sword"
-    },
-    "I": {
-      "tag": "forge:ingots/iron"
-    },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:tool_swapper_upgrade"
   }

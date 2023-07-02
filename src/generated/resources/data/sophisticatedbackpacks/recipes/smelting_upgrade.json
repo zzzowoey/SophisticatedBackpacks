@@ -1,30 +1,31 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "itemRegistryName": "sophisticatedbackpacks:smelting_upgrade",
-      "type": "sophisticatedcore:item_enabled"
+      "condition": "sophisticatedcore:item_enabled",
+      "itemRegistryName": "sophisticatedbackpacks:smelting_upgrade"
     }
   ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "sophisticatedbackpacks:upgrade_base"
+    },
+    "F": {
+      "item": "minecraft:furnace"
+    },
+    "I": {
+      "tag": "c:iron_ingots"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    }
+  },
   "pattern": [
     "RIR",
     "IBI",
     "RFR"
   ],
-  "key": {
-    "B": {
-      "item": "sophisticatedbackpacks:upgrade_base"
-    },
-    "R": {
-      "tag": "forge:dusts/redstone"
-    },
-    "I": {
-      "tag": "forge:ingots/iron"
-    },
-    "F": {
-      "item": "minecraft:furnace"
-    }
-  },
   "result": {
     "item": "sophisticatedbackpacks:smelting_upgrade"
   }
