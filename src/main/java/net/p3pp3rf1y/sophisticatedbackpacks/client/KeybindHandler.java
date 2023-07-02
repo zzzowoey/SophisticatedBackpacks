@@ -1,10 +1,11 @@
-/*
 package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.fabricators_of_create.porting_lib.event.client.KeyInputCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.impl.client.screen.ScreenEventFactory;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -29,12 +30,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
-import net.p3pp3rf1y.sophisticatedcore.SophisticatedCoreComponents;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
 
 
 public class KeybindHandler {
@@ -49,34 +51,19 @@ public class KeybindHandler {
 	private static final int CHEST_SLOT_INDEX = 6;
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
+			InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_4 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_4"),
-		KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_4 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_4"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
+		    InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_3 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_3"),
-		KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_3 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_3"),
-			KeyConflictContext.UNIVERSAL, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
+		    InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_2 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_2"),
-		KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_X), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_2 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_2"),
-			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_X), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
+		    InputConstants.Type.KEYSYM.getOrCreate(KEY_X).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_1 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_1"),
-		KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_1 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_1"),
-			KeyConflictContext.UNIVERSAL, KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(KEY_Z), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
+		    InputConstants.Type.KEYSYM.getOrCreate(KEY_Z).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 
 	public static final Map<Integer, KeyMapping> UPGRADE_SLOT_TOGGLE_KEYBINDS = Map.of(
@@ -87,25 +74,19 @@ public class KeybindHandler {
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
 	public static final KeyMapping SORT_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("sort"),
-			BackpackGuiKeyConflictContext.INSTANCE, InputConstants.Type.MOUSE.getOrCreate(MIDDLE_BUTTON), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping SORT_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("sort"),
-			BackpackGuiKeyConflictContext.INSTANCE, InputConstants.Type.MOUSE.getOrCreate(MIDDLE_BUTTON), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
-
+            InputConstants.Type.MOUSE.getOrCreate(MIDDLE_BUTTON).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"),
-		KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
-*/
-/*	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"),
-			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);*//*
-
+		    InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
-			KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM.getOrCreate(KEY_C), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+			InputConstants.Type.KEYSYM.getOrCreate(KEY_C).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping BACKPACK_OPEN_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("open_backpack"),
-			BackpackKeyConflictContext.INSTANCE, InputConstants.Type.KEYSYM.getOrCreate(KEY_B), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+			InputConstants.Type.KEYSYM.getOrCreate(KEY_B).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 
 	public static void register() {
-		ScreenEventFactory.createAfterMouseClickEvent().register(KeybindHandler::handleGuiMouseKeyPress);
-		ScreenEventFactory.createBeforeKeyPressEvent().register(KeybindHandler::handleGuiKeyPress);
+		ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+			ScreenKeyboardEvents.allowKeyPress(screen).register(KeybindHandler::handleGuiKeyPress);
+			ScreenMouseEvents.allowMouseClick(screen).register(KeybindHandler::handleGuiMouseKeyPress);
+		});
 
 		KeyInputCallback.EVENT.register(KeybindHandler::handleKeyInputEvent);
 	}
@@ -119,19 +100,23 @@ public class KeybindHandler {
 		UPGRADE_SLOT_TOGGLE_KEYBINDS.forEach((slot, keybind) -> KeyBindingHelper.registerKeyBinding(keybind));
 	}
 
-	public static void handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
+	public static boolean handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
 		if (SORT_KEYBIND.matchesMouse(InputConstants.getKey(key, scancode).getValue()) && tryCallSort(screen)) {
-			event.setCanceled(true);
+			return false;
 		}
+
+        return true;
 	}
 
-	public static void handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {
+	public static boolean handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(button);
 		if (SORT_KEYBIND.matchesMouse(input.getValue()) && tryCallSort(screen)) {
-			event.setCanceled(true);
+			return false;
 		} else if (BACKPACK_OPEN_KEYBIND.matchesMouse(input.getValue())) {
 			sendBackpackOpenOrCloseMessage();
 		}
+
+        return true;
 	}
 
 	public static void handleKeyInputEvent(int key, int scancode, int action, int mods) {
@@ -195,7 +180,7 @@ public class KeybindHandler {
 		BlockHitResult blockraytraceresult = (BlockHitResult) rayTrace;
 		BlockPos pos = blockraytraceresult.getBlockPos();
 
-		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> SophisticatedCoreComponents.ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false)) {
+		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false)) {
 			return;
 		}
 
@@ -204,7 +189,7 @@ public class KeybindHandler {
 
 	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
 	private static void sendBackpackOpenOrCloseMessage() {
-		if (!GUI.isActive()) {
+		if (Minecraft.getInstance().screen == null) {
 			SBPPacketHandler.sendToServer(new BackpackOpenMessage());
 			return;
 		}
@@ -232,7 +217,7 @@ public class KeybindHandler {
 		return slotIndex == CHEST_SLOT_INDEX || (slotIndex > 8 && slotIndex < 46);
 	}
 
-	private static class BackpackKeyConflictContext implements IKeyConflictContext {
+/*	private static class BackpackKeyConflictContext implements IKeyConflictContext {
 		public static final BackpackKeyConflictContext INSTANCE = new BackpackKeyConflictContext();
 
 		@Override
@@ -262,6 +247,5 @@ public class KeybindHandler {
 		public boolean conflicts(IKeyConflictContext other) {
 			return this == other;
 		}
-	}
+	}*/
 }
-*/
