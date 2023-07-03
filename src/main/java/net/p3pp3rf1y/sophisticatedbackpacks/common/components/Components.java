@@ -13,12 +13,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedcore.common.compontents.IComponentWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.components.IComponentWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import team.reborn.energy.api.EnergyStorage;
 
-import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ENERGY;
-import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
+import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ENERGY;
+import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
 
 public class Components implements ItemComponentInitializer, BlockComponentInitializer {
 	public static final ComponentKey<IBackpackWrapper> BACKPACK_WRAPPER = ComponentRegistry.getOrCreate(SophisticatedBackpacks.getRL("backpack_wrapper_component"), IBackpackWrapper.class);

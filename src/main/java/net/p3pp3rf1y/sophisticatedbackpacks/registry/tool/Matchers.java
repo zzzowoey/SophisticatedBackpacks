@@ -17,7 +17,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedcore.common.compontents.Components;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
+import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
 
 public class Matchers {
 	private Matchers() {}

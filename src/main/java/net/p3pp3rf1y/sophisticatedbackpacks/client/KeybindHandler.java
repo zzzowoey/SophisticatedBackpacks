@@ -36,8 +36,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.p3pp3rf1y.sophisticatedcore.common.compontents.Components.ITEM_HANDLER;
-
+import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
 
 public class KeybindHandler {
 	private KeybindHandler() {}

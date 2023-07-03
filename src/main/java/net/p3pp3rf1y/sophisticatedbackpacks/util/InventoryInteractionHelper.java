@@ -11,7 +11,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.common.compontents.IComponentWrapper;
+import net.p3pp3rf1y.sophisticatedcore.common.components.IComponentWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
