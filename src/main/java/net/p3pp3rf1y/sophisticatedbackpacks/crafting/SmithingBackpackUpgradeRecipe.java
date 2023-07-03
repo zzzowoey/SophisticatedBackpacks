@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -22,7 +23,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 	private final LegacyUpgradeRecipe compose;
 
 	public SmithingBackpackUpgradeRecipe(LegacyUpgradeRecipe compose) {
-		super(compose.getId(), Objects.requireNonNull(compose.base), Objects.requireNonNull(compose.addition), compose.getResultItem(null));
+		super(compose.getId(), Objects.requireNonNull(compose.base), Objects.requireNonNull(compose.addition), compose.getResultItem(Minecraft.getInstance().level.registryAccess()));
 		this.compose = compose;
 		REGISTERED_RECIPES.add(compose.getId());
 	}
