@@ -48,6 +48,7 @@ public class KeybindHandler {
 	private static final int KEY_UNKNOWN = -1;
 	private static final int MIDDLE_BUTTON = 2;
 	private static final int CHEST_SLOT_INDEX = 6;
+
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
 			InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
@@ -73,7 +74,7 @@ public class KeybindHandler {
 			4, BACKPACK_TOGGLE_UPGRADE_5
 	);
 	public static final KeyMapping SORT_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("sort"),
-            InputConstants.Type.MOUSE.getOrCreate(MIDDLE_BUTTON).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
+            InputConstants.Type.MOUSE, MIDDLE_BUTTON, KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping TOOL_SWAP_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("tool_swap"),
 		    InputConstants.Type.KEYSYM.getOrCreate(KEY_UNKNOWN).getValue(), KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY);
 	public static final KeyMapping INVENTORY_INTERACTION_KEYBIND = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("inventory_interaction"),
@@ -100,8 +101,11 @@ public class KeybindHandler {
 	}
 
 	public static boolean handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
-		if (SORT_KEYBIND.matchesMouse(InputConstants.getKey(key, scancode).getValue()) && tryCallSort(screen)) {
+		InputConstants.Key input = InputConstants.getKey(key, scancode);
+		if (SORT_KEYBIND.matches(input) && tryCallSort(screen)) {
 			return false;
+		} else if (BACKPACK_OPEN_KEYBIND.matches(input)) {
+			sendBackpackOpenOrCloseMessage();
 		}
 
         return true;
@@ -109,9 +113,9 @@ public class KeybindHandler {
 
 	public static boolean handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(button);
-		if (SORT_KEYBIND.matchesMouse(input.getValue()) && tryCallSort(screen)) {
+		if (SORT_KEYBIND.matches(input) && tryCallSort(screen)) {
 			return false;
-		} else if (BACKPACK_OPEN_KEYBIND.matchesMouse(input.getValue())) {
+		} else if (BACKPACK_OPEN_KEYBIND.matches(input)) {
 			sendBackpackOpenOrCloseMessage();
 		}
 
@@ -186,7 +190,6 @@ public class KeybindHandler {
 		SBPPacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getDirection()));
 	}
 
-	@SuppressWarnings({"java:S2440", "InstantiationOfUtilityClass"})
 	private static void sendBackpackOpenOrCloseMessage() {
 		if (Minecraft.getInstance().screen == null) {
 			SBPPacketHandler.sendToServer(new BackpackOpenMessage());
