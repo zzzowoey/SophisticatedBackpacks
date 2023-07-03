@@ -30,6 +30,9 @@
     "fabric-datagen": [
       "net.p3pp3rf1y.sophisticatedbackpacks.data.SophisticatedBackpacksData"
     ],
+    "jei_mod_plugin": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin"
+    ],
     "cardinal-components": [
       "net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components"
     ]
