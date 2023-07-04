@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -12,8 +13,12 @@ import net.minecraft.world.phys.Vec3;
 public class EverlastingBackpackItemEntity extends ItemEntity {
 	private boolean wasFloatingUp = false;
 
+	// Add an age property here so we can use the unlimited Lifetime and have the item rotation work normally
+	private int age;
+
 	public EverlastingBackpackItemEntity(EntityType<? extends ItemEntity> type, Level world) {
 		super(type, world);
+		age = 0;
 		setUnlimitedLifetime();
 		//lifespan = Integer.MAX_VALUE; //set to not despawn
 	}
@@ -38,6 +43,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 				setDeltaMovement(Vec3.ZERO);
 			}
 		}
+		++age;
 		super.tick();
 	}
 
@@ -64,6 +70,25 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 	@Override
 	protected void outOfWorld() {
 		//do nothing as the only thing that vanilla does here is remove entity from world, but it can't for this
+	}
+
+	@Override
+	public int getAge() {
+		return age;
+	}
+
+	@Override
+	public void addAdditionalSaveData(CompoundTag compound) {
+		super.addAdditionalSaveData(compound);
+
+		compound.putInt("EverlastingAge", this.age);
+	}
+
+	@Override
+	public void readAdditionalSaveData(CompoundTag compound) {
+		super.readAdditionalSaveData(compound);
+
+		this.age = compound.getInt("EverlastingAge");
 	}
 
 	// TODO: Necessary?
