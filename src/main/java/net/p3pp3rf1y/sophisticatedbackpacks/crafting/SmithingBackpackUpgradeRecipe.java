@@ -23,7 +23,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 	private final LegacyUpgradeRecipe compose;
 
 	public SmithingBackpackUpgradeRecipe(LegacyUpgradeRecipe compose) {
-		super(compose.getId(), Objects.requireNonNull(compose.base), Objects.requireNonNull(compose.addition), compose.getResultItem(Minecraft.getInstance().level.registryAccess()));
+		super(compose.getId(), Objects.requireNonNull(compose.base), Objects.requireNonNull(compose.addition), compose.getResultItem(null));
 		this.compose = compose;
 		REGISTERED_RECIPES.add(compose.getId());
 	}

@@ -23,7 +23,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	private final ShapedRecipe compose;
 
 	public BackpackUpgradeRecipe(ShapedRecipe compose) {
-		super(compose.getId(), compose.getGroup(), CraftingBookCategory.MISC, compose.getWidth(), compose.getHeight(), compose.getIngredients(), compose.getResultItem(Minecraft.getInstance().level.registryAccess()));
+		super(compose.getId(), compose.getGroup(), CraftingBookCategory.MISC, compose.getWidth(), compose.getHeight(), compose.getIngredients(), compose.getResultItem(null));
 		this.compose = compose;
 		REGISTERED_RECIPES.add(compose.getId());
 	}

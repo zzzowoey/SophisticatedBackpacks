@@ -16,7 +16,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 	private final ShapedRecipe compose;
 
 	public BasicBackpackRecipe(ShapedRecipe compose) {
-		super(compose.getId(), compose.getGroup(), CraftingBookCategory.MISC, compose.getWidth(), compose.getHeight(), compose.getIngredients(), compose.getResultItem(Minecraft.getInstance().level.registryAccess()));
+		super(compose.getId(), compose.getGroup(), CraftingBookCategory.MISC, compose.getWidth(), compose.getHeight(), compose.getIngredients(), compose.getResultItem(null));
 		this.compose = compose;
 	}
 
