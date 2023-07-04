@@ -104,8 +104,6 @@ public class KeybindHandler {
 		InputConstants.Key input = InputConstants.getKey(key, scancode);
 		if (SORT_KEYBIND.matches(input) && tryCallSort(screen)) {
 			return false;
-		} else if (BACKPACK_OPEN_KEYBIND.matches(input)) {
-			sendBackpackOpenOrCloseMessage();
 		}
 
         return true;
