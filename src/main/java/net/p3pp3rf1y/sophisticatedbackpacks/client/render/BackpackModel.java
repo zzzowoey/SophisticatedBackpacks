@@ -424,9 +424,6 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 			return;
 		}
 
-		FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidStack.getFluid());
-
-
 		FluidVariant fluidVariant = FluidVariant.of(fluidStack.getFluid());
 		TextureAtlasSprite still = FluidVariantRendering.getSprite(fluidVariant);
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));

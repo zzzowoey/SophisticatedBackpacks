@@ -219,13 +219,9 @@ public class ModItems {
 
 	public static void registerItemGroup() {
 		ItemGroupEvents.modifyEntriesEvent(SophisticatedBackpacks.ITEM_GROUP).register(entries -> {
-			ITEMS.getEntries().stream().filter((item) -> !(item.get() instanceof BackpackItem)).forEach((entry) -> entries.prepend(entry.get()));
-
 			entries.acceptAll(coloredItems(ModItems.BACKPACK.get()));
-			entries.acceptAll(coloredItems(ModItems.IRON_BACKPACK.get()));
-			entries.acceptAll(coloredItems(ModItems.GOLD_BACKPACK.get()));
-			entries.acceptAll(coloredItems(ModItems.DIAMOND_BACKPACK.get()));
-			entries.acceptAll(coloredItems(ModItems.NETHERITE_BACKPACK.get()));
+
+			ITEMS.getEntries().stream().filter((item) -> item.get() != ModItems.BACKPACK.get()).forEach((entry) -> entries.accept(entry.get()));
 		});
 	}
 
