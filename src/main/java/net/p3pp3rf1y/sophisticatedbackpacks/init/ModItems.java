@@ -123,6 +123,11 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeCo
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankInventoryPart;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeContainer;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeTab;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeTab;
@@ -193,7 +198,7 @@ public class ModItems {
 			() -> new ToolSwapperUpgradeItem(false, false));
 	public static final RegistryObject<ToolSwapperUpgradeItem> ADVANCED_TOOL_SWAPPER_UPGRADE = ITEMS.register("advanced_tool_swapper_upgrade",
 			() -> new ToolSwapperUpgradeItem(true, true));
-	//public static final RegistryObject<TankUpgradeItem> TANK_UPGRADE = ITEMS.register("tank_upgrade", () -> new TankUpgradeItem(SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.tankUpgrade));
+	public static final RegistryObject<TankUpgradeItem> TANK_UPGRADE = ITEMS.register("tank_upgrade", () -> new TankUpgradeItem(Config.SERVER.tankUpgrade));
 	public static final RegistryObject<BatteryUpgradeItem> BATTERY_UPGRADE = ITEMS.register("battery_upgrade", () -> new BatteryUpgradeItem(Config.SERVER.batteryUpgrade));
 /*	public static final RegistryObject<PumpUpgradeItem> PUMP_UPGRADE = ITEMS.register("pump_upgrade", () -> new PumpUpgradeItem(false, false, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.pumpUpgrade));
 	public static final RegistryObject<PumpUpgradeItem> ADVANCED_PUMP_UPGRADE = ITEMS.register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, SophisticatedBackpacks.ITEM_GROUP, Config.SERVER.pumpUpgrade));
@@ -293,7 +298,7 @@ public class ModItems {
 	private static final UpgradeContainerType<StonecutterUpgradeWrapper, StonecutterUpgradeContainer> STONECUTTER_TYPE = new UpgradeContainerType<>(StonecutterUpgradeContainer::new);
 	private static final UpgradeContainerType<JukeboxUpgradeItem.Wrapper, JukeboxUpgradeContainer> JUKEBOX_TYPE = new UpgradeContainerType<>(JukeboxUpgradeContainer::new);
 	private static final UpgradeContainerType<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeContainer> TOOL_SWAPPER_TYPE = new UpgradeContainerType<>(ToolSwapperUpgradeContainer::new);
-	//private static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
+	private static final UpgradeContainerType<TankUpgradeWrapper, TankUpgradeContainer> TANK_TYPE = new UpgradeContainerType<>(TankUpgradeContainer::new);
 	private static final UpgradeContainerType<BatteryUpgradeWrapper, BatteryUpgradeContainer> BATTERY_TYPE = new UpgradeContainerType<>(BatteryUpgradeContainer::new);
 /*	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
 	private static final UpgradeContainerType<PumpUpgradeWrapper, PumpUpgradeContainer> ADVANCED_PUMP_TYPE = new UpgradeContainerType<>(PumpUpgradeContainer::new);
@@ -329,7 +334,7 @@ public class ModItems {
 		UpgradeContainerRegistry.register(STONECUTTER_UPGRADE.getId(), STONECUTTER_TYPE);
 		UpgradeContainerRegistry.register(JUKEBOX_UPGRADE.getId(), JUKEBOX_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_TOOL_SWAPPER_UPGRADE.getId(), TOOL_SWAPPER_TYPE);
-		//UpgradeContainerRegistry.register(TANK_UPGRADE.getId(), TANK_TYPE);
+		UpgradeContainerRegistry.register(TANK_UPGRADE.getId(), TANK_TYPE);
 		UpgradeContainerRegistry.register(BATTERY_UPGRADE.getId(), BATTERY_TYPE);
 /*		UpgradeContainerRegistry.register(PUMP_UPGRADE.getId(), PUMP_TYPE);
 		UpgradeContainerRegistry.register(ADVANCED_PUMP_UPGRADE.getId(), ADVANCED_PUMP_TYPE);
@@ -390,9 +395,9 @@ public class ModItems {
 					new StonecutterUpgradeTab(upgradeContainer, position, screen, SBPButtonDefinitions.SHIFT_CLICK_TARGET));
 			UpgradeGuiManager.registerTab(JUKEBOX_TYPE, JukeboxUpgradeTab::new);
 			UpgradeGuiManager.registerTab(TOOL_SWAPPER_TYPE, ToolSwapperUpgradeTab::new);
-			//UpgradeGuiManager.registerTab(TANK_TYPE, TankUpgradeTab::new);
+			UpgradeGuiManager.registerTab(TANK_TYPE, TankUpgradeTab::new);
 			UpgradeGuiManager.registerTab(BATTERY_TYPE, BatteryUpgradeTab::new);
-			//UpgradeGuiManager.registerInventoryPart(TANK_TYPE, TankInventoryPart::new);
+			UpgradeGuiManager.registerInventoryPart(TANK_TYPE, TankInventoryPart::new);
 			UpgradeGuiManager.registerInventoryPart(BATTERY_TYPE, BatteryInventoryPart::new);
 /*			UpgradeGuiManager.registerTab(PUMP_TYPE, PumpUpgradeTab.Basic::new);
 			UpgradeGuiManager.registerTab(ADVANCED_PUMP_TYPE, PumpUpgradeTab.Advanced::new);
