@@ -4,6 +4,7 @@ import com.mojang.math.Axis;
 import io.github.fabricators_of_create.porting_lib.block.ExplosionResistanceBlock;
 import io.github.fabricators_of_create.porting_lib.event.common.PlayerInteractionEvents;
 import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -57,6 +58,7 @@ import net.p3pp3rf1y.sophisticatedcore.renderdata.IUpgradeRenderData;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.UpgradeRenderDataType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.FluidHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 import org.joml.Vector3f;
@@ -154,23 +156,12 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 			return InteractionResult.SUCCESS;
 		}
 
-		// TODO: Reimplement
-/*		if (!heldItem.isEmpty() && heldItem.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
+		if (!heldItem.isEmpty() && FluidHelper.isFluidStorage(heldItem)) {
 			WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class)
-					.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler ->
-							player.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(playerInventory -> {
-								FluidActionResult resultOfEmptying = FluidUtil.tryEmptyContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
-								if (resultOfEmptying.isSuccess()) {
-									player.setItemInHand(hand, resultOfEmptying.getResult());
-								} else {
-									FluidActionResult resultOfFilling = FluidUtil.tryFillContainerAndStow(heldItem, backpackFluidHandler, playerInventory, FluidType.BUCKET_VOLUME, player, true);
-									if (resultOfFilling.isSuccess()) {
-										player.setItemInHand(hand, resultOfFilling.getResult());
-									}
-								}
-							}));
+				.flatMap(te -> te.getBackpackWrapper().getFluidHandler()).ifPresent(backpackFluidHandler -> FluidStorageUtil.interactWithFluidStorage(backpackFluidHandler, player, hand));
+
 			return InteractionResult.SUCCESS;
-		}*/
+		}
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
 		NetworkUtil.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(world, pos)), backpackContext::toBuffer);

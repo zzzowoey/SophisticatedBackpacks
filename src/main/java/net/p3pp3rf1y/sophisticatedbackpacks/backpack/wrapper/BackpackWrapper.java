@@ -11,10 +11,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.SortBy;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
@@ -26,6 +28,7 @@ import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
@@ -73,9 +76,9 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	private BackpackSettingsHandler settingsHandler = null;
 
 	// TODO: Reimplement
-/*	private boolean fluidHandlerInitialized = false;
+	private boolean fluidHandlerInitialized = false;
 	@Nullable
-	private IStorageFluidHandler fluidHandler = null;*/
+	private IStorageFluidHandler fluidHandler = null;
 	private boolean energyStorageInitialized = false;
 	@Nullable
 	private EnergyStorage energyStorage = null;
@@ -161,21 +164,21 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	// TODO: Reimplement
-/*	@Override
+	@Override
 	public Optional<IStorageFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
 			IStorageFluidHandler wrappedHandler = getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE).isEmpty() ? null : new BackpackFluidHandler(this);
 			List<IFluidHandlerWrapperUpgrade> fluidHandlerWrapperUpgrades = getUpgradeHandler().getWrappersThatImplement(IFluidHandlerWrapperUpgrade.class);
 
 			for (IFluidHandlerWrapperUpgrade fluidHandlerWrapperUpgrade : fluidHandlerWrapperUpgrades) {
-				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler, backpack);
+				wrappedHandler = fluidHandlerWrapperUpgrade.wrapHandler(wrappedHandler, stack);
 			}
 
 			fluidHandler = wrappedHandler;
 		}
 
 		return Optional.ofNullable(fluidHandler);
-	}*/
+	}
 
 	@Override
 	public Optional<EnergyStorage> getEnergyStorage() {
@@ -226,9 +229,8 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 					handler.addListener(getSettingsHandler().getTypeCategory(ItemDisplaySettingsCategory.class)::itemChanged);
 					inventoryIOHandler = null;
 					inventoryModificationHandler = null;
-					// TODO: Reimplement
-/*					fluidHandlerInitialized = false;
-					fluidHandler = null;*/
+					fluidHandlerInitialized = false;
+					fluidHandler = null;
 					energyStorageInitialized = false;
 					energyStorage = null;
 					upgradeCachesInvalidatedHandler.run();
@@ -509,9 +511,8 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	@Override
 	public void refreshInventoryForUpgradeProcessing() {
 		inventoryModificationHandler = null;
-		// TODO: Reimplement
-/*		fluidHandler = null;
-		fluidHandlerInitialized = false;*/
+		fluidHandler = null;
+		fluidHandlerInitialized = false;
 		energyStorage = null;
 		energyStorageInitialized = false;
 		refreshInventoryForInputOutput();
