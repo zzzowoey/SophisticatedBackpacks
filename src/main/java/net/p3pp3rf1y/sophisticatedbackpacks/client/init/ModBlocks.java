@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
@@ -17,6 +19,7 @@ public class ModBlocks {
 
 	private static void registerRenderers() {
 		BlockEntityRenderers.register(BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
+		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
 	}
 
 	private static void registerBlockColorHandlers() {
