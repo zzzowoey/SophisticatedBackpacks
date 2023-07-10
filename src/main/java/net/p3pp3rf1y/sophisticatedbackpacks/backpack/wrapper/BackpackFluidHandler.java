@@ -113,7 +113,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public long extract(FluidVariant resource, long maxAmount, TransactionContext ctx) {
-		return extract(resource, maxAmount, ctx);
+		return extract(resource, maxAmount, ctx, false);
 	}
 
 	@Override
