@@ -271,12 +271,12 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 	@Override
 	public ItemStack stash(ItemStack storageStack, ItemStack stack) {
 		ItemVariant resource = ItemVariant.of(stack);
-		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> resource.toStack((int) wrapper.getInventoryForUpgradeProcessing().insert(resource, stack.getCount(), null))).orElse(stack);
+		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> resource.toStack(stack.getCount() - (int) wrapper.getInventoryForUpgradeProcessing().insert(resource, stack.getCount(), null))).orElse(stack);
 	}
 
 	@Override
 	public boolean isItemStashable(ItemStack storageStack, ItemStack stack) {
-		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().simulateInsert(ItemVariant.of(stack), stack.getCount(), null) != stack.getCount()).orElse(false);
+		return IBackpackWrapper.maybeGet(storageStack).map(wrapper -> wrapper.getInventoryForUpgradeProcessing().simulateInsert(ItemVariant.of(stack), stack.getCount(), null) == stack.getCount()).orElse(false);
 	}
 
 	public record BackpackContentsTooltip(ItemStack backpack) implements TooltipComponent {
@@ -287,7 +287,7 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 
 	@Override
 	public boolean overrideStackedOnOther(ItemStack storageStack, Slot slot, ClickAction action, Player player) {
-		if (!slot.mayPickup(player) || action != ClickAction.SECONDARY) {
+		if (storageStack.getCount() > 1 || !slot.mayPickup(player) || action != ClickAction.SECONDARY) {
 			return super.overrideStackedOnOther(storageStack, slot, action, player);
 		}
 
@@ -304,7 +304,7 @@ public class BackpackItem extends Item implements IStashStorageItem, Equipable {
 
 	@Override
 	public boolean overrideOtherStackedOnMe(ItemStack storageStack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess carriedAccess) {
-		if (!slot.mayPlace(storageStack) || action != ClickAction.SECONDARY) {
+		if (storageStack.getCount() > 1 || !slot.mayPlace(storageStack) || action != ClickAction.SECONDARY) {
 			return super.overrideOtherStackedOnMe(storageStack, otherStack, slot, action, player, carriedAccess);
 		}
 
