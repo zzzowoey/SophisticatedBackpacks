@@ -6,12 +6,14 @@ import io.github.fabricators_of_create.porting_lib.common.util.ToolAction;
 import io.github.fabricators_of_create.porting_lib.common.util.ToolActions;
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import me.alphamode.forgetags.Tags;
+import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -128,8 +130,11 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		ItemVariant mainHandItemResource = ItemVariant.of(mainHandItem);
 		ItemVariant resource = ItemVariant.of(tool);
 		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItemResource, mainHandItem.getCount(), tool, selectedSlot.get())) {
-			player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack((int) backpackInventory.extractSlot(selectedSlot.get(), resource, 1, null)));
-			backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), null);
+			try (Transaction nested = Transaction.openOuter()) {
+				player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack((int) backpackInventory.extractSlot(selectedSlot.get(), resource, 1, nested)));
+				backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), nested);
+				nested.commit();
+			}
 			return true;
 		}
 
@@ -137,7 +142,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemVariant mainHandItem, int mainHandItemCount, ItemStack tool, int selectedSlot) {
-		return (backpackInventory.simulateInsert(mainHandItem, mainHandItemCount, null) == 0)
+		return (backpackInventory.simulateInsert(mainHandItem, mainHandItemCount, null) == mainHandItemCount)
 				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem, mainHandItemCount));
 	}
 
@@ -183,18 +188,9 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean canPerformToolAction(ItemStack stack) {
-		return canPerformAnyAction(stack, ToolActions.DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_HOE_ACTIONS)
-				|| canPerformAnyAction(stack, ToolActions.DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_SHOVEL_ACTIONS)
-				|| canPerformAnyAction(stack, ToolActions.DEFAULT_SHEARS_ACTIONS);
-	}
-
-	private boolean canPerformAnyAction(ItemStack stack, Set<ToolAction> toolActions) {
-		for (ToolAction toolAction : toolActions) {
-			if (stack.canPerformAction(toolAction)) {
-				return true;
-			}
-		}
-		return false;
+		return stack.is(ItemTags.AXES) || stack.is(ItemTags.HOES)
+				|| stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS)
+				|| stack.is(ConventionalItemTags.SHEARS);
 	}
 
 	private boolean isSword(ItemStack stack, Player player) {
@@ -259,17 +255,16 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return true;
 		}
 
-		InventoryHelper.extractFromInventory(sword, backpackInventory, null);
 		try(Transaction ctx = Transaction.openOuter()) {
+			InventoryHelper.extractFromInventory(sword, backpackInventory, ctx);
 			long inserted = backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), ctx);
-			if (inserted == 0) {
+			if (inserted == mainHandItem.getCount()) {
 				player.setItemInHand(InteractionHand.MAIN_HAND, sword);
 				ctx.commit();
 				return true;
-			} else {
-				backpackInventory.insert(ItemVariant.of(sword), sword.getCount(), null);
-				return false;
 			}
+
+			return false;
 		}
 	}
 
