@@ -1,6 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -11,8 +15,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.common.components.IComponentWrapper;
-import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
+import net.p3pp3rf1y.sophisticatedcore.inventory.SlotExposedStorageWrapper;
 
 import java.util.List;
 
@@ -32,12 +35,14 @@ public class InventoryInteractionHelper {
 			return false;
 		}
 
-		return WorldHelper.getBlockEntity(world, pos)
-				.map(te -> IComponentWrapper.<SlotExposedStorage>maybeGet(te).map(w -> w.get())
-						.map(itemHandler -> player.level.isClientSide || IBackpackWrapper.maybeGet(backpack)
-								.map(wrapper -> tryRunningInteractionWrappers(itemHandler, wrapper, player))
-								.orElse(false)).orElse(false)
-				).orElse(false);
+		Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, pos, null);
+		if (storage instanceof InventoryStorage invStorage) {
+			return player.level.isClientSide || IBackpackWrapper.maybeGet(backpack)
+					.map(wrapper -> tryRunningInteractionWrappers(new SlotExposedStorageWrapper(invStorage), wrapper, player))
+					.orElse(false);
+		}
+
+		return false;
 	}
 
 	private static boolean tryRunningInteractionWrappers(SlotExposedStorage itemHandler, IStorageWrapper wrapper, Player player) {
