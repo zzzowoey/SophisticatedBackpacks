@@ -1,5 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.mixin;
 
+import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,5 +22,7 @@ public class PlayerInventory {
     @Inject(method = "tick", at = @At(value = "TAIL"))
     private void sophisticatedbackpacks$tick(CallbackInfo ci) {
         armor.forEach(a -> a.onArmorTick(player.level, player));
+        // Additional call into trinkets for armor ticks needed
+        TrinketsApi.getTrinketComponent(player).ifPresent(comp -> comp.forEach(((slotReference, stack) -> stack.onArmorTick(player.level, player))));
     }
 }

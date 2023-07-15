@@ -21,16 +21,23 @@ import java.util.function.Function;
 
 
 public class TrinketsCompat implements ICompat {
-    private static final BackpackTrinketRenderer TRINKET_BACKPACK_RENDERER = new BackpackTrinketRenderer();
+
+    private static final BackpackTrinket TRINKET_BACKPACK = new BackpackTrinket();
     private static final ItemStack BACKPACK = new ItemStack(ModItems.BACKPACK.get());
 
     public TrinketsCompat() {
+        TrinketsApi.registerTrinket(ModItems.BACKPACK.get(), TRINKET_BACKPACK);
+        TrinketsApi.registerTrinket(ModItems.IRON_BACKPACK.get(), TRINKET_BACKPACK);
+        TrinketsApi.registerTrinket(ModItems.GOLD_BACKPACK.get(), TRINKET_BACKPACK);
+        TrinketsApi.registerTrinket(ModItems.DIAMOND_BACKPACK.get(), TRINKET_BACKPACK);
+        TrinketsApi.registerTrinket(ModItems.NETHERITE_BACKPACK.get(), TRINKET_BACKPACK);
+
         EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
-            TrinketRendererRegistry.registerRenderer(ModItems.BACKPACK.get(), TRINKET_BACKPACK_RENDERER);
-            TrinketRendererRegistry.registerRenderer(ModItems.IRON_BACKPACK.get(), TRINKET_BACKPACK_RENDERER);
-            TrinketRendererRegistry.registerRenderer(ModItems.GOLD_BACKPACK.get(), TRINKET_BACKPACK_RENDERER);
-            TrinketRendererRegistry.registerRenderer(ModItems.DIAMOND_BACKPACK.get(), TRINKET_BACKPACK_RENDERER);
-            TrinketRendererRegistry.registerRenderer(ModItems.NETHERITE_BACKPACK.get(), TRINKET_BACKPACK_RENDERER);
+            TrinketRendererRegistry.registerRenderer(ModItems.BACKPACK.get(), TRINKET_BACKPACK);
+            TrinketRendererRegistry.registerRenderer(ModItems.IRON_BACKPACK.get(), TRINKET_BACKPACK);
+            TrinketRendererRegistry.registerRenderer(ModItems.GOLD_BACKPACK.get(), TRINKET_BACKPACK);
+            TrinketRendererRegistry.registerRenderer(ModItems.DIAMOND_BACKPACK.get(), TRINKET_BACKPACK);
+            TrinketRendererRegistry.registerRenderer(ModItems.NETHERITE_BACKPACK.get(), TRINKET_BACKPACK);
         });
 
 
