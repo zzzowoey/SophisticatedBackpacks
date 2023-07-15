@@ -2,6 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.trinkets.TrinketsCompat;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 
 import java.util.HashMap;
@@ -15,6 +17,7 @@ public class ModCompat {
 	private static final Map<String, Supplier<Callable<ICompat>>> compatFactories = new HashMap<>();
 
 	static {
+		compatFactories.put(CompatModIds.TRINKETS, () -> TrinketsCompat::new);
 		//compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
 		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new); // TODO readd Botania compat
 	}

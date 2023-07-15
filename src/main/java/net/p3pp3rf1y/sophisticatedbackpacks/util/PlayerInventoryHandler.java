@@ -9,14 +9,14 @@ import java.util.function.Function;
 
 public class PlayerInventoryHandler {
 	public static final Set<String> SINGLE_IDENTIFIER = Collections.singleton("");
-	private final Function<Long, Set<String>> identifiersGetter;
+	private final IdentifierGetter identifiersGetter;
 	private final SlotCountGetter slotCountGetter;
 	private final SlotStackGetter slotStackGetter;
 	private final boolean visibleInGui;
 	private final boolean ownRenderer;
 	private final boolean accessibleByAnotherPlayer;
 
-	public PlayerInventoryHandler(Function<Long, Set<String>> identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
+	public PlayerInventoryHandler(IdentifierGetter identifiersGetter, SlotCountGetter slotCountGetter, SlotStackGetter slotStackGetter, boolean visibleInGui, boolean ownRenderer, boolean accessibleByAnotherPlayer) {
 		this.identifiersGetter = identifiersGetter;
 		this.slotCountGetter = slotCountGetter;
 		this.slotStackGetter = slotStackGetter;
@@ -37,8 +37,8 @@ public class PlayerInventoryHandler {
 		return visibleInGui;
 	}
 
-	public Set<String> getIdentifiers(long gameTime) {
-		return identifiersGetter.apply(gameTime);
+	public Set<String> getIdentifiers(Player player, long gameTime) {
+		return identifiersGetter.getIdentifiers(player, gameTime);
 	}
 
 	public boolean hasItsOwnRenderer() {
@@ -47,6 +47,10 @@ public class PlayerInventoryHandler {
 
 	public boolean isAccessibleByAnotherPlayer() {
 		return accessibleByAnotherPlayer;
+	}
+
+	public interface IdentifierGetter {
+		Set<String> getIdentifiers(Player player, Long gameTime);
 	}
 
 	public interface SlotCountGetter {

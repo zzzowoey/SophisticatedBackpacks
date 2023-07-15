@@ -33,12 +33,22 @@ repositories {
     maven { url = "https://jitpack.io/" } // for Porting Lib: Mixin Extras, Fabric ASM
     maven { url = "https://cursemaven.com" } // Forge Config API Port
 
-    maven { url = "https://maven.terraformersmc.com/releases/" } // Emi
+    maven { url = "https://maven.terraformersmc.com/" } // Emi
     maven { url = "https://maven.shedaniel.me/" } // REI and deps
-    maven { url = "https://api.modrinth.com/maven" } // LazyDFU
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 
     maven { url = "https://maven.tterrag.com/" } // Flywheel
-    maven { url = "https://ladysnake.jfrog.io/artifactory/mods" } // CCA, for Trinkets
+    maven { url = "https://maven.ladysnake.org/releases" } // CCA, for Trinkets
     maven { url = "https://modmaven.dev" } // Jei
 }
 
@@ -71,6 +81,7 @@ def setup(DependencyHandler deps) {
 
 def devEnv(DependencyHandler deps) {
     deps.modLocalRuntime("maven.modrinth:lazydfu:$lazy_dfu_version")
+    deps.modLocalRuntime("dev.emi:trinkets:$trinkets_version") { transitive = false }
 }
 
 def dependencies(DependencyHandler deps) {
@@ -87,7 +98,7 @@ def dependencies(DependencyHandler deps) {
     deps.implementation "com.electronwill.night-config:core:$night_config_version"
     deps.implementation "com.electronwill.night-config:toml:$night_config_version"
 
-    deps.modApi "curse.maven:forge-config-api-port-fabric-547434:$config_api_id"
+    deps.modApi(deps.include("curse.maven:forge-config-api-port-fabric-547434:$config_api_id"))
 
     deps.modApi(deps.include("teamreborn:energy:$energy_version")) {
         exclude(group: "net.fabricmc.fabric-api")
@@ -104,15 +115,16 @@ def compat(DependencyHandler deps) {
 //    deps.modLocalRuntime("vazkii.botania:Botania:${botania_version}")
 //    deps.modCompileOnly("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
 //    deps.modLocalRuntime("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-//    deps.modCompileOnly("top.theillusivec4.curios:curios-fabric:${curios_version}:api")
-//    deps.modLocalRuntime("top.theillusivec4.curios:curios-fabric:${curios_version}")
 //    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}:api")
 //    deps.modLocalRuntime("vazkii.patchouli:Patchouli:${patchouli_version}")
 //    deps.modCompileOnly("curse.maven:quark-243121:${quark_cf_file_id}")
 //    deps.modLocalRuntime("curse.maven:quark-243121:${quark_cf_file_id}")
 
+    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version") { transitive = false }
+
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version")
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-block:$cca_version")
+    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version")
     deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-item:$cca_version")
 
     recipeViewers(deps)
