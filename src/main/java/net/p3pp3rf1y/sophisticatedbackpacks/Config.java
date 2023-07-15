@@ -19,6 +19,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.pump.PumpUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeConfig;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -85,7 +86,7 @@ public class Config {
 		public final BatteryUpgradeConfig batteryUpgrade;
 		public final StackUpgradeConfig stackUpgrade;
 		public final PumpUpgradeConfig pumpUpgrade;
-/*		public final XpPumpUpgradeConfig xpPumpUpgrade;*/
+		public final XpPumpUpgradeConfig xpPumpUpgrade;
 		public final NerfsConfig nerfsConfig;
 
 		public void onReload() {
@@ -135,7 +136,7 @@ public class Config {
 			tankUpgrade = new TankUpgradeConfig(builder);
 			batteryUpgrade = new BatteryUpgradeConfig(builder);
 			pumpUpgrade = new PumpUpgradeConfig(builder);
-			/*xpPumpUpgrade = new XpPumpUpgradeConfig(builder);*/
+			xpPumpUpgrade = new XpPumpUpgradeConfig(builder);
 			entityBackpackAdditions = new EntityBackpackAdditionsConfig(builder);
 			nerfsConfig = new NerfsConfig(builder);
 

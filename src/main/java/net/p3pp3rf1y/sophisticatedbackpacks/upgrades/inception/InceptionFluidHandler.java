@@ -5,7 +5,9 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 
 import javax.annotation.Nullable;
@@ -60,7 +62,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 		return insert(resource, maxAmount, transaction, false);
 	}
 
-/*	@Override
+	@Override
 	public FluidStack extract(TagKey<Fluid> resourceTag, long maxDrain, TransactionContext ctx, boolean ignoreInOutLimit) {
 		FluidStack drainedStack = FluidStack.EMPTY;
 		FluidStack stackToDrain = FluidStack.EMPTY;
@@ -84,7 +86,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 		}
 
 		return drainedStack;
-	}*/
+	}
 
 	@Override
 	public FluidStack extract(FluidStack resource, TransactionContext ctx, boolean ignoreInOutLimit) {

@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.material.Fluid;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
@@ -44,7 +46,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 		return insert(resource, maxFill, ctx, false);
 	}
 
-	/*@Override
+	@Override
 	public FluidStack extract(TagKey<Fluid> resourceTag, long maxDrain, TransactionContext ctx, boolean ignoreInOutLimit) {
 		FluidStack drained = FluidStack.EMPTY;
 		long toDrain = maxDrain;
@@ -52,7 +54,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 			Fluid tankFluid = tank.getContents().getFluid();
 			if ((drained.isEmpty() && tankFluid.is(resourceTag)) || tank.getContents().isFluidEqual(drained)) {
 				if (drained.isEmpty()) {
-					drained = new FluidStack(tankFluid, maxDrain - tank.drain(toDrain, ctx, ignoreInOutLimit));
+					drained = new FluidStack(tankFluid, tank.drain(toDrain, ctx, ignoreInOutLimit));
 				} else {
 					drained.grow(tank.drain(toDrain, ctx, ignoreInOutLimit));
 				}
@@ -66,7 +68,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 		}
 
 		return drained;
-	}*/
+	}
 
 	@Override
 	public FluidStack extract(FluidStack resource, TransactionContext ctx, boolean ignoreInOutLimit) {
