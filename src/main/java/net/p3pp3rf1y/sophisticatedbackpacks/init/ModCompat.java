@@ -18,7 +18,6 @@ public class ModCompat {
 
 	static {
 		compatFactories.put(CompatModIds.TRINKETS, () -> TrinketsCompat::new);
-		//compatFactories.put(CompatModIds.CURIOS, () -> CuriosCompat::new);
 		//compatFactories.put(CompatModIds.BOTANIA, () -> BotaniaCompat::new); // TODO readd Botania compat
 	}
 

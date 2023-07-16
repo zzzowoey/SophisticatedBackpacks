@@ -90,10 +90,4 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 		this.age = compound.getInt("EverlastingAge");
 	}
-
-	// TODO: Necessary?
-/*	@Override
-	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return (Packet<ClientGamePacketListener>) SBPPacketHandler.getChannel().createVanillaPacket((S2CPacket) new SpawnEntity(this));
-	}*/
 }

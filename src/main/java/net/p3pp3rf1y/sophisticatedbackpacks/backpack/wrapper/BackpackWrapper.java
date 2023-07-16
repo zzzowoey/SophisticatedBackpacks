@@ -74,8 +74,6 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	private InventoryModificationHandler inventoryModificationHandler = null;
 	@Nullable
 	private BackpackSettingsHandler settingsHandler = null;
-
-	// TODO: Reimplement
 	private boolean fluidHandlerInitialized = false;
 	@Nullable
 	private IStorageFluidHandler fluidHandler = null;
@@ -163,7 +161,6 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 		return inventoryIOHandler.getFilteredItemHandler();
 	}
 
-	// TODO: Reimplement
 	@Override
 	public Optional<IStorageFluidHandler> getFluidHandler() {
 		if (!fluidHandlerInitialized) {
