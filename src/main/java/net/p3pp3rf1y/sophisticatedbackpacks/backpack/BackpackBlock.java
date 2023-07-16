@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.math.Axis;
+import io.github.fabricators_of_create.porting_lib.block.EntityDestroyBlock;
 import io.github.fabricators_of_create.porting_lib.block.ExplosionResistanceBlock;
 import io.github.fabricators_of_create.porting_lib.event.common.PlayerInteractionEvents;
 import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
@@ -67,7 +68,7 @@ import javax.annotation.Nullable;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
-public class BackpackBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, ExplosionResistanceBlock {
+public class BackpackBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, ExplosionResistanceBlock, EntityDestroyBlock {
 	public static final BooleanProperty LEFT_TANK = BooleanProperty.create("left_tank");
 	public static final BooleanProperty RIGHT_TANK = BooleanProperty.create("right_tank");
 	public static final BooleanProperty BATTERY = BooleanProperty.create("battery");
@@ -250,14 +251,13 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 	}
 
-	// TODO: Reimplement
-/*	@Override
+	@Override
 	public boolean canEntityDestroy(BlockState state, BlockGetter world, BlockPos pos, Entity entity) {
 		if (hasEverlastingUpgrade(world, pos)) {
 			return false;
 		}
-		return super.canEntityDestroy(state, world, pos, entity);
-	}*/
+		return EntityDestroyBlock.super.canEntityDestroy(state, world, pos, entity);
+	}
 
 	private void tryToPickup(Level world, ItemEntity itemEntity, IStorageWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();

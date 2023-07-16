@@ -66,9 +66,6 @@ public class CommonEventHandler {
 		MobSpawnEvents.FINALIZE_SPAWN.register(this::onLivingSpecialSpawn);
 		LivingEntityEvents.DROPS.register(EntityBackpackAdditionHandler::handleBackpackDrop);
 
-		// TODO: Reimplement
-		//eventBus.addListener(this::onEntityMobGriefing);
-
 		EntityTrackingEvents.STOP_TRACKING.register(this::onEntityLeaveWorld);
 		ServerTickEvents.END_WORLD_TICK.register(ServerStorageSoundHandler::tick);
 		PlayerInteractionEvents.LEFT_CLICK_BLOCK.register(this::onBlockClick);
@@ -208,14 +205,6 @@ public class CommonEventHandler {
 			EntityBackpackAdditionHandler.addBackpack(monster, event.getLevel());
 		}
 	}
-
-
-	// TODO: Reimplement
-/*	private void onEntityMobGriefing(EntityMobGriefingEvent event) {
-		if (event.getEntity() instanceof Creeper creeper) {
-			EntityBackpackAdditionHandler.removeBeneficialEffects(creeper);
-		}
-	}*/
 
 	private void onEntityLeaveWorld(Entity trackedEntity, ServerPlayer player) {
 		if (!(trackedEntity instanceof Monster monster)) {
