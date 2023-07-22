@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
-import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.*;
 import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
 
 public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, BlockEntityExtensions, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
@@ -65,8 +64,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 		WorldHelper.notifyBlockUpdate(this);
 	}
-
-
 
 	@Override
 	public void onLoad() {

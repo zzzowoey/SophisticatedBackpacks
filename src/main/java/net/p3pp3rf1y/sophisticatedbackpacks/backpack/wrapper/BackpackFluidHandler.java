@@ -52,7 +52,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 		long toDrain = maxDrain;
 		for (TankUpgradeWrapper tank : getAllTanks()) {
 			Fluid tankFluid = tank.getContents().getFluid();
-			if ((drained.isEmpty() && tankFluid.is(resourceTag)) || tank.getContents().isFluidEqual(drained)) {
+			if ((drained.isEmpty() && tankFluid.defaultFluidState().is(resourceTag)) || tank.getContents().isFluidEqual(drained)) {
 				if (drained.isEmpty()) {
 					drained = new FluidStack(tankFluid, tank.drain(toDrain, ctx, ignoreInOutLimit));
 				} else {

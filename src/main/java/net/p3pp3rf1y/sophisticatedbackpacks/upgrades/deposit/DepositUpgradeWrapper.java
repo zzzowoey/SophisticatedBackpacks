@@ -34,11 +34,11 @@ public class DepositUpgradeWrapper extends UpgradeWrapperBase<DepositUpgradeWrap
 		if (filterLogic.getDepositFilterType() == DepositFilterType.INVENTORY) {
 			filterLogic.setInventory(itemHandler);
 		}
-		AtomicInteger stacksAdded = new AtomicInteger(0);
 
+		AtomicInteger stacksAdded = new AtomicInteger(0);
 		InventoryHelper.transfer(storageWrapper.getInventoryForUpgradeProcessing(),
 				new FilteredItemHandler<>(itemHandler, Collections.singletonList(filterLogic), Collections.emptyList()),
-				s -> stacksAdded.incrementAndGet());
+				s -> stacksAdded.incrementAndGet(), null);
 
 		int stacksDeposited = stacksAdded.get();
 		String translKey = stacksDeposited > 0 ? "gui.sophisticatedbackpacks.status.stacks_deposited" : "gui.sophisticatedbackpacks.status.nothing_to_deposit";

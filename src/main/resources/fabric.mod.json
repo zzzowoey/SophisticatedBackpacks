@@ -45,9 +45,8 @@
     "fabricloader": ">=${loader_version}",
     "fabric-api": ">=${fabric_version}",
     "minecraft": "${minecraft_version}",
-    "cardinal-components-base": "*",
+    "sophisticatedcore": "${sc_version}",
     "cardinal-components-entity": "*",
-    "cardinal-components-block": "*",
     "cardinal-components-item": "*"
   },
 

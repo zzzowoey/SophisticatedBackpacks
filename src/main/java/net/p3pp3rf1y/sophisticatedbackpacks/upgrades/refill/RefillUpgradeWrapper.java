@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -159,9 +157,12 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 
 		ItemStack mainHandItem = player.getMainHandItem();
 		ItemVariant resource = ItemVariant.of(mainHandItem);
+
 		int count = mainHandItem.getCount();
-		if (hasItemInBackpack.get() && !(mainHandItem.getItem() instanceof BackpackItem) &&
-				(mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), resource, count)) || inventoryHandler.simulateInsert(resource, count, null) == 0)) {
+		if (hasItemInBackpack.get() && !(mainHandItem.getItem() instanceof BackpackItem)
+				&& (mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), resource, count))
+				|| inventoryHandler.simulateInsert(resource, count, null) == 0)) {
+
 			ItemStack toExtract = filter.copy();
 			toExtract.setCount(filter.getMaxStackSize());
 			ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, null);
@@ -276,36 +277,15 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			ItemStack fill(Player player, SlotExposedStorage playerInventory, ItemStack stackToAdd);
 		}
 
-		// TODO: refactor
 		private static ItemStack refillAnywhereInInventory(SlotExposedStorage playerInvHandler, ItemStack extracted) {
 			ItemVariant resource = ItemVariant.of(extracted);
-			AtomicReference<ItemVariant> atomicResource = new AtomicReference<>(resource);
-			AtomicLong maxAmount = new AtomicLong(extracted.getCount());
+			long remaining = extracted.getCount();
 
-			InventoryHelper.iterate(playerInvHandler, (slot, stack) -> {
-				if (ItemHandlerHelper.canItemStacksStack(stack, atomicResource.get().toStack(maxAmount.intValue()))) {
-					try (Transaction outer = Transaction.openOuter()) {
-						maxAmount.set(maxAmount.get() - playerInvHandler.insertSlot(slot, atomicResource.get(), maxAmount.get(), outer));
-						outer.commit();
-					}
-				}
-			}, () -> maxAmount.get() == 0);
-
-			long remaining = maxAmount.get();
-			if (remaining > 0) {
-				try (Transaction outer = Transaction.openOuter()) {
-					long inserted = InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, outer);
-					if (inserted <= 0) {
-						return resource.toStack((int) remaining);
-					}
-				}
-
-				try (Transaction outer = Transaction.openOuter()) {
-					ItemStack result = resource.toStack((int) (remaining - InventoryHelper.insertIntoInventory(resource, remaining, playerInvHandler, outer)));
-					outer.commit();
-					return result;
-				}
+			try (Transaction outer = Transaction.openOuter()) {
+				remaining -= playerInvHandler.insert(resource, remaining, outer);
+				outer.commit();
 			}
+
 			return resource.toStack((int) remaining);
 		}
 
