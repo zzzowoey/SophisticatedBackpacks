@@ -1,7 +1,19 @@
+//file:noinspection GrMethodMayBeStatic
+buildscript {
+    repositories {
+        maven { url = "https://plugins.gradle.org/m2/" }
+        maven { url = "https://maven.fabricmc.net/" }
+        maven { url = "https://server.bbkr.space/artifactory/libs-release/" }
+        maven { url = "https://maven.quiltmc.org/repository/release" }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     id "fabric-loom" version "1.2.+"
 
-    id "io.github.juuxel.loom-vineflower" version "1.11.0" // Quiltflower, a better decompiler
+    id "io.github.juuxel.loom-vineflower" version "1.11.0" // Vineflower, a better decompiler
     id "io.github.p03w.machete" version "1.+" // automatic jar compressing on build
 
     id "maven-publish"
@@ -29,9 +41,16 @@ repositories {
     maven { url = 'https://maven.parchmentmc.org' } // Parchment
 
     maven { url = "https://maven.fabricmc.net/" } // FAPI, Loader
-    maven { url = "https://mvn.devos.one/snapshots/" } // Registrate, Porting Lib, Forge Tags, Milk Lib
+    maven { url = "https://mvn.devos.one/snapshots/" } // Porting Lib, Forge Tags, Milk Lib, serialization-hooks
     maven { url = "https://jitpack.io/" } // for Porting Lib: Mixin Extras, Fabric ASM
-    maven { url = "https://cursemaven.com" } // Forge Config API Port
+    maven {// Forge Config API Port
+        name = "Fuzs Mod Resources"
+        url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+    }
+    maven {// Modern KeyBinding
+        url "https://maven.nova-committee.cn/releases"
+    }
+    //maven { url = "https://cursemaven.com" }
 
     maven { url = "https://maven.terraformersmc.com/" } // Emi
     maven { url = "https://maven.shedaniel.me/" } // REI and deps
@@ -47,7 +66,6 @@ repositories {
         }
     }
 
-    maven { url = "https://maven.tterrag.com/" } // Flywheel
     maven { url = "https://maven.ladysnake.org/releases" } // CCA, for Trinkets
     maven { url = "https://modmaven.dev" } // Jei
 }
@@ -81,34 +99,33 @@ def setup(DependencyHandler deps) {
 
 def devEnv(DependencyHandler deps) {
     deps.modLocalRuntime("maven.modrinth:lazydfu:$lazy_dfu_version")
-    deps.modLocalRuntime("dev.emi:trinkets:$trinkets_version") { transitive = false }
+    deps.modLocalRuntime("dev.emi:trinkets:$trinkets_version")
 }
 
 def dependencies(DependencyHandler deps) {
     deps.modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
-    deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:Porting-Lib:$port_lib_version+$minecraft_version")
 
     if (findProject(':SophisticatedCore') != null) {
-        deps.implementation(deps.project(path: ":SophisticatedCore", configuration: "namedElements"))
+        deps.implementation(deps.project(path: ':SophisticatedCore', configuration: 'namedElements'))
+
+        for (String module in project(':SophisticatedCore')['port_lib_modules'].split(",")) {
+            deps.modApi("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version")
+        }
+
+        deps.modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version")
+        deps.modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-block:$cca_version")
     } else {
-/*        deps.modCompileOnly(deps.include("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}"))
-        deps.modRuntimeOnly(deps.include("curse.maven:sophisticatedcore-618298:${sc_cf_file_id}"))*/
+        deps.modImplementation("net.p3pp3rf1y:sophisticatedcore-fabric:${sc_version}")
     }
 
-    deps.implementation "com.electronwill.night-config:core:$night_config_version"
-    deps.implementation "com.electronwill.night-config:toml:$night_config_version"
+    deps.modApi(deps.include("committee.nova.mkb.fabric:mkb-${minecraft_version}:${mkb_mod_version}"))
 
-    deps.modApi(deps.include("curse.maven:forge-config-api-port-fabric-547434:$config_api_id"))
-
-    deps.modApi(deps.include("teamreborn:energy:$energy_version")) {
-        exclude(group: "net.fabricmc.fabric-api")
+    for (String module in port_lib_modules.split(",")) {
+        deps.modApi("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version")
     }
-
-    deps.api "com.google.code.findbugs:jsr305:$jsr305_version"
 }
 
 def compat(DependencyHandler deps) {
-//    deps.modCompileOnly("curse.maven:autoreglib-250363:${autoreglib_cf_file_id}")
 //    deps.modCompileOnly("curse.maven:balm-531761:${balm_cf_file_id}")
 //    deps.modLocalRuntime("curse.maven:balm-531761:${balm_cf_file_id}")
 //    deps.modCompileOnly("vazkii.botania:Botania:${botania_version}:api")
@@ -117,15 +134,14 @@ def compat(DependencyHandler deps) {
 //    deps.modLocalRuntime("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
 //    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}:api")
 //    deps.modLocalRuntime("vazkii.patchouli:Patchouli:${patchouli_version}")
-//    deps.modCompileOnly("curse.maven:quark-243121:${quark_cf_file_id}")
-//    deps.modLocalRuntime("curse.maven:quark-243121:${quark_cf_file_id}")
 
-    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version") { transitive = false }
+    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version") {
+        exclude(group: "com.terraformersmc")
+        transitive = false
+    }
 
-    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version")
-    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-block:$cca_version")
-    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version")
-    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-item:$cca_version")
+    deps.modApi(deps.include("dev.onyxstudios.cardinal-components-api:cardinal-components-item:$cca_version"))
+    deps.modApi(deps.include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version"))
 
     recipeViewers(deps)
 }
@@ -156,14 +172,10 @@ def testing(DependencyHandler deps) {
 }
 
 loom {
-    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
-        accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
-    }
+    accessWidenerPath = file("src/main/resources/sophisticatedbackpacks.accesswidener")
+
     sourceSets {
         main {
-            java {
-                exclude("src/main/java/net/p3pp3rf1y/sophisticatedbackpacks/compat")
-            }
             resources {
                 srcDir("src/generated/resources")
                 exclude("src/generated/resources/.cache")
@@ -172,7 +184,7 @@ loom {
     }
 
     runs {
-        data {
+        datagen {
             client()
             ideConfigGenerated = true
 
@@ -180,45 +192,26 @@ loom {
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
             vmArg "-Dfabric-api.datagen.modid=$mod_id"
+            vmArg "-Dmixin.debug.export=true"
+            source sourceSets.main
             runDir "run/test_client"
-
-            mods {
-                if (findProject(':SophisticatedCore') != null) {
-                    SophisticatedCore {
-                        source project(':SophisticatedCore').sourceSets.main
-                    }
-                }
-                sophisticatedbackpacks {
-                    source sourceSets.main
-                }
-            }
         }
 
         client {
             client()
             ideConfigGenerated = true
 
-            //property "mixin.env.disableRefMap", "true"
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            vmArg "-Dmixin.debug.export=true"
+            source sourceSets.main
             runDir "run/test_client"
-            mods {
-                sophisticatedbackpacks {
-                    source sourceSets.main
-                }
-            }
         }
         server {
             server()
             ideConfigGenerated = true
 
-            //property "mixin.env.disableRefMap", "true"
-            //property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            vmArg "-Dmixin.debug.export=true"
+            source sourceSets.main
             runDir "run/test_server"
-            mods {
-                sophisticatedbackpacks {
-                    source sourceSets.main
-                }
-            }
         }
         /*gametest {
             server()
@@ -229,13 +222,17 @@ loom {
             runDir "run/gametest_server"
         }*/
     }
+
+    interfaceInjection {
+        enableDependencyInterfaceInjection = true
+    }
 }
 
 /*test {
     useTestNG()
 }*/
 
-task generateSources(type: Copy) {
+tasks.register('generateSources', Copy) {
     from 'src/replaceme/java'
     into "$buildDir/generated-src"
     filter { line -> line.replaceAll('@MOD_VERSION@', '${project.version}') }
@@ -245,11 +242,13 @@ processResources {
     // Exclude datagenerator .cache directory
     exclude '.cache'
 
-    Map<String, String> properties = new HashMap<>()
-    properties.put("version", version)
-    properties.put("loader_version", loader_version)
-    properties.put("fabric_version", fabric_version)
-    properties.put("minecraft_version", minecraft_version)
+    Map<String, String> properties = [
+            "version": version,
+            "minecraft_version": minecraft_version,
+            "loader_version": loader_version,
+            "fabric_version": fabric_version,
+            "sc_version": sc_version
+    ]
 
     properties.forEach((k, v) -> inputs.property(k, v))
 
@@ -257,7 +256,7 @@ processResources {
         expand properties
     }
 
-    filesMatching("${mod_id}.mixins.json") {
+    filesMatching("sophisticatedbackpacks.mixins.json") {
         expand "archivesBaseName": archivesBaseName
     }
 
@@ -266,7 +265,6 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
-    it.options.release = Integer.parseInt(sourceCompatibility)
 }
 
 java {
