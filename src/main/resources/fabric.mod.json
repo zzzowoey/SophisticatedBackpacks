@@ -31,10 +31,13 @@
       "net.p3pp3rf1y.sophisticatedbackpacks.data.SophisticatedBackpacksData"
     ],
     "jei_mod_plugin": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBPPlugin"
+      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBJeiPlugin"
     ],
     "cardinal-components": [
       "net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components"
+    ],
+    "rei_client": [
+      "net.p3pp3rf1y.sophisticatedbackpacks.compat.rei.REIClientCompat"
     ]
   },
 
@@ -46,8 +49,9 @@
     "fabric-api": ">=${fabric_version}",
     "minecraft": "${minecraft_version}",
     "sophisticatedcore": "${sc_version}",
-    "cardinal-components-entity": "*",
-    "cardinal-components-item": "*"
+    "mkb": "${mkb_version}",
+    "cardinal-components-entity": "${cca_version}",
+    "cardinal-components-item": "${cca_version}"
   },
 
   "custom": {

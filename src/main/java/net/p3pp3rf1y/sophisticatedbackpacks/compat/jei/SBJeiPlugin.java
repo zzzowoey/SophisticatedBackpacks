@@ -38,7 +38,7 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 @JeiPlugin
-public class SBPPlugin implements IModPlugin {
+public class SBJeiPlugin implements IModPlugin {
 	@Override
 	public ResourceLocation getPluginUid() {
 		return SophisticatedBackpacks.getRL("default");

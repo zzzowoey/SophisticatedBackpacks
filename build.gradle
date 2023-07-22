@@ -152,13 +152,13 @@ def recipeViewers(DependencyHandler deps) {
     // JEI
     deps.modCompileOnly("mezz.jei:jei-$minecraft_version-fabric:$jei_version") { transitive = false }
     // REI
-    //deps.modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version")
-    //deps.modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version")
+    deps.modCompileOnly("me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version")
+    deps.modCompileOnly("me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version")
 
     switch (recipe_viewer.toLowerCase(Locale.ROOT)) {
         case "emi": deps.modLocalRuntime("dev.emi:emi-fabric:$emi_version"); break
         case "jei": deps.modLocalRuntime("mezz.jei:jei-$minecraft_version-fabric:$jei_version"); break
-        //case "rei": deps.modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"); break
+        case "rei": deps.modLocalRuntime("me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"); break
         case "disabled": break
         default: println("Unknown recipe viewer specified: $recipe_viewer. Must be JEI, REI, EMI, or disabled.")
     }
@@ -247,7 +247,9 @@ processResources {
             "minecraft_version": minecraft_version,
             "loader_version": loader_version,
             "fabric_version": fabric_version,
-            "sc_version": sc_version
+            "sc_version": sc_version,
+            "mkb_version": mkb_mod_version,
+            "cca_version": cca_version
     ]
 
     properties.forEach((k, v) -> inputs.property(k, v))
