@@ -4,6 +4,9 @@ import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -126,8 +130,10 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	private int getNumberOfInventorySlots() {
-		if (hasTag(INVENTORY_SLOTS_TAG)) {
-			return getInt(INVENTORY_SLOTS_TAG);
+		Optional<Integer> inventorySlots = NBTHelper.getInt(stack, INVENTORY_SLOTS_TAG);
+
+		if (inventorySlots.isPresent()) {
+			return inventorySlots.get();
 		}
 
 		int itemInventorySlots = ((BackpackItem) stack.getItem()).getNumberOfSlots();
@@ -142,7 +148,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	private void setNumberOfInventorySlots(int itemInventorySlots) {
-		putInt(INVENTORY_SLOTS_TAG, itemInventorySlots);
+		NBTHelper.setInteger(stack, INVENTORY_SLOTS_TAG, itemInventorySlots);
 	}
 
 	private CompoundTag getBackpackContentsNbt() {
@@ -251,8 +257,10 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	private int getNumberOfUpgradeSlots() {
-		if (hasTag(UPGRADE_SLOTS_TAG)) {
-			return getInt(UPGRADE_SLOTS_TAG);
+		Optional<Integer> upgradeSlots = NBTHelper.getInt(stack, UPGRADE_SLOTS_TAG);
+
+		if (upgradeSlots.isPresent()) {
+			return upgradeSlots.get();
 		}
 
 		int itemUpgradeSlots = ((BackpackItem) stack.getItem()).getNumberOfUpgradeSlots();
@@ -262,7 +270,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 
 	@Override
 	public Optional<UUID> getContentsUuid() {
-		return Optional.ofNullable(getUuid(CONTENTS_UUID_TAG));
+		return NBTHelper.getUniqueId(stack, CONTENTS_UUID_TAG);
 	}
 
 	private UUID getOrCreateContentsUuid() {
@@ -292,65 +300,57 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	private void migrateNbtTag(UUID newUuid, String key) {
-		if (hasTag(key)) {
-			BackpackStorage.get().getOrCreateBackpackContents(newUuid).put(key, getCompound(key));
-			markBackpackContentsDirty();
-			remove(key);
-		}
+		NBTHelper.getCompound(stack, key)
+				.ifPresent(nbt -> {
+					BackpackStorage.get().getOrCreateBackpackContents(newUuid).put(key, nbt);
+					markBackpackContentsDirty();
+					NBTHelper.removeTag(stack, key);
+				});
 	}
 
 	@Override
 	public int getMainColor() {
-		if (hasTag(CLOTH_COLOR_TAG)) {
-			return getInt(CLOTH_COLOR_TAG);
-		}
-		return DEFAULT_CLOTH_COLOR;
+		return NBTHelper.getInt(stack, CLOTH_COLOR_TAG).orElse(DEFAULT_CLOTH_COLOR);
 	}
 
 	@Override
 	public int getAccentColor() {
-		if (hasTag(BORDER_COLOR_TAG)) {
-			return getInt(BORDER_COLOR_TAG);
-		}
-		return DEFAULT_BORDER_COLOR;
+		return NBTHelper.getInt(stack, BORDER_COLOR_TAG).orElse(DEFAULT_BORDER_COLOR);
 	}
 
 	@Override
 	public Optional<Integer> getOpenTabId() {
-		if (hasTag(OPEN_TAB_ID_TAG)) {
-			return Optional.of(getInt(OPEN_TAB_ID_TAG));
-		}
-		return Optional.empty();
+		return NBTHelper.getInt(stack, OPEN_TAB_ID_TAG);
 	}
 
 	@Override
 	public void setOpenTabId(int openTabId) {
-		putInt(OPEN_TAB_ID_TAG, openTabId);
+		NBTHelper.setInteger(stack, OPEN_TAB_ID_TAG, openTabId);
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void removeOpenTabId() {
-		remove(OPEN_TAB_ID_TAG);
+		NBTHelper.removeTag(stack, OPEN_TAB_ID_TAG);
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void setColors(int mainColor, int accentColor) {
-		putInt(CLOTH_COLOR_TAG, mainColor);
-		putInt(BORDER_COLOR_TAG, accentColor);
+		stack.addTagElement(CLOTH_COLOR_TAG, IntTag.valueOf(mainColor));
+		stack.addTagElement(BORDER_COLOR_TAG, IntTag.valueOf(accentColor));
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public void setSortBy(SortBy sortBy) {
-		putString(SORT_BY_TAG, sortBy.getSerializedName());
+		stack.addTagElement(SORT_BY_TAG, StringTag.valueOf(sortBy.getSerializedName()));
 		backpackSaveHandler.run();
 	}
 
 	@Override
 	public SortBy getSortBy() {
-		return SortBy.fromName(getString(SORT_BY_TAG));
+		return NBTHelper.getEnumConstant(stack, SORT_BY_TAG, SortBy::fromName).orElse(SortBy.NAME);
 	}
 
 	@Override
@@ -392,7 +392,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
-		Optional.ofNullable(backpackCopy.getTagElement(getRootTagKey())).ifPresent(tag -> tag.remove(CONTENTS_UUID_TAG));
+		backpackCopy.removeTagKey(CONTENTS_UUID_TAG);
 		return IBackpackWrapper.maybeGet(backpackCopy)
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
@@ -421,8 +421,8 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 
 	@Override
 	public void setLoot(ResourceLocation lootTableName, float lootPercentage) {
-		putString(LOOT_TABLE_NAME_TAG, lootTableName.toString());
-		putFloat(LOOT_PERCENTAGE_TAG, lootPercentage);
+		stack.addTagElement(LOOT_TABLE_NAME_TAG, StringTag.valueOf(lootTableName.toString()));
+		stack.addTagElement(LOOT_PERCENTAGE_TAG, FloatTag.valueOf(lootPercentage));
 		backpackSaveHandler.run();
 	}
 
@@ -431,14 +431,12 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 		if (playerEntity.level.isClientSide) {
 			return;
 		}
-		if (hasTag(LOOT_TABLE_NAME_TAG)) {
-			fillWithLootFromTable(playerEntity, getString(LOOT_TABLE_NAME_TAG));
-		}
+		NBTHelper.getString(stack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
 	}
 
 	@Override
 	public void setContentsUuid(UUID storageUuid) {
-		putUuid(CONTENTS_UUID_TAG, storageUuid);
+		NBTHelper.setUniqueId(stack, CONTENTS_UUID_TAG, storageUuid);
 	}
 
 	@Override
@@ -449,7 +447,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 
 	@Override
 	public void removeContentsUUIDTag() {
-		remove(CONTENTS_UUID_TAG);
+		NBTHelper.removeTag(stack, CONTENTS_UUID_TAG);
 	}
 
 	@Override
@@ -460,7 +458,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	@Override
 	public void setColumnsTaken(int columnsTaken, boolean hasChanged) {
 		int originalColumnsTaken = getColumnsTaken();
-		putInt(COLUMNS_TAKEN_TAG, columnsTaken);
+		NBTHelper.setInteger(stack, COLUMNS_TAKEN_TAG, columnsTaken);
 		if (hasChanged) {
 			int diff = (columnsTaken - originalColumnsTaken) * getNumberOfSlotRows();
 			onSlotsChange.accept(diff);
@@ -480,7 +478,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 
 	@Override
 	public int getColumnsTaken() {
-		return getInt(COLUMNS_TAKEN_TAG);
+		return NBTHelper.getInt(stack, COLUMNS_TAKEN_TAG).orElse(0);
 	}
 
 	private void fillWithLootFromTable(Player playerEntity, String lootName) {
@@ -490,10 +488,10 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 		}
 
 		ResourceLocation lootTableName = new ResourceLocation(lootName);
-		float lootPercentage = getFloat(LOOT_PERCENTAGE_TAG);
+		float lootPercentage = NBTHelper.getFloat(stack, LOOT_PERCENTAGE_TAG).orElse(0f);
 
-		remove(LOOT_TABLE_NAME_TAG);
-		remove(LOOT_PERCENTAGE_TAG);
+		stack.removeTagKey(LOOT_TABLE_NAME_TAG);
+		stack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
 		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
 		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
@@ -502,7 +500,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {
-		putInt(UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
+		NBTHelper.setInteger(stack, UPGRADE_SLOTS_TAG, numberOfUpgradeSlots);
 	}
 
 	@Override
