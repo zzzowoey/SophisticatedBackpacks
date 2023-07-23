@@ -49,7 +49,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 		long remaining = maxFill;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
 			remaining -= fluidHandler.insert(resource, remaining, ctx, ignoreInOutLimit);
-			if (remaining == maxFill) {
+			if (remaining <= 0) {
 				return maxFill;
 			}
 		}
