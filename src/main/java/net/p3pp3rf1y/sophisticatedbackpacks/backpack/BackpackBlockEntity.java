@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import io.github.fabricators_of_create.porting_lib.block.ChunkUnloadListeningBlockEntity;
 import io.github.fabricators_of_create.porting_lib.block.CustomDataPacketHandlingBlockEntity;
-import io.github.fabricators_of_create.porting_lib.extensions.extensions.BlockEntityExtensions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -11,7 +10,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
@@ -26,9 +26,8 @@ import java.util.Optional;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
-import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
 
-public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, BlockEntityExtensions, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
+public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -41,7 +40,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = IBackpackWrapper.maybeGet(backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
+		backpackWrapper = BackpackWrapperLookup.maybeGet(backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
 		backpackWrapper.setSaveHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
@@ -125,7 +124,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	}
 
 	private void invalidateBackpackCaps() {
-		getComponent(ITEM_HANDLER).invalidate();
+		//getComponent(ITEM_HANDLER).invalidate();
 	}
 
 	public void refreshRenderState() {

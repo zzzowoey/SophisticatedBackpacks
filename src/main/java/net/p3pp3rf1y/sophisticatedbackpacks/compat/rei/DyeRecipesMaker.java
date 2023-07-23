@@ -1,7 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.rei;
 
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.common.display.Display;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -12,14 +10,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 public class DyeRecipesMaker {
 	private DyeRecipesMaker() {}
@@ -49,7 +45,7 @@ public class DyeRecipesMaker {
 				DyeColor.BLUE, DyeColor.BLACK
 		));
 
-		IBackpackWrapper.maybeGet(backpackOutput).ifPresent(wrapper -> wrapper.setColors(clothColor, trimColor));
+		BackpackWrapperLookup.maybeGet(backpackOutput).ifPresent(wrapper -> wrapper.setColors(clothColor, trimColor));
 
 		ResourceLocation id = SophisticatedBackpacks.getRL("multiple_colors");
 		recipes.add(new ShapedRecipe(id, "", CraftingBookCategory.MISC, 3, 1, ingredients, backpackOutput));
@@ -59,7 +55,7 @@ public class DyeRecipesMaker {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = SophisticatedBackpacks.getRL("single_color_" + color.getSerializedName());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
-			IBackpackWrapper.maybeGet(backpackOutput).ifPresent(
+			BackpackWrapperLookup.maybeGet(backpackOutput).ifPresent(
 					wrapper -> wrapper.setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors())));
 			NonNullList<Ingredient> ingredients = NonNullList.create();
 			ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));

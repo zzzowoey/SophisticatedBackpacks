@@ -1,11 +1,8 @@
-package net.p3pp3rf1y.sophisticatedbackpacks.common.components;
+package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import dev.onyxstudios.cca.api.v3.component.Component;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackSettingsHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
@@ -13,14 +10,10 @@ import net.p3pp3rf1y.sophisticatedcore.util.NoopStorageWrapper;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components.BACKPACK_WRAPPER;
+public interface IBackpackWrapper extends IStorageWrapper {
 
-public interface IBackpackWrapper extends IStorageWrapper, Component {
-	static IBackpackWrapper get(Object provider) {
-		return BACKPACK_WRAPPER.get(provider);
-	}
-	static LazyOptional<IBackpackWrapper> maybeGet(Object provider) {
-		return LazyOptional.ofObject(BACKPACK_WRAPPER.getNullable(provider));
+	static IBackpackWrapper of(ItemStack stack) {
+		return BackpackWrapper.of(stack);
 	}
 
 	@Override
@@ -60,18 +53,6 @@ public interface IBackpackWrapper extends IStorageWrapper, Component {
 
 	default void unregisterOnInventoryHandlerRefreshListener() {
 		//noop
-	}
-
-	@Deprecated
-	@Override
-	default void readFromNbt(CompoundTag tag) {
-		// NO-OP
-	}
-
-	@Deprecated
-	@Override
-	default void writeToNbt(CompoundTag tag) {
-		// NO-OP
 	}
 
 	class Noop extends NoopStorageWrapper implements IBackpackWrapper {

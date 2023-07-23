@@ -8,9 +8,9 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
@@ -59,7 +59,7 @@ public class AnotherPlayerBackpackOpenMessage extends SimplePacketBase {
 	}
 
 	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {
-		return IBackpackWrapper.maybeGet(backpack).map(wrapper -> {
+		return BackpackWrapperLookup.maybeGet(backpack).map(wrapper -> {
 			MainSettingsCategory category = wrapper.getSettingsHandler().getGlobalSettingsCategory();
 			return SettingsManager.getSettingValue(anotherPlayer, category.getPlayerSettingsTagName(), category, BackpackMainSettingsCategory.ANOTHER_PLAYER_CAN_OPEN);
 		}).orElse(false);

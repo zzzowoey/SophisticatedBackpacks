@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception.InceptionUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
@@ -26,7 +26,7 @@ public class BackpackInventoryHandler extends InventoryHandler {
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
-		return (stack.getItem() instanceof BackpackItem) && !IBackpackWrapper.maybeGet(stack)
+		return (stack.getItem() instanceof BackpackItem) && !BackpackWrapperLookup.maybeGet(stack)
 				.map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
 	}
 }

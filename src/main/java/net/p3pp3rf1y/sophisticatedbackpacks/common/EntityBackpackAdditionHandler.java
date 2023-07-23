@@ -33,7 +33,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.JukeboxUpgradeItem;
@@ -134,7 +135,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void equipBackpack(Monster monster, ItemStack backpack, int difficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
-		getSpawnEgg(monster.getType()).ifPresent(egg -> IBackpackWrapper.maybeGet(backpack)
+		getSpawnEgg(monster.getType()).ifPresent(egg -> BackpackWrapperLookup.maybeGet(backpack)
 				.ifPresent(w -> {
 					w.setColors(getPrimaryColor(egg), getSecondaryColor(egg));
 					setLoot(monster, w, difficulty, level);
@@ -283,7 +284,7 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void removeContentsUuid(ItemStack stack) {
-		IBackpackWrapper.maybeGet(stack)
+		BackpackWrapperLookup.maybeGet(stack)
 				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
 	}
 
@@ -291,7 +292,7 @@ public class EntityBackpackAdditionHandler {
 		if (!entity.getTags().contains(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
 			return;
 		}
-		IBackpackWrapper.maybeGet(entity.getItemBySlot(EquipmentSlot.CHEST))
+		BackpackWrapperLookup.maybeGet(entity.getItemBySlot(EquipmentSlot.CHEST))
 				.ifPresent(backpackWrapper -> backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
 					if (wrapper.isPlaying()) {
 						wrapper.tick(entity, entity.level, entity.blockPosition());

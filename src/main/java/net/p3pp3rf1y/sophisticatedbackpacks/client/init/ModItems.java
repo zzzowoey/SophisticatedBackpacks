@@ -1,15 +1,16 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
+import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.*;
+import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper.DEFAULT_CLOTH_COLOR;
+import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACKS;
 
 @Environment(EnvType.CLIENT)
 public class ModItems {
@@ -20,11 +21,7 @@ public class ModItems {
 	}
 
 	private static void registerRenderers() {
-		BuiltinItemRendererRegistry.INSTANCE.register(net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACK.get(), BackpackItemStackRenderer::renderByItem);
-		BuiltinItemRendererRegistry.INSTANCE.register(net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.IRON_BACKPACK.get(), BackpackItemStackRenderer::renderByItem);
-		BuiltinItemRendererRegistry.INSTANCE.register(net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.GOLD_BACKPACK.get(), BackpackItemStackRenderer::renderByItem);
-		BuiltinItemRendererRegistry.INSTANCE.register(net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.DIAMOND_BACKPACK.get(), BackpackItemStackRenderer::renderByItem);
-		BuiltinItemRendererRegistry.INSTANCE.register(net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.NETHERITE_BACKPACK.get(), BackpackItemStackRenderer::renderByItem);
+		BACKPACKS.forEach(item -> BuiltinItemRendererRegistry.INSTANCE.register(item.get(), BackpackItemStackRenderer::renderByItem));
 	}
 
 	private static void registerItemColorHandlers() {
@@ -32,14 +29,14 @@ public class ModItems {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
 				return -1;
 			}
-			return IBackpackWrapper.maybeGet(backpack).map(backpackWrapper -> {
+			return BackpackWrapperLookup.maybeGet(backpack).map(backpackWrapper -> {
 				if (layer == 0) {
 					return backpackWrapper.getMainColor();
 				} else if (layer == 1) {
 					return backpackWrapper.getAccentColor();
 				}
 				return -1;
-			}).orElse(BackpackWrapper.DEFAULT_CLOTH_COLOR);
-		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+			}).orElse(DEFAULT_CLOTH_COLOR);
+		}, BACKPACKS.stream().map(RegistryObject::get).toList().toArray(new BackpackItem[0]));
 	}
 }

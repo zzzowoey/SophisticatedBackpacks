@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
+import static net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage.SIDED;
 
 public class Matchers {
 	private Matchers() {}
@@ -88,7 +88,7 @@ public class Matchers {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
 				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(),
-						blockContext.getPos()).map(te -> ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false));
+						blockContext.getPos()).map(te -> SIDED.find(te.getLevel(), te.getBlockPos(), null) != null).orElse(false));
 			}
 		});
 		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {

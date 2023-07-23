@@ -111,9 +111,6 @@ def dependencies(DependencyHandler deps) {
         for (String module in project(':SophisticatedCore')['port_lib_modules'].split(",")) {
             deps.modApi("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version")
         }
-
-        deps.modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version")
-        deps.modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-block:$cca_version")
     } else {
         deps.modImplementation("net.p3pp3rf1y:sophisticatedcore-fabric:${sc_version}")
     }
@@ -135,13 +132,9 @@ def compat(DependencyHandler deps) {
 //    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}:api")
 //    deps.modLocalRuntime("vazkii.patchouli:Patchouli:${patchouli_version}")
 
-    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version") {
-        exclude(group: "com.terraformersmc")
-        transitive = false
-    }
-
-    deps.modApi(deps.include("dev.onyxstudios.cardinal-components-api:cardinal-components-item:$cca_version"))
-    deps.modApi(deps.include("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version"))
+    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version")
+    deps.modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version") // for Trinkets
+    deps.modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version") // for Trinkets
 
     recipeViewers(deps)
 }
@@ -248,8 +241,7 @@ processResources {
             "loader_version": loader_version,
             "fabric_version": fabric_version,
             "sc_version": sc_version,
-            "mkb_version": mkb_mod_version,
-            "cca_version": cca_version
+            "mkb_version": mkb_mod_version
     ]
 
     properties.forEach((k, v) -> inputs.property(k, v))

@@ -14,7 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
@@ -52,7 +52,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 	public static <T extends LivingEntity, M extends EntityModel<T>> void renderBackpack(M parentModel, LivingEntity livingEntity, PoseStack matrixStack, MultiBufferSource buffer, int packedLight, ItemStack backpack, boolean wearsArmor, IBackpackModel model) {
 		model.translateRotateAndScale(parentModel, livingEntity, matrixStack, wearsArmor);
 
-		IBackpackWrapper.maybeGet(backpack).ifPresent(wrapper -> {
+		BackpackWrapperLookup.maybeGet(backpack).ifPresent(wrapper -> {
 			int clothColor = wrapper.getMainColor();
 			int borderColor = wrapper.getAccentColor();
 			model.render(parentModel, livingEntity, matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());

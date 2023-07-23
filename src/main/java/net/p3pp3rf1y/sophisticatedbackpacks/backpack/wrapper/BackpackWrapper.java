@@ -1,6 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import dev.onyxstudios.cca.api.v3.item.ItemComponent;
+import com.google.common.collect.MapMaker;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +17,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -49,9 +49,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.IntConsumer;
 
-import static net.p3pp3rf1y.sophisticatedbackpacks.common.components.Components.BACKPACK_WRAPPER;
+public class BackpackWrapper implements IBackpackWrapper {
+	private static Map<ItemStack, BackpackWrapper> WRAPPERS = new MapMaker().weakValues().makeMap();
 
-public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
+	public static IBackpackWrapper of(ItemStack backpack) {
+		return WRAPPERS.computeIfAbsent(backpack, BackpackWrapper::new);
+	}
+
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
@@ -92,8 +96,11 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	private Runnable onInventoryHandlerRefresh = () -> {};
 	private Runnable upgradeCachesInvalidatedHandler = () -> {};
 
+	private final ItemStack stack;
+
 	public BackpackWrapper(ItemStack backpack) {
-		super(backpack, BACKPACK_WRAPPER);
+		/*super(backpack, BACKPACK_WRAPPER);*/
+		stack = backpack;
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
 
@@ -376,7 +383,7 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 	@Override
 	public ItemStack cloneBackpack() {
 		ItemStack clonedBackpack = cloneBackpack(this);
-		IBackpackWrapper.maybeGet(clonedBackpack).ifPresent(this::cloneSubbackpacks);
+		BackpackWrapperLookup.maybeGet(clonedBackpack).ifPresent(this::cloneSubbackpacks);
 		return clonedBackpack;
 	}
 
@@ -386,14 +393,14 @@ public class BackpackWrapper extends ItemComponent implements IBackpackWrapper {
 			if (!(stack.getItem() instanceof BackpackItem)) {
 				return;
 			}
-			inventoryHandler.setStackInSlot(slot, IBackpackWrapper.maybeGet(stack).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
+			inventoryHandler.setStackInSlot(slot, BackpackWrapperLookup.maybeGet(stack).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
 		});
 	}
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
 		backpackCopy.removeTagKey(CONTENTS_UUID_TAG);
-		return IBackpackWrapper.maybeGet(backpackCopy)
+		return BackpackWrapperLookup.maybeGet(backpackCopy)
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
 							return wrapperCopy.getBackpack();

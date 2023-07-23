@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -8,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
@@ -38,7 +37,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 		ItemStack upgradedBackpack = getCraftingResult().copy();
 		//if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
 			getBackpack(inventory).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-			IBackpackWrapper.maybeGet(upgradedBackpack)
+			BackpackWrapperLookup.maybeGet(upgradedBackpack)
 					.ifPresent(wrapper -> {
 						BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
 						wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());

@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -9,7 +8,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
@@ -42,7 +41,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack upgradedBackpack = super.assemble(craftingContainer, registryAccess);
 		getBackpack(craftingContainer).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-		IBackpackWrapper.maybeGet(upgradedBackpack).ifPresent(wrapper -> {
+		BackpackWrapperLookup.maybeGet(upgradedBackpack).ifPresent(wrapper -> {
 			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
 			wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
 		});

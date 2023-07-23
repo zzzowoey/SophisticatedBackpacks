@@ -13,7 +13,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.SlotExposedStorageWrapper;
 
@@ -37,7 +37,7 @@ public class InventoryInteractionHelper {
 
 		Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, pos, null);
 		if (storage instanceof InventoryStorage invStorage) {
-			return player.level.isClientSide || IBackpackWrapper.maybeGet(backpack)
+			return player.level.isClientSide || BackpackWrapperLookup.maybeGet(backpack)
 					.map(wrapper -> tryRunningInteractionWrappers(new SlotExposedStorageWrapper(invStorage), wrapper, player))
 					.orElse(false);
 		}

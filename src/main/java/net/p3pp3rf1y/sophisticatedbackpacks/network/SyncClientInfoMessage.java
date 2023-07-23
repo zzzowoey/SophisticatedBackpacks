@@ -5,8 +5,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,7 @@ public class SyncClientInfoMessage extends SimplePacketBase {
 			return;
 		}
 		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-		IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper -> {
+		BackpackWrapperLookup.maybeGet(backpack).ifPresent(backpackWrapper -> {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		});

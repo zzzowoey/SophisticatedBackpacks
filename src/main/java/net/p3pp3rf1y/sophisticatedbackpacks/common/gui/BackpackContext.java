@@ -10,7 +10,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
@@ -149,7 +150,7 @@ public abstract class BackpackContext {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find inventory handler for \"{}\"", handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
 			}
-			LazyOptional<IBackpackWrapper> backpackWrapper = IBackpackWrapper.maybeGet(inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex));
+			LazyOptional<IBackpackWrapper> backpackWrapper = BackpackWrapperLookup.maybeGet(inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex));
 			if (!backpackWrapper.isPresent()) {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find backpack at slot index {} in \"{}\" inventory handler", backpackSlotIndex, handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
@@ -223,7 +224,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(player).map(parent -> IBackpackWrapper.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
@@ -348,7 +349,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(player).map(parent -> IBackpackWrapper.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
@@ -457,7 +458,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(otherPlayer).map(parent -> IBackpackWrapper.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(otherPlayer).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 

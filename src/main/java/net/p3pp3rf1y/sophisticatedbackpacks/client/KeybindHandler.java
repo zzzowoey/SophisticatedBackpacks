@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static committee.nova.mkb.keybinding.KeyConflictContext.GUI;
-import static net.p3pp3rf1y.sophisticatedcore.common.components.Components.ITEM_HANDLER;
+import static net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage.SIDED;
 
 public class KeybindHandler {
 	private KeybindHandler() {}
@@ -197,7 +197,7 @@ public class KeybindHandler {
 		BlockHitResult blockraytraceresult = (BlockHitResult) rayTrace;
 		BlockPos pos = blockraytraceresult.getBlockPos();
 
-		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> ITEM_HANDLER.maybeGet(te).isPresent()).orElse(false)) {
+		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> SIDED.find(te.getLevel(), te.getBlockPos(), null) != null).orElse(false)) {
 			return;
 		}
 

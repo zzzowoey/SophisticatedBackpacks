@@ -28,7 +28,8 @@ import net.minecraft.world.phys.Vec3;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
@@ -122,7 +123,7 @@ public class CommonEventHandler {
 					numberOfBackpacks.incrementAndGet();
 				}
 				if (runDedupeLogic) {
-					IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper ->
+					BackpackWrapperLookup.maybeGet(backpack).ifPresent(backpackWrapper ->
 							addBackpackIdIfUniqueOrDedupe(backpackIds, backpackWrapper));
 				}
 				return false;
@@ -171,7 +172,7 @@ public class CommonEventHandler {
 		}
 		Player player = event.getEntity();
 		BlockPos pos = event.getPos();
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.maybeGet(backpack)
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
@@ -186,7 +187,7 @@ public class CommonEventHandler {
 		if (player.level.isClientSide) {
 			return InteractionResult.PASS;
 		}
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.maybeGet(backpack)
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
@@ -224,7 +225,7 @@ public class CommonEventHandler {
 
 		AtomicReference<ItemStack> remainingStack = new AtomicReference<>(itemEntity.getItem().copy());
 		try(Transaction ctx = Transaction.openOuter()) {
-			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> IBackpackWrapper.maybeGet(backpack)
+			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.maybeGet(backpack)
 					.map(wrapper -> {
 						remainingStack.set(InventoryHelper.runPickupOnPickupResponseUpgrades(world, wrapper.getUpgradeHandler(), remainingStack.get(), ctx));
 						return remainingStack.get().isEmpty();

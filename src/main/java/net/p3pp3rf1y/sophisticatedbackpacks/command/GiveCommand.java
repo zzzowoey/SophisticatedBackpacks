@@ -13,7 +13,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackAccessLogger;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.components.IBackpackWrapper;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 
 import java.util.Collection;
@@ -39,7 +39,7 @@ public class GiveCommand {
 			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
 				backpack.setHoverName(Component.literal(alr.getBackpackName()));
 			}
-			IBackpackWrapper.maybeGet(backpack).ifPresent(backpackWrapper -> {
+			BackpackWrapperLookup.maybeGet(backpack).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
 				backpackWrapper.setColumnsTaken(alr.getColumnsTaken(), false);
 				backpackWrapper.setContentsUuid(backpackUuid);
