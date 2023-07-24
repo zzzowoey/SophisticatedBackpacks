@@ -10,6 +10,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage;
+import team.reborn.energy.api.EnergyStorage;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACKS;
 
@@ -27,5 +28,7 @@ public class BackpackWrapperLookup {
 
         ItemStorage.ITEM.registerForItems((itemStack, context) -> maybeGet(itemStack).lazyMap(IStorageWrapper::getInventoryForInputOutput).orElseGet(null), backpacks);
         ItemStorage.SIDED.registerForBlockEntity((blockEntity, direction) -> blockEntity.getBackpackWrapper().getInventoryForInputOutput(), ModBlocks.BACKPACK_TILE_TYPE.get());
+
+        EnergyStorage.SIDED.registerForBlockEntity((blockEntity, direction) -> blockEntity.getBackpackWrapper().getEnergyStorage().orElse(EnergyStorage.EMPTY), ModBlocks.BACKPACK_TILE_TYPE.get());
     }
 }
