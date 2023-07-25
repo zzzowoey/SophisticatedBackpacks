@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilteredUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeConfig;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeConfig;
@@ -31,6 +32,10 @@ import java.util.stream.Collectors;
 public class Config {
 	private static final Map<ModConfig.Type, BaseConfig> CONFIGS = new EnumMap<>(ModConfig.Type.class);
 
+	private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
+
+	private Config() {}
+
 	public static Server SERVER;
 
 	public static Common COMMON;
@@ -46,6 +51,7 @@ public class Config {
 	public static class Server extends BaseConfig {
 		public final DisallowedItems disallowedItems;
 		public final NoInteractionBlocks noInteractionBlocks;
+		public final NoConnectionBlocks noConnectionBlocks;
 		public final BackpackConfig leatherBackpack;
 		public final BackpackConfig ironBackpack;
 		public final BackpackConfig goldBackpack;
@@ -81,6 +87,7 @@ public class Config {
 		public final ForgeConfigSpec.BooleanValue allowOpeningOtherPlayerBackpacks;
 		public final ForgeConfigSpec.BooleanValue itemDisplayDisabled;
 		public final ForgeConfigSpec.BooleanValue tickDedupeLogicDisabled;
+		public final ForgeConfigSpec.BooleanValue canBePlacedInContainerItems;
 		public final FilteredUpgradeConfig toolSwapperUpgrade;
 		public final TankUpgradeConfig tankUpgrade;
 		public final BatteryUpgradeConfig batteryUpgrade;
@@ -99,6 +106,7 @@ public class Config {
 
 			disallowedItems = new DisallowedItems(builder);
 			noInteractionBlocks = new NoInteractionBlocks(builder);
+			noConnectionBlocks = new NoConnectionBlocks(builder);
 
 			leatherBackpack = new BackpackConfig(builder, "Leather", 27, 1);
 			ironBackpack = new BackpackConfig(builder, "Iron", 54, 2);
@@ -144,10 +152,10 @@ public class Config {
 			allowOpeningOtherPlayerBackpacks = builder.comment("Determines whether player can right click on backpack that another player is wearing to open it. If off will turn off that capability for everyone and remove related settings from backpack.").define("allowOpeningOtherPlayerBackpacks", true);
 			itemDisplayDisabled = builder.comment("Allows disabling item display settings. Primarily in cases where custom backpack model doesn't support showing the item. (Requires game restart to take effect)").define("itemDisplayDisabled", false);
 			tickDedupeLogicDisabled = builder.comment("Allows disabling logic that dedupes backpacks with the same UUID in players' inventory. This is here to allow turning off the logic just in case it would be causing performance issues.").define("tickDedupeLogicDisabled", false);
+			canBePlacedInContainerItems = builder.comment("Determines if backpacks can be placed in container items (those that check for return value of canFitInsideContainerItems)").define("canBePlacedInContainerItems", false);
 
 			builder.pop();
 		}
-
 		public static class NerfsConfig {
 			public final ForgeConfigSpec.BooleanValue tooManyBackpacksSlowness;
 			public final ForgeConfigSpec.IntValue maxNumberOfBackpacks;
@@ -161,10 +169,9 @@ public class Config {
 				onlyWornBackpackTriggersUpgrades = builder.comment("Determines if active upgrades will only work in the backpack that's worn by the player. Active upgrades are for example magnet, pickup, cooking, feeding upgrades.").define("onlyWornBackpackTriggersUpgrades", false);
 				builder.pop();
 			}
-		}
 
+		}
 		public static class EntityBackpackAdditionsConfig {
-			private static final String REGISTRY_NAME_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)";
 			private static final String ENTITY_LOOT_MATCHER = "([a-z0-9_.-]+:[a-z0-9_/.-]+)\\|(null|[a-z0-9_.-]+:[a-z0-9/_.-]+)";
 			public final ForgeConfigSpec.DoubleValue chance;
 			public final ForgeConfigSpec.BooleanValue addLoot;
@@ -324,22 +331,64 @@ public class Config {
 			}
 		}
 
-		public static class DisallowedItems {
-			private final ForgeConfigSpec.ConfigValue<List<String>> disallowedItemsList;
+		public static class NoConnectionBlocks {
+			private final ForgeConfigSpec.ConfigValue<List<? extends String>> noConnectionBlocksList;
 			private boolean initialized = false;
-			private Set<Item> disallowedItemsSet = null;
+			private Set<Block> noConnnectionBlocksSet = null;
 
-			DisallowedItems(ForgeConfigSpec.Builder builder) {
-				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
+			NoConnectionBlocks(ForgeConfigSpec.Builder builder) {
+				noConnectionBlocksList = builder.comment("List of blocks that are not allowed to connect to backpacks - e.g. \"refinedstorage:external_storage\"")
+						.defineList("noConnectionBlocks", new ArrayList<>(), mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 			}
 
-			public boolean isItemDisallowed(Item item) {
+			public boolean isBlockConnectionDisallowed(Block block) {
 				if (!SERVER.specification.isLoaded()) {
 					return true;
 				}
 				if (!initialized) {
 					loadDisallowedSet();
 				}
+				return noConnnectionBlocksSet.contains(block);
+			}
+
+			private void loadDisallowedSet() {
+				initialized = true;
+				noConnnectionBlocksSet = new HashSet<>();
+
+				for (String disallowedItemName : noConnectionBlocksList.get()) {
+					ResourceLocation registryName = new ResourceLocation(disallowedItemName);
+					if (BuiltInRegistries.BLOCK.containsKey(registryName)) {
+						noConnnectionBlocksSet.add(BuiltInRegistries.BLOCK.get(registryName));
+					}
+				}
+			}
+		}
+
+		public static class DisallowedItems {
+			private final ForgeConfigSpec.BooleanValue containerItemsDisallowed;
+			private final ForgeConfigSpec.ConfigValue<List<String>> disallowedItemsList;
+			private boolean initialized = false;
+			private Set<Item> disallowedItemsSet = null;
+
+			DisallowedItems(ForgeConfigSpec.Builder builder) {
+				disallowedItemsList = builder.comment("List of items that are not allowed to be put in backpacks - e.g. \"minecraft:shulker_box\"").define("disallowedItems", new ArrayList<>());
+				containerItemsDisallowed = builder.comment("Determines if container items (those that override canFitInsideContainerItems to false) are able to fit in backpacks")
+						.define("containerItemsDisallowed", false);
+			}
+
+			public boolean isItemDisallowed(Item item) {
+				if (!SERVER.specification.isLoaded()) {
+					return true;
+				}
+
+				if (!initialized) {
+					loadDisallowedSet();
+				}
+
+				if (Boolean.TRUE.equals(containerItemsDisallowed.get()) && !(item instanceof BackpackItem) && !item.canFitInsideContainerItems()) {
+					return true;
+				}
+
 				return disallowedItemsSet.contains(item);
 			}
 

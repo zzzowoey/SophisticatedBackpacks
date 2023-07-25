@@ -25,10 +25,6 @@ targetCompatibility = JavaVersion.VERSION_17
 archivesBaseName = project.mod_id
 group = project.maven_group
 
-String buildNumber = System.getenv("GITHUB_RUN_NUMBER")
-String patch = buildNumber != null ? buildNumber : "99999"
-version = mod_version.replace("<build>", patch)
-
 if (findProject(':SophisticatedCore') != null) {
     evaluationDependsOn(':SophisticatedCore')
 }
@@ -99,6 +95,7 @@ def setup(DependencyHandler deps) {
 
 def devEnv(DependencyHandler deps) {
     deps.modLocalRuntime("maven.modrinth:lazydfu:$lazy_dfu_version")
+//    deps.modLocalRuntime("com.terraformersmc:modmenu:$modmenu_version")
     deps.modLocalRuntime("dev.emi:trinkets:$trinkets_version")
 }
 
@@ -118,11 +115,12 @@ def dependencies(DependencyHandler deps) {
     deps.modApi(deps.include("committee.nova.mkb.fabric:mkb-${minecraft_version}:${mkb_mod_version}"))
 
     for (String module in port_lib_modules.split(",")) {
-        deps.modApi("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version")
+        deps.modApi(deps.include("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version"))
     }
 }
 
 def compat(DependencyHandler deps) {
+//    deps.modCompileOnly("com.terraformersmc:modmenu:$modmenu_version")
 //    deps.modCompileOnly("curse.maven:balm-531761:${balm_cf_file_id}")
 //    deps.modLocalRuntime("curse.maven:balm-531761:${balm_cf_file_id}")
 //    deps.modCompileOnly("vazkii.botania:Botania:${botania_version}:api")
@@ -224,6 +222,10 @@ loom {
 /*test {
     useTestNG()
 }*/
+
+machete {
+    enabled = System.getenv("GITHUB_RUN_NUMBER") != null
+}
 
 tasks.register('generateSources', Copy) {
     from 'src/replaceme/java'
