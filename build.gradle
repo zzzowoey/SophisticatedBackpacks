@@ -23,6 +23,7 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.mod_id
+version = project.mod_version
 group = project.maven_group
 
 if (findProject(':SophisticatedCore') != null) {
@@ -238,12 +239,13 @@ processResources {
     exclude '.cache'
 
     Map<String, String> properties = [
-            "version": version,
+            "mod_id": project.mod_id,
+            "mod_version": project.mod_version,
             "minecraft_version": minecraft_version,
             "loader_version": loader_version,
             "fabric_version": fabric_version,
-            "sc_version": sc_version,
-            "mkb_version": mkb_mod_version
+            "sc_version": project.sc_version,
+            "mkb_version": project.mkb_mod_version
     ]
 
     properties.forEach((k, v) -> inputs.property(k, v))
@@ -296,7 +298,7 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            artifactId = 'sophisticatedbackpacks'
+            artifactId = 'sophisticatedbackpacks-fabric'
             from(components.java)
         }
     }
