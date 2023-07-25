@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;

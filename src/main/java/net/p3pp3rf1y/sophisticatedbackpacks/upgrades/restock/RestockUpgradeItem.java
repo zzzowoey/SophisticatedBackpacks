@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.restock;
 
-import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeType;
 

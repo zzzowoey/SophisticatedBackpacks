@@ -5,7 +5,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.function.Function;
 
 public class PlayerInventoryHandler {
 	public static final Set<String> SINGLE_IDENTIFIER = Collections.singleton("");
