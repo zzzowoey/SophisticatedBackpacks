@@ -47,7 +47,6 @@ repositories {
     maven {// Modern KeyBinding
         url "https://maven.nova-committee.cn/releases"
     }
-    //maven { url = "https://cursemaven.com" }
 
     maven { url = "https://maven.terraformersmc.com/" } // Emi
     maven { url = "https://maven.shedaniel.me/" } // REI and deps
@@ -65,6 +64,7 @@ repositories {
 
     maven { url = "https://maven.ladysnake.org/releases" } // CCA, for Trinkets
     maven { url = "https://modmaven.dev" } // Jei
+    maven { url = "https://www.cursemaven.com" } // Balm, CraftingTweaks
 }
 
 configurations.configureEach {
@@ -96,8 +96,11 @@ def setup(DependencyHandler deps) {
 
 def devEnv(DependencyHandler deps) {
     deps.modLocalRuntime("maven.modrinth:lazydfu:$lazy_dfu_version")
-//    deps.modLocalRuntime("com.terraformersmc:modmenu:$modmenu_version")
     deps.modLocalRuntime("dev.emi:trinkets:$trinkets_version")
+    deps.modLocalRuntime("curse.maven:balm-500525:${balm_cf_file_id}")
+    deps.modLocalRuntime("curse.maven:craftingtweaks-502516:${crafting_tweaks_cf_file_id}")
+    deps.modLocalRuntime("com.terraformersmc:modmenu:$modmenu_version")
+    deps.modLocalRuntime("curse.maven:config-menus-forge-544048:$config_menu_version")
 }
 
 def dependencies(DependencyHandler deps) {
@@ -121,13 +124,9 @@ def dependencies(DependencyHandler deps) {
 }
 
 def compat(DependencyHandler deps) {
-//    deps.modCompileOnly("com.terraformersmc:modmenu:$modmenu_version")
-//    deps.modCompileOnly("curse.maven:balm-531761:${balm_cf_file_id}")
-//    deps.modLocalRuntime("curse.maven:balm-531761:${balm_cf_file_id}")
+    deps.modCompileOnly("com.terraformersmc:modmenu:$modmenu_version")
 //    deps.modCompileOnly("vazkii.botania:Botania:${botania_version}:api")
 //    deps.modLocalRuntime("vazkii.botania:Botania:${botania_version}")
-//    deps.modCompileOnly("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
-//    deps.modLocalRuntime("curse.maven:craftingtweaks-233071:${crafting_tweaks_cf_file_id}")
 //    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}:api")
 //    deps.modLocalRuntime("vazkii.patchouli:Patchouli:${patchouli_version}")
 
