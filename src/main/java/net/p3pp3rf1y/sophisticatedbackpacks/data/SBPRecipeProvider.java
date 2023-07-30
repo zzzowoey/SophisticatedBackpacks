@@ -417,14 +417,14 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.unlockedBy("has_tool_swapper_upgrade", has(ModItems.TOOL_SWAPPER_UPGRADE.get()))
 				.save(consumer);
 
-/*		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.TANK_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
+		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.TANK_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
 				.pattern("GGG")
 				.pattern("GBG")
 				.pattern("GGG")
 				.define('G', Tags.Items.GLASS)
 				.define('B', ModItems.UPGRADE_BASE.get())
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
-				.save(consumer);*/
+				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.ADVANCED_FEEDING_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
 				.pattern(" D ")
@@ -447,7 +447,7 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
 				.save(consumer);
 
-/*		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.PUMP_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
+		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.PUMP_UPGRADE.get(), ModRecipes.UPGRADE_NEXT_TIER_SERIALIZER.get())
 				.pattern("GUG")
 				.pattern("PBS")
 				.pattern("GUG")
@@ -480,7 +480,7 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.define('C', Items.EXPERIENCE_BOTTLE)
 				.define('P', ModItems.ADVANCED_PUMP_UPGRADE.get())
 				.unlockedBy("has_advanced_pump_upgrade", has(ModItems.ADVANCED_PUMP_UPGRADE.get()))
-				.save(consumer);*/
+				.save(consumer);
 
 		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SMOKING_UPGRADE.get())
 				.pattern("RIR")
