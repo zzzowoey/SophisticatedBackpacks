@@ -21,13 +21,13 @@ import javax.annotation.Nullable;
 
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	@Override
-	public void render(BackpackBlockEntity tileEntityIn, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
-		BlockState state = tileEntityIn.getBlockState();
+	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
+		BlockState state = backpackBlockEntity.getBlockState();
 		Direction facing = state.getValue(BackpackBlock.FACING);
 		boolean showLeftTank = state.getValue(BackpackBlock.LEFT_TANK);
 		boolean showRightTank = state.getValue(BackpackBlock.RIGHT_TANK);
 		boolean showBattery = state.getValue(BackpackBlock.BATTERY);
-		IBackpackWrapper backpackWrapper = tileEntityIn.getBackpackWrapper();
+		IBackpackWrapper backpackWrapper = backpackBlockEntity.getBackpackWrapper();
 		RenderInfo renderInfo = backpackWrapper.getRenderInfo();
 		poseStack.pushPose();
 		poseStack.translate(0.5, 0, 0.5);
@@ -67,7 +67,7 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 				}
 			});
 		}
-		renderItemDisplay(poseStack, buffer, combinedLight, combinedOverlay, renderInfo, tileEntityIn.getLevel());
+		renderItemDisplay(poseStack, buffer, combinedLight, combinedOverlay, renderInfo, backpackBlockEntity.getLevel());
 		poseStack.popPose();
 	}
 

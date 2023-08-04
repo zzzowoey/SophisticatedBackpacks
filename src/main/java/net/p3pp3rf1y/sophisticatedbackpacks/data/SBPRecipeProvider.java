@@ -31,7 +31,6 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 		super(output);
 	}
 
-	@SuppressWarnings("removal")
 	@Override
 	public void buildRecipes(Consumer<FinishedRecipe> consumer) {
 		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.BACKPACK, ModItems.BASIC_BACKPACK_RECIPE_SERIALIZER)

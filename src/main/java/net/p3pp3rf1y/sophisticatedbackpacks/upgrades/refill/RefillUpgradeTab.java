@@ -28,6 +28,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 	private static List<Component> additionalTooltip = new ArrayList<>();
 
+	@SuppressWarnings("unused")
 	public static List<Component> getAdditionalTooltip() {
 		if (!additionalTooltip.isEmpty()) {
 			LocalPlayer player = Minecraft.getInstance().player;
@@ -128,7 +129,7 @@ public abstract class RefillUpgradeTab extends UpgradeSettingsTab<RefillUpgradeC
 
 		private void renderTargetSlotAcronyms(PoseStack poseStack) {
 			poseStack.pushPose();
-			poseStack.translate(0, 0, 100);
+			poseStack.translate(0, 0, 300); // TODO: was 100, is 300 better here?
 			getContainer().getSlots().forEach(slot -> {
 				if (!slot.getItem().isEmpty()) {
 					int slotIndex = slot.getContainerSlot();

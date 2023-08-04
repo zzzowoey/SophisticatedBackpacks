@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper.DEFAULT_CLOTH_COLOR;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACKS;

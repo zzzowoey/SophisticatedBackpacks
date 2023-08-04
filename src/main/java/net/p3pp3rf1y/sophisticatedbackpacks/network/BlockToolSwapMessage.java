@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
@@ -44,7 +44,7 @@ public class BlockToolSwapMessage extends SimplePacketBase {
 											}
 											anyUpgradeCanInteract.set(true);
 
-											result.set(upgrade.onBlockInteract(sender.level, pos, sender.level.getBlockState(pos), sender));
+											result.set(upgrade.onBlockInteract(sender.getLevel(), pos, sender.getLevel().getBlockState(pos), sender));
 										});
 								return result.get();
 							}

@@ -25,11 +25,11 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public void tick() {
-		if (!level.isClientSide) {
+		if (!getLevel().isClientSide) {
 			double d0 = getX() + 0.5F - random.nextFloat();
 			double d1 = getY() + random.nextFloat() * 0.5F;
 			double d2 = getZ() + 0.5F - random.nextFloat();
-			ServerLevel serverWorld = (ServerLevel) level;
+			ServerLevel serverWorld = (ServerLevel) getLevel();
 			if (random.nextInt(20) == 0) {
 				serverWorld.sendParticles(ParticleTypes.HAPPY_VILLAGER, d0, d1, d2, 0, 0, 0.1D, 0, 1f);
 			}
@@ -49,7 +49,7 @@ public class EverlastingBackpackItemEntity extends ItemEntity {
 
 	@Override
 	public boolean isInWater() {
-		return getY() < -63 || super.isInWater();
+		return getY() < getLevel().getMinBuildHeight() + 1 || super.isInWater();
 	}
 
 	@Override

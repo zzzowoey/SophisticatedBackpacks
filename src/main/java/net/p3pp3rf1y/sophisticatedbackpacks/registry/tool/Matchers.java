@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.registry.tool;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -18,14 +19,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import static net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED;
 
 public class Matchers {
 	private Matchers() {}
@@ -88,8 +86,7 @@ public class Matchers {
 		BLOCK_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("item_handler") {
 			@Override
 			protected Optional<Predicate<BlockContext>> getPredicateFromObject(JsonObject jsonObject) {
-				return Optional.of(blockContext -> WorldHelper.getBlockEntity(blockContext.getWorld(),
-						blockContext.getPos()).map(te -> SIDED.find(te.getLevel(), te.getBlockPos(), null) != null).orElse(false));
+				return Optional.of(blockContext -> ItemStorage.SIDED.find(blockContext.getWorld(), blockContext.getPos(), null) != null);
 			}
 		});
 		ENTITY_MATCHER_FACTORIES.add(new TypedMatcherFactory<>("animal") {

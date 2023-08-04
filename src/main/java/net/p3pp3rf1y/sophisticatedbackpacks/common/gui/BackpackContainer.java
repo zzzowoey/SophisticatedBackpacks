@@ -41,7 +41,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			BackpackAccessLogger.logPlayerAccess(player, backpack.getItem(), backpackUuid, backpack.getHoverName().getString(),
 					storageWrapper.getMainColor(), storageWrapper.getAccentColor(), storageWrapper.getColumnsTaken());
 
-			if (!player.level.isClientSide()) {
+			if (!player.getLevel().isClientSide()) {
 				UUIDDeduplicator.checkForDuplicateBackpacksAndRemoveTheirUUID(player, backpackUuid, storageWrapper.getBackpack());
 			}
 		});
@@ -58,7 +58,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected void sendStorageSettingsToClient() {
-		if (player.level.isClientSide) {
+		if (player.getLevel().isClientSide) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	}
 
 	public static BackpackContainer fromBuffer(int windowId, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.level));
+		return new BackpackContainer(windowId, playerInventory.player, BackpackContext.fromBuffer(packetBuffer, playerInventory.player.getLevel()));
 	}
 
 	public BackpackContext getBackpackContext() {

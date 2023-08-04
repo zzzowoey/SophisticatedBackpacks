@@ -1,8 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
+import com.mojang.serialization.Codec;
+
+import io.github.fabricators_of_create.porting_lib.loot.IGlobalLootModifier;
+import io.github.fabricators_of_create.porting_lib.loot.PortingLibLoot;
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -14,6 +19,7 @@ import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.OptionalDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
@@ -24,6 +30,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -36,6 +43,8 @@ import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -44,13 +53,16 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPButtonDefinitions;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackSettingsContainerMenu;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackDyeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.CopyBackpackDataFunction;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootEnabledCondition;
+import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootModifierProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
@@ -150,6 +162,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class ModItems {
 	static List<Item> ITEMS = new ArrayList<>(); // Must be up here!
@@ -157,62 +170,68 @@ public class ModItems {
 	public static final ResourceLocation BACKPACK_UPGRADE_TAG_NAME = SophisticatedBackpacks.getRL("upgrade");
 	public static final TagKey<Item> BACKPACK_UPGRADE_TAG = TagKey.create(Registries.ITEM, BACKPACK_UPGRADE_TAG_NAME);
 
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
 	// ITEMS
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final BackpackItem BACKPACK = register("backpack", new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, () -> ModBlocks.BACKPACK));
-	public static final BackpackItem IRON_BACKPACK = register("iron_backpack", new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get, () -> ModBlocks.IRON_BACKPACK));
-	public static final BackpackItem GOLD_BACKPACK = register("gold_backpack", new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get, () -> ModBlocks.GOLD_BACKPACK));
-	public static final BackpackItem DIAMOND_BACKPACK = register("diamond_backpack", new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get, () -> ModBlocks.DIAMOND_BACKPACK));
-	public static final BackpackItem NETHERITE_BACKPACK = register("netherite_backpack", new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get, () -> ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
+	public static final BackpackItem BACKPACK = register("backpack", () -> new BackpackItem(Config.SERVER.leatherBackpack.inventorySlotCount::get, Config.SERVER.leatherBackpack.upgradeSlotCount::get, () -> ModBlocks.BACKPACK));
+	public static final BackpackItem IRON_BACKPACK = register("iron_backpack", () -> new BackpackItem(Config.SERVER.ironBackpack.inventorySlotCount::get, Config.SERVER.ironBackpack.upgradeSlotCount::get, () -> ModBlocks.IRON_BACKPACK));
+	public static final BackpackItem GOLD_BACKPACK = register("gold_backpack", () -> new BackpackItem(Config.SERVER.goldBackpack.inventorySlotCount::get, Config.SERVER.goldBackpack.upgradeSlotCount::get, () -> ModBlocks.GOLD_BACKPACK));
+	public static final BackpackItem DIAMOND_BACKPACK = register("diamond_backpack", () -> new BackpackItem(Config.SERVER.diamondBackpack.inventorySlotCount::get, Config.SERVER.diamondBackpack.upgradeSlotCount::get, () -> ModBlocks.DIAMOND_BACKPACK));
+	public static final BackpackItem NETHERITE_BACKPACK = register("netherite_backpack", () -> new BackpackItem(Config.SERVER.netheriteBackpack.inventorySlotCount::get, Config.SERVER.netheriteBackpack.upgradeSlotCount::get, () -> ModBlocks.NETHERITE_BACKPACK, Item.Properties::fireResistant));
 
 	public static final BackpackItem[] BACKPACKS = new BackpackItem[] { BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK, NETHERITE_BACKPACK };
 
-	public static final PickupUpgradeItem PICKUP_UPGRADE = register("pickup_upgrade", new PickupUpgradeItem(Config.SERVER.pickupUpgrade.filterSlots::get));
-	public static final PickupUpgradeItem ADVANCED_PICKUP_UPGRADE = register("advanced_pickup_upgrade", new PickupUpgradeItem(Config.SERVER.advancedPickupUpgrade.filterSlots::get));
-	public static final FilterUpgradeItem FILTER_UPGRADE = register("filter_upgrade", new FilterUpgradeItem(Config.SERVER.filterUpgrade.filterSlots::get));
-	public static final FilterUpgradeItem ADVANCED_FILTER_UPGRADE = register("advanced_filter_upgrade", new FilterUpgradeItem(Config.SERVER.advancedFilterUpgrade.filterSlots::get));
-	public static final MagnetUpgradeItem MAGNET_UPGRADE = register("magnet_upgrade", new MagnetUpgradeItem(Config.SERVER.magnetUpgrade.magnetRange::get, Config.SERVER.magnetUpgrade.filterSlots::get));
-	public static final MagnetUpgradeItem ADVANCED_MAGNET_UPGRADE = register("advanced_magnet_upgrade", new MagnetUpgradeItem(Config.SERVER.advancedMagnetUpgrade.magnetRange::get, Config.SERVER.advancedMagnetUpgrade.filterSlots::get));
-	public static final FeedingUpgradeItem FEEDING_UPGRADE = register("feeding_upgrade", new FeedingUpgradeItem(Config.SERVER.feedingUpgrade.filterSlots::get));
-	public static final FeedingUpgradeItem ADVANCED_FEEDING_UPGRADE = register("advanced_feeding_upgrade", new FeedingUpgradeItem(Config.SERVER.advancedFeedingUpgrade.filterSlots::get));
-	public static final CompactingUpgradeItem COMPACTING_UPGRADE = register("compacting_upgrade", new CompactingUpgradeItem(false, Config.SERVER.compactingUpgrade.filterSlots::get));
-	public static final CompactingUpgradeItem ADVANCED_COMPACTING_UPGRADE = register("advanced_compacting_upgrade", new CompactingUpgradeItem(true, Config.SERVER.advancedCompactingUpgrade.filterSlots::get));
-	public static final VoidUpgradeItem VOID_UPGRADE = register("void_upgrade", new VoidUpgradeItem(Config.SERVER.voidUpgrade));
-	public static final VoidUpgradeItem ADVANCED_VOID_UPGRADE = register("advanced_void_upgrade", new VoidUpgradeItem(Config.SERVER.advancedVoidUpgrade));
-	public static final RestockUpgradeItem RESTOCK_UPGRADE = register("restock_upgrade", new RestockUpgradeItem(Config.SERVER.restockUpgrade.filterSlots::get));
-	public static final RestockUpgradeItem ADVANCED_RESTOCK_UPGRADE = register("advanced_restock_upgrade", new RestockUpgradeItem(Config.SERVER.advancedRestockUpgrade.filterSlots::get));
-	public static final DepositUpgradeItem DEPOSIT_UPGRADE = register("deposit_upgrade", new DepositUpgradeItem(Config.SERVER.depositUpgrade.filterSlots::get));
-	public static final DepositUpgradeItem ADVANCED_DEPOSIT_UPGRADE = register("advanced_deposit_upgrade", new DepositUpgradeItem(Config.SERVER.advancedDepositUpgrade.filterSlots::get));
-	public static final RefillUpgradeItem REFILL_UPGRADE = register("refill_upgrade", new RefillUpgradeItem(Config.SERVER.refillUpgrade.filterSlots::get, false, false));
-	public static final RefillUpgradeItem ADVANCED_REFILL_UPGRADE = register("advanced_refill_upgrade", new RefillUpgradeItem(Config.SERVER.advancedRefillUpgrade.filterSlots::get, true, true));
-	public static final InceptionUpgradeItem INCEPTION_UPGRADE = register("inception_upgrade", new InceptionUpgradeItem());
-	public static final EverlastingUpgradeItem EVERLASTING_UPGRADE = register("everlasting_upgrade", new EverlastingUpgradeItem());
-	public static final SmeltingUpgradeItem SMELTING_UPGRADE = register("smelting_upgrade", new SmeltingUpgradeItem(Config.SERVER.smeltingUpgrade));
-	public static final AutoSmeltingUpgradeItem AUTO_SMELTING_UPGRADE = register("auto_smelting_upgrade", new AutoSmeltingUpgradeItem(Config.SERVER.autoSmeltingUpgrade));
-	public static final SmokingUpgradeItem SMOKING_UPGRADE = register("smoking_upgrade", new SmokingUpgradeItem(Config.SERVER.smokingUpgrade));
-	public static final AutoSmokingUpgradeItem AUTO_SMOKING_UPGRADE = register("auto_smoking_upgrade", new AutoSmokingUpgradeItem(Config.SERVER.autoSmokingUpgrade));
-	public static final BlastingUpgradeItem BLASTING_UPGRADE = register("blasting_upgrade", new BlastingUpgradeItem(Config.SERVER.blastingUpgrade));
-	public static final AutoBlastingUpgradeItem AUTO_BLASTING_UPGRADE = register("auto_blasting_upgrade", new AutoBlastingUpgradeItem(Config.SERVER.autoBlastingUpgrade));
-	public static final CraftingUpgradeItem CRAFTING_UPGRADE = register("crafting_upgrade", new CraftingUpgradeItem());
-	public static final StonecutterUpgradeItem STONECUTTER_UPGRADE = register("stonecutter_upgrade", new StonecutterUpgradeItem());
-	public static final StackUpgradeItem STACK_UPGRADE_TIER_1 = register("stack_upgrade_tier_1", new StackUpgradeItem(2));
-	public static final StackUpgradeItem STACK_UPGRADE_TIER_2 = register("stack_upgrade_tier_2", new StackUpgradeItem(4));
-	public static final StackUpgradeItem STACK_UPGRADE_TIER_3 = register("stack_upgrade_tier_3", new StackUpgradeItem(8));
-	public static final StackUpgradeItem STACK_UPGRADE_TIER_4 = register("stack_upgrade_tier_4", new StackUpgradeItem(16));
-	public static final JukeboxUpgradeItem JUKEBOX_UPGRADE = register("jukebox_upgrade", new JukeboxUpgradeItem());
-	public static final ToolSwapperUpgradeItem TOOL_SWAPPER_UPGRADE = register("tool_swapper_upgrade", new ToolSwapperUpgradeItem(false, false));
-	public static final ToolSwapperUpgradeItem ADVANCED_TOOL_SWAPPER_UPGRADE = register("advanced_tool_swapper_upgrade", new ToolSwapperUpgradeItem(true, true));
-	public static final TankUpgradeItem TANK_UPGRADE = register("tank_upgrade", new TankUpgradeItem(Config.SERVER.tankUpgrade));
-	public static final BatteryUpgradeItem BATTERY_UPGRADE = register("battery_upgrade", new BatteryUpgradeItem(Config.SERVER.batteryUpgrade));
-	public static final PumpUpgradeItem PUMP_UPGRADE = register("pump_upgrade", new PumpUpgradeItem(false, false, Config.SERVER.pumpUpgrade));
-	public static final PumpUpgradeItem ADVANCED_PUMP_UPGRADE = register("advanced_pump_upgrade", new PumpUpgradeItem(true, true, Config.SERVER.pumpUpgrade));
-	public static final XpPumpUpgradeItem XP_PUMP_UPGRADE = register("xp_pump_upgrade", new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade));
+	public static final PickupUpgradeItem PICKUP_UPGRADE = register("pickup_upgrade", () -> new PickupUpgradeItem(Config.SERVER.pickupUpgrade.filterSlots::get));
+	public static final PickupUpgradeItem ADVANCED_PICKUP_UPGRADE = register("advanced_pickup_upgrade", () -> new PickupUpgradeItem(Config.SERVER.advancedPickupUpgrade.filterSlots::get));
+	public static final FilterUpgradeItem FILTER_UPGRADE = register("filter_upgrade", () -> new FilterUpgradeItem(Config.SERVER.filterUpgrade.filterSlots::get));
+	public static final FilterUpgradeItem ADVANCED_FILTER_UPGRADE = register("advanced_filter_upgrade", () -> new FilterUpgradeItem(Config.SERVER.advancedFilterUpgrade.filterSlots::get));
+	public static final MagnetUpgradeItem MAGNET_UPGRADE = register("magnet_upgrade", () -> new MagnetUpgradeItem(Config.SERVER.magnetUpgrade.magnetRange::get, Config.SERVER.magnetUpgrade.filterSlots::get));
+	public static final MagnetUpgradeItem ADVANCED_MAGNET_UPGRADE = register("advanced_magnet_upgrade", () -> new MagnetUpgradeItem(Config.SERVER.advancedMagnetUpgrade.magnetRange::get, Config.SERVER.advancedMagnetUpgrade.filterSlots::get));
+	public static final FeedingUpgradeItem FEEDING_UPGRADE = register("feeding_upgrade", () -> new FeedingUpgradeItem(Config.SERVER.feedingUpgrade.filterSlots::get));
+	public static final FeedingUpgradeItem ADVANCED_FEEDING_UPGRADE = register("advanced_feeding_upgrade", () -> new FeedingUpgradeItem(Config.SERVER.advancedFeedingUpgrade.filterSlots::get));
+	public static final CompactingUpgradeItem COMPACTING_UPGRADE = register("compacting_upgrade", () -> new CompactingUpgradeItem(false, Config.SERVER.compactingUpgrade.filterSlots::get));
+	public static final CompactingUpgradeItem ADVANCED_COMPACTING_UPGRADE = register("advanced_compacting_upgrade", () -> new CompactingUpgradeItem(true, Config.SERVER.advancedCompactingUpgrade.filterSlots::get));
+	public static final VoidUpgradeItem VOID_UPGRADE = register("void_upgrade", () -> new VoidUpgradeItem(Config.SERVER.voidUpgrade));
+	public static final VoidUpgradeItem ADVANCED_VOID_UPGRADE = register("advanced_void_upgrade", () -> new VoidUpgradeItem(Config.SERVER.advancedVoidUpgrade));
+	public static final RestockUpgradeItem RESTOCK_UPGRADE = register("restock_upgrade", () -> new RestockUpgradeItem(Config.SERVER.restockUpgrade.filterSlots::get));
+	public static final RestockUpgradeItem ADVANCED_RESTOCK_UPGRADE = register("advanced_restock_upgrade", () -> new RestockUpgradeItem(Config.SERVER.advancedRestockUpgrade.filterSlots::get));
+	public static final DepositUpgradeItem DEPOSIT_UPGRADE = register("deposit_upgrade", () -> new DepositUpgradeItem(Config.SERVER.depositUpgrade.filterSlots::get));
+	public static final DepositUpgradeItem ADVANCED_DEPOSIT_UPGRADE = register("advanced_deposit_upgrade", () -> new DepositUpgradeItem(Config.SERVER.advancedDepositUpgrade.filterSlots::get));
+	public static final RefillUpgradeItem REFILL_UPGRADE = register("refill_upgrade", () -> new RefillUpgradeItem(Config.SERVER.refillUpgrade.filterSlots::get, false, false));
+	public static final RefillUpgradeItem ADVANCED_REFILL_UPGRADE = register("advanced_refill_upgrade", () -> new RefillUpgradeItem(Config.SERVER.advancedRefillUpgrade.filterSlots::get, true, true));
+	public static final InceptionUpgradeItem INCEPTION_UPGRADE = register("inception_upgrade", InceptionUpgradeItem::new);
+	public static final EverlastingUpgradeItem EVERLASTING_UPGRADE = register("everlasting_upgrade", EverlastingUpgradeItem::new);
+	public static final SmeltingUpgradeItem SMELTING_UPGRADE = register("smelting_upgrade", () -> new SmeltingUpgradeItem(Config.SERVER.smeltingUpgrade));
+	public static final AutoSmeltingUpgradeItem AUTO_SMELTING_UPGRADE = register("auto_smelting_upgrade", () -> new AutoSmeltingUpgradeItem(Config.SERVER.autoSmeltingUpgrade));
+	public static final SmokingUpgradeItem SMOKING_UPGRADE = register("smoking_upgrade", () -> new SmokingUpgradeItem(Config.SERVER.smokingUpgrade));
+	public static final AutoSmokingUpgradeItem AUTO_SMOKING_UPGRADE = register("auto_smoking_upgrade", () -> new AutoSmokingUpgradeItem(Config.SERVER.autoSmokingUpgrade));
+	public static final BlastingUpgradeItem BLASTING_UPGRADE = register("blasting_upgrade", () -> new BlastingUpgradeItem(Config.SERVER.blastingUpgrade));
+	public static final AutoBlastingUpgradeItem AUTO_BLASTING_UPGRADE = register("auto_blasting_upgrade", () -> new AutoBlastingUpgradeItem(Config.SERVER.autoBlastingUpgrade));
+	public static final CraftingUpgradeItem CRAFTING_UPGRADE = register("crafting_upgrade", CraftingUpgradeItem::new);
+	public static final StonecutterUpgradeItem STONECUTTER_UPGRADE = register("stonecutter_upgrade", StonecutterUpgradeItem::new);
+	public static final StackUpgradeItem STACK_UPGRADE_TIER_1 = register("stack_upgrade_tier_1", () -> new StackUpgradeItem(2));
+	public static final StackUpgradeItem STACK_UPGRADE_TIER_2 = register("stack_upgrade_tier_2", () -> new StackUpgradeItem(4));
+	public static final StackUpgradeItem STACK_UPGRADE_TIER_3 = register("stack_upgrade_tier_3", () -> new StackUpgradeItem(8));
+	public static final StackUpgradeItem STACK_UPGRADE_TIER_4 = register("stack_upgrade_tier_4", () -> new StackUpgradeItem(16));
+	public static final JukeboxUpgradeItem JUKEBOX_UPGRADE = register("jukebox_upgrade", JukeboxUpgradeItem::new);
+	public static final ToolSwapperUpgradeItem TOOL_SWAPPER_UPGRADE = register("tool_swapper_upgrade", () -> new ToolSwapperUpgradeItem(false, false));
+	public static final ToolSwapperUpgradeItem ADVANCED_TOOL_SWAPPER_UPGRADE = register("advanced_tool_swapper_upgrade", () -> new ToolSwapperUpgradeItem(true, true));
+	public static final TankUpgradeItem TANK_UPGRADE = register("tank_upgrade", () -> new TankUpgradeItem(Config.SERVER.tankUpgrade));
+	public static final BatteryUpgradeItem BATTERY_UPGRADE = register("battery_upgrade", () -> new BatteryUpgradeItem(Config.SERVER.batteryUpgrade));
+	public static final PumpUpgradeItem PUMP_UPGRADE = register("pump_upgrade", () -> new PumpUpgradeItem(false, false, Config.SERVER.pumpUpgrade));
+	public static final PumpUpgradeItem ADVANCED_PUMP_UPGRADE = register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, Config.SERVER.pumpUpgrade));
+	public static final XpPumpUpgradeItem XP_PUMP_UPGRADE = register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade));
 
-	public static final Item UPGRADE_BASE = register("upgrade_base", new Item(new Item.Properties().stacksTo(16)));
+	public static final Item UPGRADE_BASE = register("upgrade_base", () -> new Item(new Item.Properties().stacksTo(16)));
+
+	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(SophisticatedBackpacks.getRL("item_group"))
+			.title(Component.translatable("itemGroup.sophisticatedbackpacks"))
+			.icon(() -> new ItemStack(ModItems.BACKPACK))
+			.build();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -220,9 +239,9 @@ public class ModItems {
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final MenuType<BackpackContainer> BACKPACK_CONTAINER_TYPE = register("backpack", new ExtendedScreenHandlerType<>(BackpackContainer::fromBuffer));
+	public static final MenuType<BackpackContainer> BACKPACK_CONTAINER_TYPE = registerMenu("backpack", () -> new ExtendedScreenHandlerType<>(BackpackContainer::fromBuffer));
 
-	public static final MenuType<BackpackSettingsContainerMenu> SETTINGS_CONTAINER_TYPE = register("settings", new ExtendedScreenHandlerType<>(BackpackSettingsContainerMenu::fromBuffer));
+	public static final MenuType<BackpackSettingsContainerMenu> SETTINGS_CONTAINER_TYPE = registerMenu("settings", () -> new ExtendedScreenHandlerType<>(BackpackSettingsContainerMenu::fromBuffer));
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -230,9 +249,12 @@ public class ModItems {
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final EntityType<EverlastingBackpackItemEntity> EVERLASTING_BACKPACK_ITEM_ENTITY = register(
-			"everlasting_backpack_item", EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
-					.sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20).build("")
+	public static final EntityType<EverlastingBackpackItemEntity> EVERLASTING_BACKPACK_ITEM_ENTITY = registerEntityType("everlasting_backpack_item", () ->
+					EntityType.Builder.of(EverlastingBackpackItemEntity::new, MobCategory.MISC)
+							.sized(0.25F, 0.25F)
+							.clientTrackingRange(6)
+							.updateInterval(20)
+							.build("")
 	);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,37 +263,62 @@ public class ModItems {
 	//
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final SimpleCraftingRecipeSerializer<BackpackDyeRecipe> BACKPACK_DYE_RECIPE_SERIALIZER = register("backpack_dye", new SimpleCraftingRecipeSerializer<>(BackpackDyeRecipe::new));
-	public static final RecipeSerializer<BackpackUpgradeRecipe> BACKPACK_UPGRADE_RECIPE_SERIALIZER = register("backpack_upgrade", new BackpackUpgradeRecipe.Serializer());
-	public static final RecipeSerializer<SmithingBackpackUpgradeRecipe> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = register("smithing_backpack_upgrade", new SmithingBackpackUpgradeRecipe.Serializer());
-	public static final RecipeSerializer<BasicBackpackRecipe> BASIC_BACKPACK_RECIPE_SERIALIZER = register("basic_backpack", new BasicBackpackRecipe.Serializer());
+	public static final SimpleCraftingRecipeSerializer<BackpackDyeRecipe> BACKPACK_DYE_RECIPE_SERIALIZER = registerRecipeSerializer("backpack_dye", () -> new SimpleCraftingRecipeSerializer<>(BackpackDyeRecipe::new));
+	public static final RecipeSerializer<BackpackUpgradeRecipe> BACKPACK_UPGRADE_RECIPE_SERIALIZER = registerRecipeSerializer("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
+	public static final RecipeSerializer<SmithingBackpackUpgradeRecipe> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = registerRecipeSerializer("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
+	public static final RecipeSerializer<BasicBackpackRecipe> BASIC_BACKPACK_RECIPE_SERIALIZER = registerRecipeSerializer("basic_backpack", BasicBackpackRecipe.Serializer::new);
+
+	public static final LootItemFunctionType COPY_BACKPACK_DATA = registerLootFunction("copy_backpack_data", () -> new LootItemFunctionType(new CopyBackpackDataFunction.Serializer()));
+	public static final LootItemConditionType LOOT_ENABLED_CONDITION = registerLootCondition("loot_enabled", () -> new LootItemConditionType(new SBLootEnabledCondition.Serializer()));
+	public static final Codec<SBLootModifierProvider.InjectLootModifier> INJECT_LOOT = registerLootModifier("inject_loot", () -> SBLootModifierProvider.InjectLootModifier.CODEC);
 
 
 	// Register
-	public static <T extends Item> T register(String id, T value) {
-		ITEMS.add(value);
-		return Registry.register(BuiltInRegistries.ITEM, SophisticatedBackpacks.getRL(id), value);
+	public static <T extends Item> T register(String id, Supplier<T> supplier) {
+		T item = supplier.get();
+		ITEMS.add(item);
+		return Registry.register(BuiltInRegistries.ITEM, SophisticatedBackpacks.getRL(id), item);
 	}
-	public static <T extends MenuType<?>> T register(String id, T value) {
-		return Registry.register(BuiltInRegistries.MENU, SophisticatedBackpacks.getRL(id), value);
+	public static <T extends MenuType<?>> T registerMenu(String id, Supplier<T> supplier) {
+		return Registry.register(BuiltInRegistries.MENU, SophisticatedBackpacks.getRL(id), supplier.get());
 	}
-	public static <T extends EntityType<?>> T register(String id, T value) {
-		return Registry.register(BuiltInRegistries.ENTITY_TYPE, SophisticatedBackpacks.getRL(id), value);
+	public static <T extends EntityType<?>> T registerEntityType(String id, Supplier<T> supplier) {
+		return Registry.register(BuiltInRegistries.ENTITY_TYPE, SophisticatedBackpacks.getRL(id), supplier.get());
 	}
-	public static <T extends RecipeSerializer<?>> T register(String id, T value) {
-		return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.getRL(id), value);
+	public static <T extends RecipeSerializer<?>> T registerRecipeSerializer(String id, Supplier<T> supplier) {
+		return Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, SophisticatedBackpacks.getRL(id), supplier.get());
+	}
+
+	public static <T extends LootItemFunctionType> T registerLootFunction(String id, Supplier<T> supplier) {
+		return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, SophisticatedBackpacks.getRL(id), supplier.get());
+	}
+	public static <T extends LootItemConditionType> T registerLootCondition(String id, Supplier<T> supplier) {
+		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, SophisticatedBackpacks.getRL(id), supplier.get());
+	}
+	public static <T extends Codec<? extends IGlobalLootModifier>> T registerLootModifier(String id, Supplier<T> supplier) {
+		return Registry.register(PortingLibLoot.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.getRL(id), supplier.get());
 	}
 
 	private static void registerItemGroup() {
-		ItemGroupEvents.modifyEntriesEvent(SophisticatedBackpacks.ITEM_GROUP).register(entries -> {
+		ItemGroupEvents.modifyEntriesEvent(ITEM_GROUP).register(entries -> {
 			entries.acceptAll(coloredItems(ModItems.BACKPACK));
-			
+
 			ITEMS.stream().filter(item -> item != ModItems.BACKPACK).forEach(entries::accept);
 		});
 	}
 
+	public static void register() {
+		registerItemGroup();
+
+		registerDispenseBehavior();
+		registerCauldronInteractions();
+
+		registerContainers();
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ModItems::onResourceReload);
+	}
+
 	private static Collection<ItemStack> coloredItems(Item item) {
-		if (!net.p3pp3rf1y.sophisticatedcore.Config.SERVER.enabledItems.isItemEnabled(item)) {
+		if (!net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(item)) {
 			return Collections.emptyList();
 		}
 
@@ -293,15 +340,6 @@ public class ModItems {
 		items.add(stack);
 
 		return items;
-	}
-
-	public static void register() {
-		registerContainers();
-		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ModItems::onResourceReload);
-
-		registerDispenseBehavior();
-		registerCauldronInteractions();
-		registerItemGroup();
 	}
 
 	private static void onResourceReload(MinecraftServer server, CloseableResourceManager resourceManager, boolean success) {

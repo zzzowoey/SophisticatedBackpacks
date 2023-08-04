@@ -43,9 +43,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
@@ -209,27 +209,28 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid));
 	}
 
-	public static InteractionResult playerInteract(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+	public static InteractionResult playerInteract(Player player, Level level, InteractionHand hand, BlockHitResult hitResult) {
 		BlockPos pos = hitResult.getBlockPos();
 
-		if (!player.isShiftKeyDown() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(player, world, hand, pos)) {
+		if (!player.isShiftKeyDown() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(player, level, hand, pos)) {
 			return InteractionResult.PASS;
 		}
 
-		if (world.isClientSide) {
+		if (level.isClientSide) {
 			return InteractionResult.SUCCESS;
 		}
 
-		BlockState state = world.getBlockState(pos);
+		BlockState state = level.getBlockState(pos);
 		if (!(state.getBlock() instanceof BackpackBlock)) {
 			return InteractionResult.PASS;
 		}
 
-		putInPlayersHandAndRemove(state, world, pos, player, player.getMainHandItem().isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
+		putInPlayersHandAndRemove(state, level, pos, player, player.getMainHandItem().isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
 
 		return InteractionResult.SUCCESS;
 	}
 
+	@SuppressWarnings("unused")
 	private static boolean didntInteractWithBackpack(Player player, Level world, InteractionHand hand, BlockPos pos) {
 		return !(world.getBlockState(pos).getBlock() instanceof BackpackBlock);
 	}
@@ -294,7 +295,8 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	private static Vector3f getBackpackMiddleFacePoint(BlockPos pos, Direction facing, Vector3f vector) {
 		Vector3f point = new Vector3f(vector);
 		point.add(0, 0, 0.41f);
-		point = Axis.YN.rotationDegrees(facing.toYRot()).transform(point);
+		//point = Axis.YN.rotationDegrees(facing.toYRot()).transform(point);
+		point.rotate(Axis.YN.rotationDegrees(facing.toYRot()));
 		point.add(pos.getX() + 0.5f, pos.getY(), pos.getZ() + 0.5f);
 		return point;
 	}

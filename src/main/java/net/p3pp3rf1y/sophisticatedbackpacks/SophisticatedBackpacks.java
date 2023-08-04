@@ -1,20 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.command.SBPCommand;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.CommonEventHandler;
-import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPBlockLootProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPLootInjectProvider;
-import net.p3pp3rf1y.sophisticatedbackpacks.data.SBPRecipeProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
 
@@ -24,10 +16,6 @@ import org.slf4j.LoggerFactory;
 public class SophisticatedBackpacks implements ModInitializer {
 	public static final String ID = "sophisticatedbackpacks";
 	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
-
-	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(getRL("item_group"))
-			.icon(() -> new ItemStack(ModItems.BACKPACK))
-			.build();
 
 	private final RegistryLoader registryLoader = new RegistryLoader();
 	public final CommonEventHandler commonEventHandler = new CommonEventHandler();
@@ -41,6 +29,20 @@ public class SophisticatedBackpacks implements ModInitializer {
 	public void onInitialize() {
 		Config.register();
 		commonEventHandler.registerHandlers();
+		// TODO: Check
+		/*IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		if (FMLEnvironment.dist == Dist.CLIENT) {
+			ClientEventHandler.registerHandlers();
+			modBus.addListener(KeybindHandler::registerKeyMappings);
+			modBus.addListener(SophisticatedBackpacks::registerTooltipComponent);
+		}
+
+		modBus.addListener(SophisticatedBackpacks::setup);
+		modBus.addListener(DataGenerators::gatherData);
+		modBus.addListener(Config.SERVER::onConfigReload);
+		modBus.addListener(CapabilityBackpackWrapper::onRegister);
+		modBus.addListener(SophisticatedBackpacks::clientSetup);
+		SBPCommand.init(modBus);*/
 
 		ModCompat.initCompats();
 
@@ -60,10 +62,4 @@ public class SophisticatedBackpacks implements ModInitializer {
 		return ID + ":" + regName;
 	}
 
-	public static void gatherData(FabricDataGenerator gen) {
-		FabricDataGenerator.Pack pack = gen.createPack();
-		pack.addProvider(SBPBlockLootProvider::new);
-		pack.addProvider(SBPRecipeProvider::new);
-		pack.addProvider(SBPLootInjectProvider::new);
-	}
 }

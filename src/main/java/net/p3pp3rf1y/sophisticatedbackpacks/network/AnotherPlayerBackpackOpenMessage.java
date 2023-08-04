@@ -6,9 +6,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
@@ -37,7 +37,7 @@ public class AnotherPlayerBackpackOpenMessage extends SimplePacketBase {
 				return;
 			}
 
-			if (player.level.getEntity(anotherPlayerId) instanceof Player anotherPlayer) {
+			if (player.getLevel().getEntity(anotherPlayerId) instanceof Player anotherPlayer) {
 				PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
 					if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 

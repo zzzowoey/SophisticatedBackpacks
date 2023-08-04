@@ -1,22 +1,29 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import team.reborn.energy.api.EnergyStorage;
+
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerBlockEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.controller.ControllerBlockEntityBase;
 import net.p3pp3rf1y.sophisticatedcore.controller.IControllableStorage;
+import net.p3pp3rf1y.sophisticatedcore.inventory.CachedFailedInsertInventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -36,14 +43,24 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
 	private boolean updateBlockRender = true;
-
 	private boolean chunkBeingUnloaded = false;
+
+	@Nullable
+	private SlottedStackStorage itemHandlerCap;
+	@Nullable
+	private IStorageFluidHandler fluidHandlerCap;
+	@Nullable
+	private EnergyStorage energyStorageCap;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE, pos, state);
 
-		ClientChunkEvents.CHUNK_UNLOAD.register(this::onClientChunkUnloaded);
-		ServerChunkEvents.CHUNK_UNLOAD.register(this::onServerChunkUnloaded);
+		ServerChunkEvents.CHUNK_UNLOAD.register((level, chunk) -> onChunkUnloaded());
+		ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.register((be, world) -> {
+			if (be == this) {
+				invalidateCaps();
+			}
+		});
 	}
 
 	public void setBackpack(ItemStack backpack) {
@@ -54,7 +71,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
-		//backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateBackpackCaps);
+		backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateBackpackCaps);
 	}
 
 	@Override
@@ -118,6 +135,51 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
+	}
+
+	// TODO: Address this now!
+	@Nullable
+	public <T> T getCapability(BlockApiLookup<T, Direction> cap, @Nullable Direction opt) {
+		if (opt != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(opt)).getBlock())) {
+			return null;
+		}
+
+		if (cap == ItemStorage.SIDED) {
+			if (itemHandlerCap == null) {
+				itemHandlerCap = new CachedFailedInsertInventoryHandler(getBackpackWrapper().getInventoryForInputOutput(), () -> level != null ? level.getGameTime() : 0);
+			}
+			//noinspection unchecked
+			return (T) itemHandlerCap;
+		} else if (cap == FluidStorage.SIDED) {
+			if (fluidHandlerCap == null) {
+				fluidHandlerCap = getBackpackWrapper().getFluidHandler().orElse(null);
+			}
+			//noinspection unchecked
+			return (T) fluidHandlerCap;
+		} else if (cap == EnergyStorage.SIDED) {
+			if (energyStorageCap == null) {
+				energyStorageCap = getBackpackWrapper().getEnergyStorage().orElse(null);
+			}
+			//noinspection unchecked
+			return (T) energyStorageCap;
+		}
+		return null;
+	}
+
+	public void invalidateCaps() {
+		invalidateBackpackCaps();
+	}
+
+	private void invalidateBackpackCaps() {
+		if (itemHandlerCap != null) {
+			itemHandlerCap = null;
+		}
+		if (fluidHandlerCap != null) {
+			fluidHandlerCap = null;
+		}
+		if (energyStorageCap != null) {
+			energyStorageCap = null;
+		}
 	}
 
 	public void refreshRenderState() {
@@ -195,10 +257,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		}
 	}
 
-	public void onClientChunkUnloaded(ClientLevel world, LevelChunk chunk) {
-		chunkBeingUnloaded = true;
-	}
-	public void onServerChunkUnloaded(ServerLevel world, LevelChunk chunk) {
+	public void onChunkUnloaded() {
 		chunkBeingUnloaded = true;
 	}
 

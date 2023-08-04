@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class TrinketsCompat implements ICompat {
-
     private static final BackpackTrinket TRINKET_BACKPACK = new BackpackTrinket();
     private static final ItemStack BACKPACK = new ItemStack(ModItems.BACKPACK);
 

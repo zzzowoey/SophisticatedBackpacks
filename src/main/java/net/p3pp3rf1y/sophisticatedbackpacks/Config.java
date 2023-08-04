@@ -54,8 +54,8 @@ public class Config {
 	public static class BaseConfig {
 		public ForgeConfigSpec specification;
 
-		public void onLoad() { }
-		public void onReload() { }
+		public void onConfigLoad() { }
+		public void onConfigReload() { }
 	}
 
 	public static class Server extends BaseConfig {
@@ -106,7 +106,8 @@ public class Config {
 		public final XpPumpUpgradeConfig xpPumpUpgrade;
 		public final NerfsConfig nerfsConfig;
 
-		public void onReload() {
+		@Override
+		public void onConfigReload() {
 			disallowedItems.initialized = false;
 			stackUpgrade.clearNonStackableItems();
 		}
@@ -213,8 +214,8 @@ public class Config {
 						.defineList("discBlockList", this::getDefaultDiscBlockList, mapping -> ((String) mapping).matches(REGISTRY_NAME_MATCHER));
 				playJukebox = builder.comment("Turns on/off a chance that the entity that wears backpack gets jukebox upgrade and plays a music disc.").define("playJukebox", true);
 				dropToFakePlayers = builder.comment("Determines whether backpack drops to fake players if killed by them in addition to real ones that it always drops to").define("dropToFakePlayers", false);
-				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.085, 0, 1);
-				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack").defineInRange("lootingChanceIncreasePerLevel", 0.01, 0, 0.2);
+				backpackDropChance = builder.comment("Chance of mob dropping backpack when killed by player").defineInRange("backpackDropChance", 0.5, 0, 1);
+				lootingChanceIncreasePerLevel = builder.comment("Chance increase per looting level of mob dropping backpack").defineInRange("lootingChanceIncreasePerLevel", 0.15, 0, 0.3);
 				builder.pop();
 			}
 
@@ -445,19 +446,19 @@ public class Config {
 			ForgeConfigRegistry.INSTANCE.register(SophisticatedBackpacks.ID, pair.getKey(), pair.getValue().specification);
 		}
 
-		ModConfigEvents.loading(SophisticatedBackpacks.ID).register(Config::onLoad);
-		ModConfigEvents.reloading(SophisticatedBackpacks.ID).register(Config::onReload);
+		ModConfigEvents.loading(SophisticatedBackpacks.ID).register(Config::onConfigLoad);
+		ModConfigEvents.reloading(SophisticatedBackpacks.ID).register(Config::onConfigReload);
 	}
 
-	public static void onLoad(ModConfig modConfig) {
+	public static void onConfigLoad(ModConfig modConfig) {
 		for (Config.BaseConfig config : CONFIGS.values())
 			if (config.specification == modConfig.getSpec())
-				config.onLoad();
+				config.onConfigLoad();
 	}
 
-	public static void onReload(ModConfig modConfig) {
+	public static void onConfigReload(ModConfig modConfig) {
 		for (Config.BaseConfig config : CONFIGS.values())
 			if (config.specification == modConfig.getSpec())
-				config.onReload();
+				config.onConfigReload();
 	}
 }

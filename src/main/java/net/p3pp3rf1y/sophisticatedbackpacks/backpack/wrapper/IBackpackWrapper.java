@@ -11,11 +11,6 @@ import java.util.UUID;
 import java.util.function.IntConsumer;
 
 public interface IBackpackWrapper extends IStorageWrapper {
-
-	static IBackpackWrapper of(ItemStack stack) {
-		return BackpackWrapper.of(stack);
-	}
-
 	@Override
 	BackpackSettingsHandler getSettingsHandler();
 

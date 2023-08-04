@@ -44,7 +44,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedBatteryUpgrade;
@@ -252,6 +252,10 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 			FluidVariant fluidVariant = fluidStack.getType();
 			TextureAtlasSprite still = FluidVariantRendering.getSprite(fluidVariant);
+			if (still == null) {
+				return;
+			}
+
 			int color = FluidVariantRendering.getColor(fluidVariant);
 			float bx1 = 0;
 			float bx2 = 5;
@@ -304,6 +308,17 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		public ItemOverrides getOverrides() {
 			return overrideList;
 		}
+
+/*		@Override
+		public BakedModel applyTransform(ItemDisplayContext transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
+			if (transformType == ItemDisplayContext.NONE) {
+				return this;
+			}
+
+			ITEM_TRANSFORMS.getTransform(transformType).apply(applyLeftHandTransform, poseStack);
+
+			return this;
+		}*/
 
 		@Override
 		public ItemTransforms getTransforms() {

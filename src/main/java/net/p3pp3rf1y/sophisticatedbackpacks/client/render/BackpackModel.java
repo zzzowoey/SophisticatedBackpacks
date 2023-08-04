@@ -423,6 +423,10 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 		FluidVariant fluidVariant = FluidVariant.of(fluidStack.getFluid());
 		TextureAtlasSprite still = FluidVariantRendering.getSprite(fluidVariant);
+		if (still == null) {
+			return;
+		}
+
 		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
 		ModelPart fluidBox = getFluidBar(still, (int) (fill * 10), left);
 		int color = FluidVariantRendering.getColor(fluidVariant);
@@ -433,8 +437,8 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 	}
 
 	private ModelPart getFluidBar(TextureAtlasSprite still, int fill, boolean left) {
-		int atlasWidth = (int) (still.getX() / (still.getU1() - still.getU0()));
-		int atlasHeight = (int) (still.getY() / (still.getV1() - still.getV0()));
+		int atlasWidth = (int) (still.contents().width() / (still.getU1() - still.getU0()));
+		int atlasHeight = (int) (still.contents().height() / (still.getV1() - still.getV0()));
 		int u = (int) (still.getU0() * atlasWidth);
 		int v = (int) (still.getV0() * atlasHeight);
 		FluidBarCacheKey key = new FluidBarCacheKey(u, v, fill);

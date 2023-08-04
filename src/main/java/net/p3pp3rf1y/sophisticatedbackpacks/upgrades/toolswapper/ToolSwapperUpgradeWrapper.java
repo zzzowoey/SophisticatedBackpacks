@@ -45,7 +45,6 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedcore.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import java.util.Collection;
@@ -94,7 +93,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 			return false;
 		}
 
-		BlockState state = player.level.getBlockState(pos);
+		BlockState state = player.getLevel().getBlockState(pos);
 		Block block = state.getBlock();
 
 		double mainToolSpeed = 0;
@@ -347,7 +346,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		boolean itemInHandIsValid = isToolValid.test(mainHandStack);
 
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryForUpgradeProcessing();
-		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStackHelper.areItemStackTagsEqualIgnoreDurability(st, mainHandStack))) {
+		if (itemInHandIsValid && toolCache.stream().noneMatch(st -> ItemStack.isSame(st, mainHandStack))) {
 			toolCache.offer(mainHandStack);
 		}
 		ItemStack tool = findToolToSwap(backpackInventory, isToolValid);
@@ -400,7 +399,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private boolean hasEquivalentItem(Collection<ItemStack> alreadyGivenBefore, ItemStack stack) {
 		for (ItemStack givenTool : alreadyGivenBefore) {
-			if (ItemStackHelper.areItemStackTagsEqualIgnoreDurability(givenTool, stack)) {
+			if (ItemStack.isSame(givenTool, stack)) {
 				return true;
 			}
 		}
@@ -434,7 +433,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean isShearableEntity(Entity entity, ItemStack stack) {
-		return entity instanceof IShearable shearable && shearable.isShearable(stack, entity.level, entity.blockPosition());
+		return entity instanceof IShearable shearable && shearable.isShearable(stack, entity.getLevel(), entity.blockPosition());
 	}
 
 	@Override

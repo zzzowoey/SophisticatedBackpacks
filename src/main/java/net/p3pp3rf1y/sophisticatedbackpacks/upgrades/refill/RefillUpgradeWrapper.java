@@ -18,10 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockPickResponseUpgrade;
-import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
+import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IFilteredUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
@@ -146,9 +145,11 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		int stashSlot = -1;
 		boolean hasItemInBackpack = false;
 
-		InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
+		// TODO: check
+		//InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
+		ITrackedContentsItemHandler inventoryHandler = storageWrapper.getInventoryForUpgradeProcessing();
 		for (int slot = 0; slot < inventoryHandler.getSlotCount(); slot++) {
-			ItemStack stack = inventoryHandler.getSlotStack(slot);
+			ItemStack stack = inventoryHandler.getStackInSlot(slot);
 			if (ItemStackHelper.canItemStacksStack(stack, filter)) {
 				hasItemInBackpack = true;
 				if (stack.getCount() <= stack.getMaxStackSize()) {
@@ -161,19 +162,53 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		ItemStack mainHandItem = player.getMainHandItem();
 		ItemVariant mainHandResource = ItemVariant.of(mainHandItem);
 
-		int count = mainHandItem.getCount();
-		if (hasItemInBackpack
-				&& !(mainHandItem.getItem() instanceof BackpackItem)
-				&& (mainHandItem.isEmpty() || (stashSlot > -1 && inventoryHandler.isItemValid(stashSlot, mainHandResource))
-				|| StorageUtil.simulateInsert(inventoryHandler, mainHandResource, count, null) == 0)) {
+		ItemVariant filterResource = ItemVariant.of(filter);
+		if (hasItemInBackpack && StorageUtil.simulateExtract(inventoryHandler, filterResource, filter.getMaxStackSize(), null) > 0) {
+			if ((inventoryHandler.getStackInSlot(stashSlot).getCount() > filter.getMaxStackSize()	|| !inventoryHandler.isItemValid(stashSlot, mainHandResource))
+					&& StorageUtil.simulateInsert(inventoryHandler, mainHandResource, mainHandItem.getCount(), null) > 0) {
+				if (canMoveMainHandToInventory(player)) {
+					try (Transaction ctx = Transaction.openOuter()) {
+						long extracted = inventoryHandler.extract(filterResource, filter.getMaxStackSize(), ctx);
+						if (extracted > 0) {
+							player.setItemInHand(InteractionHand.MAIN_HAND, filterResource.toStack((int) extracted));
+							player.getInventory().add(mainHandItem);
+							ctx.commit();
+							return true;
+						}
+					}
+					return true;
+				} else {
+					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.no_space_for_mainhand_item"), true);
+					return false;
+				}
+			} else {
+				try (Transaction ctx = Transaction.openOuter()) {
+					long extracted = inventoryHandler.extract(filterResource, filter.getMaxStackSize(), ctx);
+					if (extracted > 0) {
+						player.setItemInHand(InteractionHand.MAIN_HAND, filterResource.toStack((int) extracted));
+						inventoryHandler.insert(mainHandResource, mainHandItem.getCount(), ctx);
+						ctx.commit();
+						return true;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 
-			ItemVariant filterResource = ItemVariant.of(filter);
-			try (Transaction ctx = Transaction.openOuter()) {
-				long extracted = inventoryHandler.extract(filterResource, filter.getMaxStackSize(), ctx);
-				if (extracted > 0) {
-					inventoryHandler.insert(mainHandResource, count, ctx);
-					player.setItemInHand(InteractionHand.MAIN_HAND, filterResource.toStack((int) extracted));
-					ctx.commit();
+	private boolean canMoveMainHandToInventory(Player player) {
+		int countToAdd = player.getMainHandItem().getCount();
+		for (int slot = 0; slot < player.getInventory().getContainerSize() - 5; slot++) {
+			if (slot == player.getInventory().selected) {
+				continue;
+			}
+			ItemStack slotStack = player.getInventory().getItem(slot);
+			if (slotStack.isEmpty()) {
+				return true;
+			} else if (ItemStackHelper.canItemStacksStack(slotStack, player.getMainHandItem())) {
+				countToAdd -= (slotStack.getMaxStackSize() - slotStack.getCount());
+				if (countToAdd <= 0) {
 					return true;
 				}
 			}

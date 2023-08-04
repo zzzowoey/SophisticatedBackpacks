@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
-import com.google.common.collect.MapMaker;
 import team.reborn.energy.api.EnergyStorage;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -19,7 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IEnergyStorageUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IFluidHandlerWrapperUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -50,12 +49,6 @@ import java.util.function.IntConsumer;
 import javax.annotation.Nullable;
 
 public class BackpackWrapper implements IBackpackWrapper {
-	private static final Map<ItemStack, BackpackWrapper> WRAPPERS = new MapMaker().weakValues().makeMap();
-
-	public static IBackpackWrapper of(ItemStack backpack) {
-		return WRAPPERS.computeIfAbsent(backpack, BackpackWrapper::new);
-	}
-
 	public static final int DEFAULT_CLOTH_COLOR = 13394234;
 	public static final int DEFAULT_BORDER_COLOR = 6434330;
 	private static final String CLOTH_COLOR_TAG = "clothColor";
@@ -435,7 +428,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void fillWithLoot(Player playerEntity) {
-		if (playerEntity.level.isClientSide) {
+		if (playerEntity.getLevel().isClientSide) {
 			return;
 		}
 		NBTHelper.getString(stack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
@@ -489,8 +482,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void fillWithLootFromTable(Player playerEntity, String lootName) {
-		MinecraftServer server = playerEntity.level.getServer();
-		if (server == null || !(playerEntity.level instanceof ServerLevel world)) {
+		MinecraftServer server = playerEntity.getLevel().getServer();
+		if (server == null || !(playerEntity.getLevel() instanceof ServerLevel serverLevel)) {
 			return;
 		}
 
@@ -500,10 +493,10 @@ public class BackpackWrapper implements IBackpackWrapper {
 		stack.removeTagKey(LOOT_TABLE_NAME_TAG);
 		stack.removeTagKey(LOOT_PERCENTAGE_TAG);
 
-		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, world, playerEntity);
+		List<ItemStack> loot = LootHelper.getLoot(lootTableName, server, serverLevel, playerEntity);
 		loot.removeIf(stack -> stack.getItem() instanceof BackpackItem);
 		loot = RandHelper.getNRandomElements(loot, (int) (loot.size() * lootPercentage));
-		LootHelper.fillWithLoot(world.random, loot, getInventoryHandler());
+		LootHelper.fillWithLoot(serverLevel.random, loot, getInventoryHandler());
 	}
 
 	private void setNumberOfUpgradeSlots(int numberOfUpgradeSlots) {

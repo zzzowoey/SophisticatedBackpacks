@@ -36,6 +36,7 @@ public class PlayerInventoryHandler {
 		return visibleInGui;
 	}
 
+	// Need player parameter for Trinket
 	public Set<String> getIdentifiers(Player player, long gameTime) {
 		return identifiersGetter.getIdentifiers(player, gameTime);
 	}

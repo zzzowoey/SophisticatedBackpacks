@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SyncClientInfoMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryHandler;
@@ -161,7 +161,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level.isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+			if (!player.getLevel().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
 				SBPPacketHandler.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
 			}
@@ -274,8 +274,8 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.level.isClientSide) {
-				WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
+			if (!player.getLevel().isClientSide) {
+				WorldHelper.getBlockEntity(player.getLevel(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
 			}
 		}
 
@@ -291,7 +291,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return WorldHelper.getBlockEntity(player.level, pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
+			return WorldHelper.getBlockEntity(player.getLevel(), pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
@@ -320,7 +320,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.level.getBlockEntity(pos) instanceof BackpackBlockEntity
+			return player.getLevel().getBlockEntity(pos) instanceof BackpackBlockEntity
 					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
 		}
 

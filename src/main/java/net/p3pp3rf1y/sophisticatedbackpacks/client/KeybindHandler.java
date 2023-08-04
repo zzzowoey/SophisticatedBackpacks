@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -20,7 +21,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -37,13 +37,11 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.event.client.ClientRawInputEvent;
-import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static committee.nova.mkb.keybinding.KeyConflictContext.GUI;
-import static net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED;
 
 public class KeybindHandler {
 	private KeybindHandler() {}
@@ -120,7 +118,13 @@ public class KeybindHandler {
 
 	public static boolean handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
 		InputConstants.Key input = InputConstants.getKey(key, scancode);
-		return !((IKeyBinding) SORT_KEYBIND).isActiveAndMatches(input) || !tryCallSort(screen);
+		if (((IKeyBinding) SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen)) {
+			return false;
+		} else if (((IKeyBinding) BACKPACK_OPEN_KEYBIND).isActiveAndMatches(input)) {
+			sendBackpackOpenOrCloseMessage();
+			return false;
+		}
+		return true;
 	}
 
 	public static boolean handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {
@@ -205,7 +209,7 @@ public class KeybindHandler {
 		BlockHitResult blockraytraceresult = (BlockHitResult) rayTrace;
 		BlockPos pos = blockraytraceresult.getBlockPos();
 
-		if (!WorldHelper.getBlockEntity(mc.level, pos, BlockEntity.class).map(te -> SIDED.find(te.getLevel(), te.getBlockPos(), null) != null).orElse(false)) {
+		if (ItemStorage.SIDED.find(mc.level, pos, null) == null) {
 			return;
 		}
 

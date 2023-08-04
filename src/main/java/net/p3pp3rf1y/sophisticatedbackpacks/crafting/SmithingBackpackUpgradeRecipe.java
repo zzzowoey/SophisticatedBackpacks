@@ -9,13 +9,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
+import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.crafting.IWrapperRecipe;
 import net.p3pp3rf1y.sophisticatedcore.crafting.RecipeWrapperSerializer;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,7 +24,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 	private final LegacyUpgradeRecipe compose;
 
 	public SmithingBackpackUpgradeRecipe(LegacyUpgradeRecipe compose) {
-		super(compose.getId(), Objects.requireNonNull(compose.base), Objects.requireNonNull(compose.addition), compose.getResultItem(null));
+		super(compose.getId(), compose.base, compose.addition, compose.result);
 		this.compose = compose;
 		REGISTERED_RECIPES.add(compose.getId());
 	}
@@ -37,7 +36,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 
 	@Override
 	public ItemStack assemble(Container inventory, RegistryAccess registryManager) {
-		ItemStack upgradedBackpack = getCraftingResult().copy();
+		ItemStack upgradedBackpack = result.copy();
 		if (LogicalSidedProvider.WORKQUEUE.get(EnvType.SERVER).isSameThread()) {
 			getBackpack(inventory).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
 			BackpackWrapperLookup.get(upgradedBackpack)
@@ -49,12 +48,8 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 		return upgradedBackpack;
 	}
 
-	private ItemStack getCraftingResult() {
-		return Objects.requireNonNull(this.result);
-	}
-
 	private Optional<ItemStack> getBackpack(Container inv) {
-		ItemStack slotStack = inv.getItem(0);
+		ItemStack slotStack = inv.getItem(1);
 		if (slotStack.getItem() instanceof BackpackItem) {
 			return Optional.of(slotStack);
 		}

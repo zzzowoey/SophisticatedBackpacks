@@ -32,10 +32,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IAttackEntityResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockClickResponseUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
-import net.p3pp3rf1y.sophisticatedbackpacks.init.ModLoot;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.AnotherPlayerBackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.settings.BackpackMainSettingsCategory;
@@ -60,7 +58,6 @@ import javax.annotation.Nullable;
 
 public class CommonEventHandler {
 	public void registerHandlers() {
-		ModLoot.init();
 		ModBlocks.registerEvents();
 		ModItems.register();
 
@@ -85,7 +82,7 @@ public class CommonEventHandler {
 	private final Map<ResourceLocation, Long> nextBackpackCheckTime = new HashMap<>();
 
 	InteractionResult interactWithEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-		if (!(entity instanceof Player targetPlayer) || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
+		if (!(entity instanceof Player targetPlayer) || hitResult == null || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
 			return InteractionResult.PASS;
 		}
 
@@ -100,7 +97,7 @@ public class CommonEventHandler {
 			return InteractionResult.PASS;
 		}
 
-		if (targetPlayer.level.isClientSide) {
+		if (targetPlayer.getLevel().isClientSide) {
 			SBPPacketHandler.sendToServer(new AnotherPlayerBackpackOpenMessage(targetPlayer.getId()));
 			return InteractionResult.SUCCESS;
 		}
@@ -176,34 +173,39 @@ public class CommonEventHandler {
 		if (world.isClientSide) {
 			return InteractionResult.PASS;
 		}
+		AtomicReference<InteractionResult> result = new AtomicReference<>(InteractionResult.PASS);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
+							result.set(InteractionResult.SUCCESS);
 							return true;
 						}
 					}
 					return false;
 				}).orElse(false));
 
-		return InteractionResult.PASS;
+		return result.get();
 	}
 
-	private InteractionResult onAttackEntity(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-		if (player.level.isClientSide) {
+	private InteractionResult onAttackEntity(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+		if (level.isClientSide) {
 			return InteractionResult.PASS;
 		}
+
+		AtomicReference<InteractionResult> result = new AtomicReference<>(InteractionResult.PASS);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
+							result.set(InteractionResult.SUCCESS);
 							return true;
 						}
 					}
 					return false;
 				}).orElse(false));
 
-		return InteractionResult.PASS;
+		return result.get();
 	}
 
 	private void onLivingSpecialSpawn(MobSpawnEvents.FinalizeSpawn event) {

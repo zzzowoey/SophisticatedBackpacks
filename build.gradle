@@ -19,8 +19,9 @@ plugins {
     id "maven-publish"
 }
 
-version = project.mod_version
-group = project.maven_group
+group = mod_group_id
+version = "${project.minecraft_version}-${project.mod_version}.${getBuildNumber()}${getStable()}"
+archivesBaseName = mod_id
 
 base {
     archivesName = project.mod_id + "-" + project.minecraft_version
@@ -66,6 +67,14 @@ repositories {
     maven { url = "https://modmaven.dev" } // Jei
     maven { url = "https://www.cursemaven.com" } // Balm, CraftingTweaks
     maven { url = 'https://maven.blamejared.com' }
+/*    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/p3pp3rf1y/sophisticatedcore")
+        credentials {
+            username = System.getenv("USERNAME")
+            password = System.getenv("READ_PACKAGES_TOKEN")
+        }
+    }*/
 }
 
 configurations.configureEach {
@@ -230,37 +239,31 @@ loom {
     useTestNG()
 }*/
 
-if (project.tasks.findByName("generateResources")) {
-    generateResources.dependsOn runDatagen
-}
-
 machete {
     enabled = System.getenv("GITHUB_RUN_NUMBER") != null
 }
 
-processResources {
-    // Exclude datagenerator .cache directory
-    exclude '.cache'
+tasks.withType(ProcessResources).configureEach {
+    dependsOn runDatagen
 
-    Map<String, String> properties = [
-            "mod_id": project.mod_id,
-            "mod_version": project.mod_version,
-            "minecraft_version": minecraft_version,
-            "loader_version": loader_version,
-            "fabric_version": fabric_version,
-            "sc_version": project.sc_version,
-            "mkb_version": project.mkb_mod_version
+    var replaceProperties = [
+            mod_id           : mod_id,
+            mod_version      : mod_version,
+            mod_full_version : "${project.mod_version}.${getBuildNumber()}${getStable()}",
+            minecraft_version: minecraft_version,
+            loader_version   : loader_version,
+            fabric_version   : fabric_version,
+            sc_version       : project.sc_version,
+            mkb_version      : project.mkb_mod_version
     ]
     for (String module in port_lib_modules.split(","))
-        properties.put("port_lib_${module.trim()}_version".toString(), port_lib_version)
+        replaceProperties.put("port_lib_${module.trim()}_version".toString(), port_lib_version)
 
-    properties.forEach((k, v) -> inputs.property(k, v))
+    inputs.properties replaceProperties
 
-    filesMatching("fabric.mod.json") {
-        expand properties
+    filesMatching(['fabric.mods.json', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
-
-    duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -275,27 +278,47 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.base.archivesName}" }
+tasks.named('jar', Jar).configure {
+    from('/') {
+        include 'LICENSE'
     }
 
     manifest {
-        attributes(["Specification-Title"     : "sophisticatedbackpacks",
-                    "Specification-Vendor"    : "p3pp3rf1y",
-                    "Specification-Version"   : "1",
-                    "Implementation-Title"    : project.name,
-                    "Implementation-Version"  : "${project.version}",
-                    "Implementation-Vendor"   : "p3pp3rf1y",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : "p3pp3rf1y",
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : "p3pp3rf1y",
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
+}
+
+static def getBuildNumber() {
+    if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+        return System.getenv("GITHUB_RUN_NUMBER").toString()
+    }
+    return ""
+}
+
+static def getStable() {
+    if (System.getenv("GITHUB_REF") == null || System.getenv("GITHUB_REF").endsWith("-dev")) {
+        return "-SNAPSHOT"
+    }
+    return ""
+}
+
+tasks.named('publish').configure {
+    dependsOn 'reobfJar'
 }
 
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/P3pp3rF1y/SophisticatedBackpacks")
+            url = uri("${github_package_url}")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -304,7 +327,7 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            artifactId = 'sophisticatedbackpacks-fabric'
+            artifactId = mod_id
             from(components.java)
         }
     }

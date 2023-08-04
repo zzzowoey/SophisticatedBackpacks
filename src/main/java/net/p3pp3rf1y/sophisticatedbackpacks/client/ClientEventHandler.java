@@ -45,7 +45,7 @@ public class ClientEventHandler {
 	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(SophisticatedBackpacks.getRL(BACKPACK_REG_NAME), "main");
 
 	public static void registerHandlers() {
-		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(ClientBackpackContentsTooltip::onWorldLoad);
+		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register((client, world) -> ClientBackpackContentsTooltip.onWorldLoad());
 
 		ClientPickBlockApplyCallback.EVENT.register(ClientEventHandler::handleBlockPick);
 		RegisterGeometryLoadersCallback.EVENT.register(ClientEventHandler::onModelRegistry);
@@ -98,7 +98,7 @@ public class ClientEventHandler {
 		if (player.isCreative() || result.getType() != HitResult.Type.BLOCK) {
 			return stack;
 		}
-		Level level = player.level;
+		Level level = player.getLevel();
 		BlockPos pos = ((BlockHitResult)result).getBlockPos();
 		BlockState state = level.getBlockState(pos);
 
