@@ -44,7 +44,7 @@ public class SyncClientInfoMessage extends SimplePacketBase {
 			return;
 		}
 		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-		BackpackWrapperLookup.maybeGet(backpack).ifPresent(backpackWrapper -> {
+		BackpackWrapperLookup.get(backpack).ifPresent(backpackWrapper -> {
 			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
 			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
 		});

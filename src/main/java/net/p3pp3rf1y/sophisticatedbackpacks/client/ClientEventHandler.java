@@ -1,9 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client;
 
-import io.github.fabricators_of_create.porting_lib.event.client.ClientWorldEvents;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
 import io.github.fabricators_of_create.porting_lib.models.geometry.RegisterGeometryLoadersCallback;
-import io.github.fabricators_of_create.porting_lib.util.IdentifiableSimplePreparableReloadListener;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.event.client.player.ClientPickBlockApplyCallback;
@@ -34,6 +32,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockPickMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
+import net.p3pp3rf1y.sophisticatedcore.event.client.ClientLifecycleEvent;
+import net.p3pp3rf1y.sophisticatedcore.util.SimpleIdentifiablePrepareableReloadListener;
 
 import java.util.Collections;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class ClientEventHandler {
 	public static final ModelLayerLocation BACKPACK_LAYER = new ModelLayerLocation(SophisticatedBackpacks.getRL(BACKPACK_REG_NAME), "main");
 
 	public static void registerHandlers() {
-		ClientWorldEvents.LOAD.register(ClientBackpackContentsTooltip::onWorldLoad);
+		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(ClientBackpackContentsTooltip::onWorldLoad);
 
 		ClientPickBlockApplyCallback.EVENT.register(ClientEventHandler::handleBlockPick);
 		RegisterGeometryLoadersCallback.EVENT.register(ClientEventHandler::onModelRegistry);
@@ -53,20 +53,15 @@ public class ClientEventHandler {
 		registerEntityRenderers();
 		registerLayer();
 
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableSimplePreparableReloadListener<>(SophisticatedBackpacks.getRL(BACKPACK_REG_NAME)) {
-			@Override
-			protected Object prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-				return null;
-			}
-
+		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleIdentifiablePrepareableReloadListener<>(SophisticatedBackpacks.getRL(BACKPACK_REG_NAME)) {
 			@Override
 			protected void apply(Object object, ResourceManager resourceManager, ProfilerFiller profiler) {
 				registerBackpackLayer();
 			}
 		});
 
-		ModItems.register();
 		ModBlocks.register();
+		ModItems.register();
 	}
 
 	private static void onModelRegistry(Map<ResourceLocation, IGeometryLoader<?>> loaders) {
@@ -86,13 +81,13 @@ public class ClientEventHandler {
 		EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 		Map<String, EntityRenderer<? extends Player>> skinMap = Collections.unmodifiableMap(renderManager.playerRenderers);
 		for (EntityRenderer<? extends Player> renderer : skinMap.values()) {
-			if (renderer instanceof LivingEntityRenderer livingEntityRenderer) {
+			if (renderer instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
 				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}
 		}
 		renderManager.renderers.forEach((e, r) -> {
-			if (r instanceof LivingEntityRenderer livingEntityRenderer) {
+			if (r instanceof LivingEntityRenderer<?, ?> livingEntityRenderer) {
 				//noinspection rawtypes ,unchecked - this is not going to fail as the LivingRenderer makes sure the types are right, but there doesn't seem to be a way to us inference here
 				livingEntityRenderer.addLayer(new BackpackLayerRenderer(livingEntityRenderer));
 			}

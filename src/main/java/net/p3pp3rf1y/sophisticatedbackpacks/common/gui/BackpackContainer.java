@@ -1,12 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
-import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -20,6 +18,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackContentsMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.ISyncedContainer;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.StorageContainerMenuBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
@@ -98,8 +97,8 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 			return;
 		}
 
-		NetworkUtil.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext),
-				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))), backpackContext::toBuffer);
+		player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackSettingsContainerMenu(w, pl, backpackContext), backpackContext,
+				Component.translatable(SBPTranslationHelper.INSTANCE.translGui("settings.title"))));
 	}
 
 	@Override
@@ -135,6 +134,6 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	@Override
 	protected boolean shouldSlotItemBeDroppedFromStorage(Slot slot) {
 		return slot.getItem().getItem() instanceof BackpackItem &&
-				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItemVariant(), slot.getItem().getCount());
+				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItemVariant());
 	}
 }

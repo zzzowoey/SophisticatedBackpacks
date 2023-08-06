@@ -5,7 +5,6 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -51,6 +50,7 @@ public class REIClientCompat implements REIClientPlugin {
         });
     }
 
+    @SuppressWarnings("removal")
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         registerRecipes(registry, DyeRecipesMaker.getRecipes(), BuiltinPlugin.CRAFTING);
@@ -58,6 +58,7 @@ public class REIClientCompat implements REIClientPlugin {
         registerRecipes(registry, ClientRecipeHelper.getAndTransformAvailableRecipes(SmithingBackpackUpgradeRecipe.REGISTERED_RECIPES, LegacyUpgradeRecipe.class, this::copyUpgradeRecipe), BuiltinPlugin.SMITHING);
     }
 
+    @SuppressWarnings("removal")
     private LegacyUpgradeRecipe copyUpgradeRecipe(LegacyUpgradeRecipe recipe) {
         return new LegacyUpgradeRecipe(recipe.getId(), recipe.base, recipe.addition, recipe.getResultItem(Minecraft.getInstance().level.registryAccess()));
     }
@@ -71,10 +72,5 @@ public class REIClientCompat implements REIClientPlugin {
                 }
             }
         });
-    }
-
-    @Override
-    public void registerTransferHandlers(TransferHandlerRegistry registry) {
-        //registry.register(new CraftingContainerRecipeTransferHandlerBase<BackpackContainer>());
     }
 }

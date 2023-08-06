@@ -5,7 +5,6 @@ import committee.nova.mkb.api.IKeyBinding;
 import committee.nova.mkb.api.IKeyConflictContext;
 import committee.nova.mkb.keybinding.KeyConflictContext;
 import committee.nova.mkb.keybinding.KeyModifier;
-import io.github.fabricators_of_create.porting_lib.event.client.KeyInputCallback;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
@@ -18,6 +17,7 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,6 +35,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
+import net.p3pp3rf1y.sophisticatedcore.event.client.ClientRawInputEvent;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.Map;
@@ -93,7 +94,7 @@ public class KeybindHandler {
 			ScreenMouseEvents.allowMouseClick(screen).register(KeybindHandler::handleGuiMouseKeyPress);
 		});
 
-		KeyInputCallback.EVENT.register(KeybindHandler::handleKeyInputEvent);
+		ClientRawInputEvent.KEY_PRESSED.register(KeybindHandler::handleKeyInputEvent);
 	}
 
 	public static void registerKeyMappings() {
@@ -136,20 +137,30 @@ public class KeybindHandler {
         return true;
 	}
 
-	public static void handleKeyInputEvent(int key, int scancode, int action, int mods) {
+	public static InteractionResult handleKeyInputEvent(Minecraft minecraft, int key, int scancode, int action, int mods) {
 		if (BACKPACK_OPEN_KEYBIND.consumeClick()) {
 			sendBackpackOpenOrCloseMessage();
+			return InteractionResult.SUCCESS;
 		} else if (INVENTORY_INTERACTION_KEYBIND.consumeClick()) {
 			sendInteractWithInventoryMessage();
+			return InteractionResult.SUCCESS;
 		} else if (TOOL_SWAP_KEYBIND.consumeClick()) {
 			sendToolSwapMessage();
+			return InteractionResult.SUCCESS;
 		} else {
+			boolean success = false;
 			for (Map.Entry<Integer, KeyMapping> slotKeybind : UPGRADE_SLOT_TOGGLE_KEYBINDS.entrySet()) {
 				if (slotKeybind.getValue().consumeClick()) {
 					SBPPacketHandler.sendToServer(new UpgradeToggleMessage(slotKeybind.getKey()));
+					success = true;
 				}
 			}
+			if (success) {
+				return InteractionResult.SUCCESS;
+			}
 		}
+
+		return InteractionResult.PASS;
 	}
 
 	private static boolean tryCallSort(Screen gui) {

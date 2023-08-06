@@ -1,13 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
@@ -81,12 +80,12 @@ public class BackpackOpenMessage extends SimplePacketBase {
 	private static void findAndOpenFirstBackpack(ServerPlayer player) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
 			BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryName, identifier, slot);
-			NetworkUtil.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpack.getHoverName()), backpackContext::toBuffer);
+			player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext, backpack.getHoverName()));
 			return true;
 		});
 	}
 
 	private static void openBackpack(ServerPlayer player, BackpackContext backpackContext) {
-		NetworkUtil.openGui(player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext.getDisplayName(player)), backpackContext::toBuffer);
+		player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext, backpackContext.getDisplayName(player)));
 	}
 }

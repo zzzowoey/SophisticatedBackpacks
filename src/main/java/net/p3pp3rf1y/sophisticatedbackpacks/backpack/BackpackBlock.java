@@ -3,20 +3,16 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import com.mojang.math.Axis;
 import io.github.fabricators_of_create.porting_lib.block.EntityDestroyBlock;
 import io.github.fabricators_of_create.porting_lib.block.ExplosionResistanceBlock;
-import io.github.fabricators_of_create.porting_lib.event.common.PlayerInteractionEvents;
-import io.github.fabricators_of_create.porting_lib.util.NetworkUtil;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -25,10 +21,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -51,6 +44,7 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.everlasting.EverlastingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.api.IUpgradeRenderer;
 import net.p3pp3rf1y.sophisticatedcore.client.render.UpgradeRenderRegistry;
@@ -169,7 +163,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 		}
 
 		BackpackContext.Block backpackContext = new BackpackContext.Block(pos);
-		NetworkUtil.openGui((ServerPlayer) player, new SimpleMenuProvider((w, p, pl) -> new BackpackContainer(w, pl, backpackContext), getBackpackDisplayName(world, pos)), backpackContext::toBuffer);
+		player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext, getBackpackDisplayName(world, pos)));
 		return InteractionResult.SUCCESS;
 	}
 
@@ -207,39 +201,33 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private static void stopBackpackSounds(ItemStack backpack, Level world, BlockPos pos) {
-		BackpackWrapperLookup.maybeGet(backpack).ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid ->
-				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid))
-		);
+		BackpackWrapperLookup.get(backpack).flatMap(IStorageWrapper::getContentsUuid).ifPresent(uuid ->
+				ServerStorageSoundHandler.stopPlayingDisc((ServerLevel) world, Vec3.atCenterOf(pos), uuid));
 	}
 
-	public static void playerInteract(PlayerInteractionEvents.RightClickBlock event) {
-		Player player = event.getEntity();
-		Level world = player.level;
-		BlockPos pos = event.getPos();
+	public static InteractionResult playerInteract(Player player, Level world, InteractionHand hand, BlockHitResult hitResult) {
+		BlockPos pos = hitResult.getBlockPos();
 
-		if (!player.isShiftKeyDown() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(event)) {
-			return;
+		if (!player.isShiftKeyDown() || !hasEmptyMainHandAndSomethingInOffhand(player) || didntInteractWithBackpack(player, world, hand, pos)) {
+			return InteractionResult.PASS;
 		}
 
 		if (world.isClientSide) {
-			event.setCanceled(true);
-			event.setCancellationResult(InteractionResult.SUCCESS);
-			return;
+			return InteractionResult.SUCCESS;
 		}
 
 		BlockState state = world.getBlockState(pos);
 		if (!(state.getBlock() instanceof BackpackBlock)) {
-			return;
+			return InteractionResult.PASS;
 		}
 
 		putInPlayersHandAndRemove(state, world, pos, player, player.getMainHandItem().isEmpty() ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND);
 
-		event.setCanceled(true);
-		event.setCancellationResult(InteractionResult.SUCCESS);
+		return InteractionResult.SUCCESS;
 	}
 
-	private static boolean didntInteractWithBackpack(PlayerInteractionEvents.RightClickBlock event) {
-		return !(event.getLevel().getBlockState(event.getPos()).getBlock() instanceof BackpackBlock);
+	private static boolean didntInteractWithBackpack(Player player, Level world, InteractionHand hand, BlockPos pos) {
+		return !(world.getBlockState(pos).getBlock() instanceof BackpackBlock);
 	}
 
 	private static boolean hasEmptyMainHandAndSomethingInOffhand(Player player) {

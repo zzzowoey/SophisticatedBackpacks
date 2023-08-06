@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.crafting;
 
+import io.github.fabricators_of_create.porting_lib.util.LogicalSidedProvider;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("removal")
 public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implements IWrapperRecipe<LegacyUpgradeRecipe> {
 	public static final Set<ResourceLocation> REGISTERED_RECIPES = new LinkedHashSet<>();
 	private final LegacyUpgradeRecipe compose;
@@ -35,14 +38,14 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 	@Override
 	public ItemStack assemble(Container inventory, RegistryAccess registryManager) {
 		ItemStack upgradedBackpack = getCraftingResult().copy();
-		//if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+		if (LogicalSidedProvider.WORKQUEUE.get(EnvType.SERVER).isSameThread()) {
 			getBackpack(inventory).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-			BackpackWrapperLookup.maybeGet(upgradedBackpack)
+			BackpackWrapperLookup.get(upgradedBackpack)
 					.ifPresent(wrapper -> {
 						BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
 						wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
 					});
-		//}
+		}
 		return upgradedBackpack;
 	}
 

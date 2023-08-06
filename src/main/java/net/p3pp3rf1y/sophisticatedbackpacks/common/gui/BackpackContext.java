@@ -1,7 +1,6 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -150,8 +149,8 @@ public abstract class BackpackContext {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find inventory handler for \"{}\"", handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
 			}
-			LazyOptional<IBackpackWrapper> backpackWrapper = BackpackWrapperLookup.maybeGet(inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex));
-			if (!backpackWrapper.isPresent()) {
+			Optional<IBackpackWrapper> backpackWrapper = BackpackWrapperLookup.get(inventoryHandler.get().getStackInSlot(player, identifier, backpackSlotIndex));
+			if (backpackWrapper.isEmpty()) {
 				SophisticatedBackpacks.LOGGER.error("Error getting backpack wrapper - Unable to find backpack at slot index {} in \"{}\" inventory handler", backpackSlotIndex, handlerName);
 				return IBackpackWrapper.Noop.INSTANCE;
 			}
@@ -224,7 +223,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.get(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
@@ -349,7 +348,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(player).map(parent -> BackpackWrapperLookup.get(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
@@ -458,7 +457,7 @@ public abstract class BackpackContext {
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return getParentBackpackWrapper(otherPlayer).map(parent -> BackpackWrapperLookup.maybeGet(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
+			return getParentBackpackWrapper(otherPlayer).map(parent -> BackpackWrapperLookup.get(parent.getInventoryHandler().getStackInSlot(subBackpackSlotIndex))
 					.orElse(IBackpackWrapper.Noop.INSTANCE)).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 

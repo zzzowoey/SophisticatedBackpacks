@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
 import com.google.common.primitives.Ints;
-import io.github.fabricators_of_create.porting_lib.fake_players.FakePlayer;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvent;
@@ -135,13 +135,13 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void equipBackpack(Monster monster, ItemStack backpack, int difficulty, boolean playMusicDisc, LevelAccessor level, RandomSource rnd) {
-		getSpawnEgg(monster.getType()).ifPresent(egg -> BackpackWrapperLookup.maybeGet(backpack)
+		getSpawnEgg(monster.getType()).ifPresent(egg -> BackpackWrapperLookup.get(backpack)
 				.ifPresent(w -> {
 					w.setColors(getPrimaryColor(egg), getSecondaryColor(egg));
 					setLoot(monster, w, difficulty, level);
 					if (playMusicDisc) {
 						w.getInventoryHandler(); //just to assign uuid and real upgrade handler
-						if (w.getUpgradeHandler().getSlots() > 0) {
+						if (w.getUpgradeHandler().getSlotCount() > 0) {
 							monster.addTag(SPAWNED_WITH_JUKEBOX_UPGRADE);
 							addJukeboxUpgradeAndRandomDisc(w, rnd);
 						}
@@ -284,15 +284,14 @@ public class EntityBackpackAdditionHandler {
 	}
 
 	private static void removeContentsUuid(ItemStack stack) {
-		BackpackWrapperLookup.maybeGet(stack)
-				.ifPresent(backpackWrapper -> backpackWrapper.getContentsUuid().ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid)));
+		BackpackWrapperLookup.get(stack).flatMap(IStorageWrapper::getContentsUuid).ifPresent(uuid -> BackpackStorage.get().removeBackpackContents(uuid));
 	}
 
 	public static void onLivingUpdate(LivingEntity entity) {
 		if (!entity.getTags().contains(SPAWNED_WITH_JUKEBOX_UPGRADE)) {
 			return;
 		}
-		BackpackWrapperLookup.maybeGet(entity.getItemBySlot(EquipmentSlot.CHEST))
+		BackpackWrapperLookup.get(entity.getItemBySlot(EquipmentSlot.CHEST))
 				.ifPresent(backpackWrapper -> backpackWrapper.getUpgradeHandler().getTypeWrappers(JukeboxUpgradeItem.TYPE).forEach(wrapper -> {
 					if (wrapper.isPlaying()) {
 						wrapper.tick(entity, entity.level, entity.blockPosition());

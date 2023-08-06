@@ -252,6 +252,8 @@ processResources {
             "sc_version": project.sc_version,
             "mkb_version": project.mkb_mod_version
     ]
+    for (String module in port_lib_modules.split(","))
+        properties.put("port_lib_${module}_version".toString(), port_lib_version)
 
     properties.forEach((k, v) -> inputs.property(k, v))
 

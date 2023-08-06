@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import io.github.fabricators_of_create.porting_lib.util.NetworkDirection;
 import me.pepperbell.simplenetworking.C2SPacket;
 import me.pepperbell.simplenetworking.S2CPacket;
 import me.pepperbell.simplenetworking.SimpleChannel;
@@ -15,32 +14,34 @@ import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
 import java.util.function.Function;
 
-import static io.github.fabricators_of_create.porting_lib.util.NetworkDirection.PLAY_TO_CLIENT;
-import static io.github.fabricators_of_create.porting_lib.util.NetworkDirection.PLAY_TO_SERVER;
-
 public class SBPPacketHandler {
-	public static final ResourceLocation CHANNEL_NAME = SophisticatedBackpacks.getRL("channel");
+	private static int index = 0;
 	private static SimpleChannel channel;
+
+	public static final ResourceLocation CHANNEL_NAME = SophisticatedBackpacks.getRL("channel");
 
 	public static void init() {
 		channel = new SimpleChannel(CHANNEL_NAME);
 
-		registerMessage(BackpackOpenMessage.class, BackpackOpenMessage::new, PLAY_TO_SERVER);
-		registerMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::new, PLAY_TO_SERVER);
-		registerMessage(RequestBackpackInventoryContentsMessage.class, RequestBackpackInventoryContentsMessage::new, PLAY_TO_SERVER);
-		registerMessage(BackpackContentsMessage.class, BackpackContentsMessage::new, PLAY_TO_CLIENT);
-		registerMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::new, PLAY_TO_SERVER);
-		registerMessage(BlockToolSwapMessage.class, BlockToolSwapMessage::new, PLAY_TO_SERVER);
-		registerMessage(EntityToolSwapMessage.class, EntityToolSwapMessage::new, PLAY_TO_SERVER);
-		registerMessage(BackpackCloseMessage.class, BackpackCloseMessage::new, PLAY_TO_SERVER);
-		registerMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::new, PLAY_TO_CLIENT);
-		registerMessage(AnotherPlayerBackpackOpenMessage.class, AnotherPlayerBackpackOpenMessage::new, PLAY_TO_SERVER);
-		registerMessage(BlockPickMessage.class, BlockPickMessage::new, PLAY_TO_SERVER);
+		registerC2SMessage(BackpackOpenMessage.class, BackpackOpenMessage::new);
+		registerC2SMessage(UpgradeToggleMessage.class, UpgradeToggleMessage::new);
+		registerC2SMessage(RequestBackpackInventoryContentsMessage.class, RequestBackpackInventoryContentsMessage::new);
+		registerC2SMessage(InventoryInteractionMessage.class, InventoryInteractionMessage::new);
+		registerC2SMessage(BlockToolSwapMessage.class, BlockToolSwapMessage::new);
+		registerC2SMessage(EntityToolSwapMessage.class, EntityToolSwapMessage::new);
+		registerC2SMessage(BackpackCloseMessage.class, BackpackCloseMessage::new);
+		registerC2SMessage(AnotherPlayerBackpackOpenMessage.class, AnotherPlayerBackpackOpenMessage::new);
+		registerC2SMessage(BlockPickMessage.class, BlockPickMessage::new);
+
+		registerS2CMessage(BackpackContentsMessage.class, BackpackContentsMessage::new);
+		registerS2CMessage(SyncClientInfoMessage.class, SyncClientInfoMessage::new);
 	}
 
-	public static <T extends SimplePacketBase> void registerMessage(Class<T> type, Function<FriendlyByteBuf, T> factory, NetworkDirection direction) {
-		PacketType<T> packet = new PacketType<>(type, factory, direction);
-		packet.register();
+	public static <T extends SimplePacketBase> void registerC2SMessage(Class<T> type, Function<FriendlyByteBuf, T> factory) {
+		getChannel().registerC2SPacket(type, index++, factory);
+	}
+	public static <T extends SimplePacketBase> void registerS2CMessage(Class<T> type, Function<FriendlyByteBuf, T> factory) {
+		getChannel().registerS2CPacket(type, index++, factory);
 	}
 
 	public static SimpleChannel getChannel() {
@@ -62,24 +63,4 @@ public class SBPPacketHandler {
 		getChannel().sendToClientsAround((S2CPacket) message, world, pos, range);
 	}
 
-	public static class PacketType<T extends SimplePacketBase> {
-		private static int index = 0;
-
-		private Function<FriendlyByteBuf, T> decoder;
-		private Class<T> type;
-		private NetworkDirection direction;
-
-		public PacketType(Class<T> type, Function<FriendlyByteBuf, T> factory, NetworkDirection direction) {
-			decoder = factory;
-			this.type = type;
-			this.direction = direction;
-		}
-
-		public void register() {
-			switch (direction) {
-				case PLAY_TO_CLIENT -> getChannel().registerS2CPacket(type, index++, decoder);
-				case PLAY_TO_SERVER -> getChannel().registerC2SPacket(type, index++, decoder);
-			}
-		}
-	}
 }

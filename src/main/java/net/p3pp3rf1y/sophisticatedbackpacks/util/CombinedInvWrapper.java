@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -10,21 +10,23 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Optional;
 
-public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedStorage<ItemVariant, S> implements SlotExposedStorage {
+public class CombinedInvWrapper<S extends SlottedStackStorage> extends CombinedSlottedStorage<ItemVariant, S> implements SlottedStackStorage {
     protected final int[] baseIndex;
     protected final int slotCount;
 
     public CombinedInvWrapper(List<S> inventories) {
         super(inventories);
+
         this.baseIndex = new int[inventories.size()];
         int index = 0;
         for (int i = 0; i < inventories.size(); i++) {
-            index += inventories.get(i).getSlots();
+            index += inventories.get(i).getSlotCount();
             baseIndex[i] = index;
         }
         this.slotCount = index;
     }
 
+    @SafeVarargs
     public CombinedInvWrapper(S... inventories) {
         this(List.of(inventories));
     }
@@ -45,7 +47,7 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
         return -1;
     }
 
-    protected Optional<SlotExposedStorage> getHandlerFromIndex(int index)
+    protected Optional<SlottedStackStorage> getHandlerFromIndex(int index)
     {
         if (index < 0 || index >= parts.size())
         {
@@ -64,14 +66,14 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
     }
 
     @Override
-    public int getSlots() {
+    public int getSlotCount() {
         return slotCount;
     }
 
     @Override
     public void setStackInSlot(int slot, @NotNull ItemStack stack) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return;
         }
@@ -82,7 +84,7 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
     @Override
     public ItemStack getStackInSlot(int slot) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return ItemStack.EMPTY;
         }
@@ -93,7 +95,7 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
     @Override
     public int getSlotLimit(int slot) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return 0;
         }
@@ -102,20 +104,20 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemVariant resource, long amount) {
+    public boolean isItemValid(int slot, ItemVariant resource) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return false;
         }
         int localSlot = getSlotFromIndex(slot, index);
-        return handler.get().isItemValid(localSlot, resource, amount);
+        return handler.get().isItemValid(localSlot, resource);
     }
 
     @Override
     public long insertSlot(int slot, ItemVariant resource, long maxAmount, TransactionContext ctx) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return 0;
         }
@@ -126,7 +128,7 @@ public class CombinedInvWrapper<S extends SlotExposedStorage> extends CombinedSt
     @Override
     public long extractSlot(int slot, ItemVariant resource, long maxAmount, TransactionContext ctx) {
         int index = getIndexForSlot(slot);
-        Optional<SlotExposedStorage> handler = getHandlerFromIndex(index);
+        Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {
             return 0;
         }

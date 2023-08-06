@@ -2,7 +2,6 @@ package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
 import com.google.common.collect.ImmutableList;
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import io.github.fabricators_of_create.porting_lib.util.LazyRegistrar;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.fabricmc.api.EnvType;
@@ -148,6 +147,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ModItems {
 	private ModItems() {}
@@ -269,7 +269,7 @@ public class ModItems {
 		return items;
 	}
 
-	public static void registerHandlers() {
+	public static void register() {
 		ITEMS.register();
 		MENU_TYPES.register();
 		ENTITY_TYPES.register();
@@ -277,6 +277,10 @@ public class ModItems {
 
 		registerContainers();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ModItems::onResourceReload);
+
+		registerDispenseBehavior();
+		registerCauldronInteractions();
+		registerItemGroup();
 	}
 
 
@@ -443,7 +447,7 @@ public class ModItems {
 	private static class BackpackCauldronInteraction implements CauldronInteraction {
 		@Override
 		public InteractionResult interact(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack stack) {
-			LazyOptional<IBackpackWrapper> backpackWrapperCapability = BackpackWrapperLookup.maybeGet(stack);
+			Optional<IBackpackWrapper> backpackWrapperCapability = BackpackWrapperLookup.get(stack);
 			if (backpackWrapperCapability.map(ModItems::hasDefaultColor).orElse(true)) {
 				return InteractionResult.PASS;
 			}

@@ -27,7 +27,7 @@ public class REICompat implements REIServerPlugin {
         EntryComparator<Tag> nbt = EntryComparator.nbt();
         Function<ItemStack, CompoundTag> colorTag = stack -> {
             CompoundTag tag = new CompoundTag();
-            BackpackWrapperLookup.maybeGet(stack)
+            BackpackWrapperLookup.get(stack)
                     .ifPresent(wrapper -> {
                         tag.putInt("clothColor", wrapper.getMainColor());
                         tag.putInt("borderColor", wrapper.getAccentColor());

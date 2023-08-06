@@ -246,9 +246,9 @@ public class BackpackWrapper implements IBackpackWrapper {
 					upgradeCachesInvalidatedHandler.run();
 				}) {
 					@Override
-					public boolean isItemValid(int slot, ItemVariant resource, long amount) {
-						//noinspection ConstantConditions - by this time the upgrade has registryName so it can't be null
-						return super.isItemValid(slot, resource, amount) && (amount > 0 || SophisticatedBackpacks.ID.equals(BuiltInRegistries.ITEM.getKey(resource.getItem()).getNamespace()) || resource.toStack().is(ModItems.BACKPACK_UPGRADE_TAG));
+					public boolean isItemValid(int slot, ItemVariant resource) {
+						//noinspection ConstantConditions - by this time the upgrade has registryName, so it can't be null
+						return super.isItemValid(slot, resource) && (SophisticatedBackpacks.ID.equals(BuiltInRegistries.ITEM.getKey(resource.getItem()).getNamespace()) || resource.toStack().is(ModItems.BACKPACK_UPGRADE_TAG));
 					}
 				};
 			} else {
@@ -383,7 +383,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 	@Override
 	public ItemStack cloneBackpack() {
 		ItemStack clonedBackpack = cloneBackpack(this);
-		BackpackWrapperLookup.maybeGet(clonedBackpack).ifPresent(this::cloneSubbackpacks);
+		BackpackWrapperLookup.get(clonedBackpack).ifPresent(this::cloneSubbackpacks);
 		return clonedBackpack;
 	}
 
@@ -393,14 +393,14 @@ public class BackpackWrapper implements IBackpackWrapper {
 			if (!(stack.getItem() instanceof BackpackItem)) {
 				return;
 			}
-			inventoryHandler.setStackInSlot(slot, BackpackWrapperLookup.maybeGet(stack).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
+			inventoryHandler.setStackInSlot(slot, BackpackWrapperLookup.get(stack).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
 		});
 	}
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {
 		ItemStack backpackCopy = originalWrapper.getBackpack().copy();
 		backpackCopy.removeTagKey(CONTENTS_UUID_TAG);
-		return BackpackWrapperLookup.maybeGet(backpackCopy)
+		return BackpackWrapperLookup.get(backpackCopy)
 				.map(wrapperCopy -> {
 							originalWrapper.copyDataTo(wrapperCopy);
 							return wrapperCopy.getBackpack();

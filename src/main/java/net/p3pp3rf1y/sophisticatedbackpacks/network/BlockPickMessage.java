@@ -35,7 +35,7 @@ public class BlockPickMessage extends SimplePacketBase {
 			return;
 		}
 
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.maybeGet(backpack)
+		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
 				.map(wrapper -> {
 					for (IBlockPickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockPickResponseUpgrade.class)) {
 						if (upgrade.pickBlock(player, msg.filter)) {

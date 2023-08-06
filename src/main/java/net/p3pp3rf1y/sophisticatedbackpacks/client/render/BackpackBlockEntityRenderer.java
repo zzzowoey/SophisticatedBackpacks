@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
@@ -14,6 +15,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.RenderInfo;
 import net.p3pp3rf1y.sophisticatedcore.renderdata.TankPosition;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
+
+import javax.annotation.Nullable;
 
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	@Override
@@ -63,18 +66,18 @@ public class BackpackBlockEntityRenderer implements BlockEntityRenderer<Backpack
 				}
 			});
 		}
-		renderItemDisplay(poseStack, buffer, combinedLight, combinedOverlay, renderInfo);
+		renderItemDisplay(poseStack, buffer, combinedLight, combinedOverlay, renderInfo, tileEntityIn.getLevel());
 		poseStack.popPose();
 	}
 
-	private void renderItemDisplay(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo) {
+	private void renderItemDisplay(PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay, RenderInfo renderInfo, @Nullable Level level) {
 		renderInfo.getItemDisplayRenderInfo().getDisplayItem().ifPresent(displayItem -> {
 			poseStack.pushPose();
 			poseStack.translate(0, 0.6, 0.25);
 			poseStack.scale(0.5f, 0.5f, 0.5f);
 			poseStack.mulPose(Axis.XN.rotationDegrees(180));
 			poseStack.mulPose(Axis.ZP.rotationDegrees(180f + displayItem.getRotation()));
-			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, Minecraft.getInstance().level, 0);
+			Minecraft.getInstance().getItemRenderer().renderStatic(displayItem.getItem(), ItemDisplayContext.FIXED, combinedLight, combinedOverlay, poseStack, buffer, level, 0);
 			poseStack.popPose();
 		});
 	}

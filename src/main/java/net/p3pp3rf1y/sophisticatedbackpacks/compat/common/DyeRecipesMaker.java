@@ -45,7 +45,7 @@ public class DyeRecipesMaker {
 				DyeColor.BLUE, DyeColor.BLACK
 		));
 
-		BackpackWrapperLookup.maybeGet(backpackOutput).ifPresent(wrapper -> wrapper.setColors(clothColor, trimColor));
+		BackpackWrapperLookup.get(backpackOutput).ifPresent(wrapper -> wrapper.setColors(clothColor, trimColor));
 
 		ResourceLocation id = SophisticatedBackpacks.getRL("multiple_colors");
 		recipes.add(new ShapedRecipe(id, "", CraftingBookCategory.MISC, 3, 1, ingredients, backpackOutput));
@@ -55,7 +55,7 @@ public class DyeRecipesMaker {
 		for (DyeColor color : DyeColor.values()) {
 			ResourceLocation id = SophisticatedBackpacks.getRL("single_color_" + color.getSerializedName());
 			ItemStack backpackOutput = new ItemStack(ModItems.BACKPACK.get());
-			BackpackWrapperLookup.maybeGet(backpackOutput).ifPresent(
+			BackpackWrapperLookup.get(backpackOutput).ifPresent(
 					wrapper -> wrapper.setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors())));
 			NonNullList<Ingredient> ingredients = NonNullList.create();
 			ingredients.add(Ingredient.of(ModItems.BACKPACK.get()));

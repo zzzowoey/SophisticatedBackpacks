@@ -37,7 +37,7 @@ public class UpgradeToggleMessage extends SimplePacketBase {
 		}
 
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier, slot) -> {
-			BackpackWrapperLookup.maybeGet(backpack).ifPresent(w -> {
+			BackpackWrapperLookup.get(backpack).ifPresent(w -> {
 				Map<Integer, IUpgradeWrapper> slotWrappers = w.getUpgradeHandler().getSlotWrappers();
 				if (slotWrappers.containsKey(msg.upgradeSlot)) {
 					IUpgradeWrapper upgradeWrapper = slotWrappers.get(msg.upgradeSlot);

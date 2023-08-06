@@ -1,9 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.util;
 
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlotExposedStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -15,7 +14,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.Config;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.IItemHandlerInteractionUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.inventory.SlotExposedStorageWrapper;
 
 import java.util.List;
 
@@ -36,16 +34,16 @@ public class InventoryInteractionHelper {
 		}
 
 		Storage<ItemVariant> storage = ItemStorage.SIDED.find(world, pos, null);
-		if (storage instanceof InventoryStorage invStorage) {
-			return player.level.isClientSide || BackpackWrapperLookup.maybeGet(backpack)
-					.map(wrapper -> tryRunningInteractionWrappers(new SlotExposedStorageWrapper(invStorage), wrapper, player))
+		if (storage instanceof SlottedStorage<ItemVariant> invStorage) {
+			return player.level.isClientSide || BackpackWrapperLookup.get(backpack)
+					.map(wrapper -> tryRunningInteractionWrappers(invStorage, wrapper, player))
 					.orElse(false);
 		}
 
 		return false;
 	}
 
-	private static boolean tryRunningInteractionWrappers(SlotExposedStorage itemHandler, IStorageWrapper wrapper, Player player) {
+	private static boolean tryRunningInteractionWrappers(SlottedStorage<ItemVariant> itemHandler, IStorageWrapper wrapper, Player player) {
 		List<IItemHandlerInteractionUpgrade> wrappers = wrapper.getUpgradeHandler().getWrappersThatImplement(IItemHandlerInteractionUpgrade.class);
 		if (wrappers.isEmpty()) {
 			return false;

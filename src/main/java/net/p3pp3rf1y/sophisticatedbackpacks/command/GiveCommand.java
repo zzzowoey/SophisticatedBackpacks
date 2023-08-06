@@ -39,7 +39,7 @@ public class GiveCommand {
 			if (!backpack.getHoverName().getString().equals(alr.getBackpackName())) {
 				backpack.setHoverName(Component.literal(alr.getBackpackName()));
 			}
-			BackpackWrapperLookup.maybeGet(backpack).ifPresent(backpackWrapper -> {
+			BackpackWrapperLookup.get(backpack).ifPresent(backpackWrapper -> {
 				backpackWrapper.setColors(alr.getClothColor(), alr.getTrimColor());
 				backpackWrapper.setColumnsTaken(alr.getColumnsTaken(), false);
 				backpackWrapper.setContentsUuid(backpackUuid);

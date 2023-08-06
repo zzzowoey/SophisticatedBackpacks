@@ -22,7 +22,7 @@ public class UUIDDeduplicator {
 	public static void checkForDuplicateBackpacksAndRemoveTheirUUID(Player player, UUID backpackUuid, ItemStack backpack) {
 		PlayerInventoryProvider.get().runOnBackpacks(player, (otherBackpack, inventoryHandlerName, identifier, slot) -> {
 			if (otherBackpack != backpack) {
-				BackpackWrapperLookup.maybeGet(otherBackpack)
+				BackpackWrapperLookup.get(otherBackpack)
 						.ifPresent(wrapper -> wrapper.getContentsUuid().ifPresent(uuid -> {
 							if (uuid.equals(backpackUuid)) {
 								wrapper.removeContentsUUIDTag();
@@ -35,7 +35,7 @@ public class UUIDDeduplicator {
 	}
 
 	public static void dedupeBackpackItemEntityInArea(ItemEntity newBackpackItemEntity) {
-		BackpackWrapperLookup.maybeGet(newBackpackItemEntity.getItem())
+		BackpackWrapperLookup.get(newBackpackItemEntity.getItem())
 				.ifPresent(newBackpackWrapper -> newBackpackWrapper.getContentsUuid()
 						.ifPresent(backpackId -> dedupeBackpackItemEntityInArea(newBackpackWrapper, newBackpackItemEntity, backpackId))
 				);
@@ -50,7 +50,7 @@ public class UUIDDeduplicator {
 	}
 
 	private static boolean checkEntityBackpackIdMatchAndRemoveIfItDoes(IBackpackWrapper newBackpackWrapper, UUID newBackpackId, ItemEntity entity) {
-		return BackpackWrapperLookup.maybeGet(entity.getItem()).resolve().flatMap(IStorageWrapper::getContentsUuid).map(backpackId -> {
+		return BackpackWrapperLookup.get(entity.getItem()).flatMap(IStorageWrapper::getContentsUuid).map(backpackId -> {
 			if (backpackId.equals(newBackpackId)) {
 				newBackpackWrapper.removeContentsUUIDTag();
 				newBackpackWrapper.onContentsNbtUpdated();

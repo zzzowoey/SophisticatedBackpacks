@@ -7,11 +7,7 @@ import dev.emi.emi.api.stack.Comparison;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
-import dev.emi.emi.recipe.EmiSmithingRecipe;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackSettingsScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
@@ -33,18 +29,22 @@ public class EmiCompat implements EmiPlugin {
             screen.getSortButtonsRectangle().ifPresent(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
         });
 
-        registry.addExclusionArea(BackpackSettingsScreen.class, (screen, consumer) -> screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight()))));
+        registry.addExclusionArea(BackpackSettingsScreen.class, (screen, consumer) -> {
+            //noinspection ConstantValue
+            if (screen == null || screen.getSettingsTabControl() == null) { // Due to how Emi collects the exclusion area this can be null
+                return;
+            }
+            screen.getSettingsTabControl().getTabRectangles().forEach(r -> consumer.accept(new Bounds(r.getX(), r.getY(), r.getWidth(), r.getHeight())));
+        });
 
         registry.addDragDropHandler(BackpackScreen.class, new EmiStorageGhostDragDropHandler<>());
         registry.addDragDropHandler(SettingsScreen.class, new EmiSettingsGhostDragDropHandler<>());
 
         registerCraftingRecipes(registry, DyeRecipesMaker.getRecipes());
-        //registerCraftingRecipes(registry, ClientRecipeHelper.getAndTransformAvailableRecipes(BackpackUpgradeRecipe.REGISTERED_RECIPES, ShapedRecipe.class, ClientRecipeHelper::copyShapedRecipe));
-        //registerSmithingRecipes(registry, ClientRecipeHelper.getAndTransformAvailableRecipes(SmithingBackpackUpgradeRecipe.REGISTERED_RECIPES, LegacyUpgradeRecipe.class, this::copyUpgradeRecipe));
 
         Comparison compareColor = Comparison.of((a, b) ->
-            BackpackWrapperLookup.maybeGet(a.getItemStack())
-                .map(stackA -> BackpackWrapperLookup.maybeGet(b.getItemStack())
+            BackpackWrapperLookup.get(a.getItemStack())
+                .map(stackA -> BackpackWrapperLookup.get(b.getItemStack())
                     .map(stackB -> stackA.getMainColor() == stackB.getMainColor() && stackA.getAccentColor() == stackB.getAccentColor())
                     .orElse(false))
                 .orElse(false));
@@ -52,10 +52,6 @@ public class EmiCompat implements EmiPlugin {
         registry.setDefaultComparison(EmiStack.of(ModItems.BACKPACK.get()), compareColor);
 
         registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), new EmiGridMenuInfo<>());
-    }
-
-    private LegacyUpgradeRecipe copyUpgradeRecipe(LegacyUpgradeRecipe recipe) {
-        return new LegacyUpgradeRecipe(recipe.getId(), recipe.base, recipe.addition, recipe.getResultItem(Minecraft.getInstance().level.registryAccess()));
     }
 
     private static void registerCraftingRecipes(EmiRegistry registry, Collection<CraftingRecipe> recipes) {
@@ -66,9 +62,5 @@ public class EmiCompat implements EmiPlugin {
                 r.getId())
             )
         );
-    }
-
-    private static void registerSmithingRecipes(EmiRegistry registry, Collection<SmithingRecipe> recipes) {
-        recipes.forEach(r -> registry.addRecipe(new EmiSmithingRecipe(r)));
     }
 }

@@ -16,7 +16,7 @@ public class BackpackInventoryHandler extends InventoryHandler {
 	}
 
 	@Override
-	protected boolean isAllowed(ItemVariant resource, long amount) {
+	protected boolean isAllowed(ItemVariant resource) {
 		return !Config.SERVER.disallowedItems.isItemDisallowed(resource.getItem())
 				&& (!(resource.getItem() instanceof BackpackItem) || (hasInceptionUpgrade() && isBackpackWithoutInceptionUpgrade(resource.toStack())));
 	}
@@ -26,7 +26,7 @@ public class BackpackInventoryHandler extends InventoryHandler {
 	}
 
 	private boolean isBackpackWithoutInceptionUpgrade(ItemStack stack) {
-		return (stack.getItem() instanceof BackpackItem) && !BackpackWrapperLookup.maybeGet(stack)
+		return (stack.getItem() instanceof BackpackItem) && !BackpackWrapperLookup.get(stack)
 				.map(w -> w.getUpgradeHandler().hasUpgrade(InceptionUpgradeItem.TYPE)).orElse(false);
 	}
 }

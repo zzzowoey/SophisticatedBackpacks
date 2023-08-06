@@ -1,15 +1,17 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
-import io.github.fabricators_of_create.porting_lib.block.ChunkUnloadListeningBlockEntity;
-import io.github.fabricators_of_create.porting_lib.block.CustomDataPacketHandlingBlockEntity;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
@@ -27,7 +29,7 @@ import java.util.Optional;
 import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.*;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 
-public class BackpackBlockEntity extends BlockEntity implements IControllableStorage, CustomDataPacketHandlingBlockEntity, ChunkUnloadListeningBlockEntity {
+public class BackpackBlockEntity extends BlockEntity implements IControllableStorage {
 	@Nullable
 	private BlockPos controllerPos = null;
 	private IBackpackWrapper backpackWrapper = IBackpackWrapper.Noop.INSTANCE;
@@ -37,17 +39,20 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
 		super(BACKPACK_TILE_TYPE.get(), pos, state);
+
+		ClientChunkEvents.CHUNK_UNLOAD.register(this::onClientChunkUnloaded);
+		ServerChunkEvents.CHUNK_UNLOAD.register(this::onServerChunkUnloaded);
 	}
 
 	public void setBackpack(ItemStack backpack) {
-		backpackWrapper = BackpackWrapperLookup.maybeGet(backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
+		backpackWrapper = BackpackWrapperLookup.get(backpack).orElse(IBackpackWrapper.Noop.INSTANCE);
 		backpackWrapper.setSaveHandler(() -> {
 			setChanged();
 			updateBlockRender = false;
 			WorldHelper.notifyBlockUpdate(this);
 		});
 		backpackWrapper.setInventorySlotChangeHandler(this::setChanged);
-		backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateBackpackCaps);
+		//backpackWrapper.setUpgradeCachesInvalidatedHandler(this::invalidateBackpackCaps);
 	}
 
 	@Override
@@ -101,7 +106,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
-	@Override
+/*	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
 		CompoundTag tag = pkt.getTag();
 		if (tag == null) {
@@ -112,19 +117,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		if (tag.getBoolean("updateBlockRender")) {
 			WorldHelper.notifyBlockUpdate(this);
 		}
-	}
+	}*/
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
-	}
-
-	@Override
-	public void invalidateCaps() {
-		invalidateBackpackCaps();
-	}
-
-	private void invalidateBackpackCaps() {
-		//getComponent(ITEM_HANDLER).invalidate();
 	}
 
 	public void refreshRenderState() {
@@ -202,8 +198,10 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		}
 	}
 
-	@Override
-	public void onChunkUnloaded() {
+	public void onClientChunkUnloaded(ClientLevel world, LevelChunk chunk) {
+		chunkBeingUnloaded = true;
+	}
+	public void onServerChunkUnloaded(ServerLevel world, LevelChunk chunk) {
 		chunkBeingUnloaded = true;
 	}
 

@@ -41,7 +41,7 @@ public class BackpackUpgradeRecipe extends ShapedRecipe implements IWrapperRecip
 	public ItemStack assemble(CraftingContainer craftingContainer, RegistryAccess registryAccess) {
 		ItemStack upgradedBackpack = super.assemble(craftingContainer, registryAccess);
 		getBackpack(craftingContainer).flatMap(backpack -> Optional.ofNullable(backpack.getTag())).ifPresent(tag -> upgradedBackpack.setTag(tag.copy()));
-		BackpackWrapperLookup.maybeGet(upgradedBackpack).ifPresent(wrapper -> {
+		BackpackWrapperLookup.get(upgradedBackpack).ifPresent(wrapper -> {
 			BackpackItem backpackItem = ((BackpackItem) upgradedBackpack.getItem());
 			wrapper.setSlotNumbers(backpackItem.getNumberOfSlots(), backpackItem.getNumberOfUpgradeSlots());
 		});

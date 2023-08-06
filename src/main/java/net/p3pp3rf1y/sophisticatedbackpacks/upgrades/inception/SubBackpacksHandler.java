@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
@@ -12,6 +11,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -48,7 +48,7 @@ public class SubBackpacksHandler {
 		if (backpackWasInTheSlot != backpackIsInTheSlot) {
 			notifyAndRefreshSubbackpacks();
 		} else {
-			LazyOptional<IBackpackWrapper> backpackWrapper = BackpackWrapperLookup.maybeGet(stackInSlot);
+			Optional<IBackpackWrapper> backpackWrapper = BackpackWrapperLookup.get(stackInSlot);
 			if (backpackWrapper.isPresent() && backpackWrapper.map(w -> w != subBackpacks.get(slot)).orElse(false)) {
 				notifyAndRefreshSubbackpacks();
 			}
@@ -78,9 +78,9 @@ public class SubBackpacksHandler {
 	private void refreshSubBackpacks() {
 		subBackpacks.clear();
 
-		for (int slot = 0; slot < inventoryHandler.getSlots(); slot++) {
+		for (int slot = 0; slot < inventoryHandler.getSlotCount(); slot++) {
 			int finalSlot = slot;
-			BackpackWrapperLookup.maybeGet(inventoryHandler.getStackInSlot(slot))
+			BackpackWrapperLookup.get(inventoryHandler.getStackInSlot(slot))
 					.ifPresent(wrapper -> subBackpacks.put(finalSlot, wrapper));
 		}
 	}

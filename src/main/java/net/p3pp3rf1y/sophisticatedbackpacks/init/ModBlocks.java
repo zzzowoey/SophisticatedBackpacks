@@ -1,8 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
-import io.github.fabricators_of_create.porting_lib.event.common.PlayerInteractionEvents;
 import io.github.fabricators_of_create.porting_lib.util.LazyRegistrar;
 import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -27,10 +27,10 @@ public class ModBlocks {
 			BlockEntityType.Builder.of(BackpackBlockEntity::new, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get())
 					.build(null));
 
-	public static void registerHandlers() {
+	public static void register() {
 		BLOCKS.register();
 		BLOCK_ENTITY_TYPES.register();
 
-		PlayerInteractionEvents.RIGHT_CLICK_BLOCK.register(BackpackBlock::playerInteract);
+		UseBlockCallback.EVENT.register(BackpackBlock::playerInteract);
 	}
 }

@@ -2,8 +2,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
-import io.github.fabricators_of_create.porting_lib.common.util.ToolAction;
-import io.github.fabricators_of_create.porting_lib.common.util.ToolActions;
+import io.github.fabricators_of_create.porting_lib.util.ToolAction;
+import io.github.fabricators_of_create.porting_lib.util.ToolActions;
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import me.alphamode.forgetags.Tags;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static io.github.fabricators_of_create.porting_lib.common.util.ToolActions.*;
+import static io.github.fabricators_of_create.porting_lib.util.ToolActions.*;
 
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
@@ -143,7 +143,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemVariant mainHandItem, int mainHandItemCount, ItemStack tool, int selectedSlot) {
 		return (backpackInventory.simulateInsert(mainHandItem, mainHandItemCount, null) == mainHandItemCount)
-				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem, mainHandItemCount));
+				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
 	}
 
 	private boolean isAllowedAndGoodAtBreakingBlock(BlockState state, ItemStack stack) {

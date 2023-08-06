@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.CombinedInvWrapper;
@@ -45,7 +46,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		baseIndex = new int[handlers.size()];
 		int index = 0;
 		for (int i = 0; i < handlers.size(); i++) {
-			index += handlers.get(i).getSlots();
+			index += handlers.get(i).getSlotCount();
 			baseIndex[i] = index;
 		}
 	}
@@ -56,8 +57,13 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	}
 
 	@Override
-	public int getSlots() {
-		return combinedInventories.getSlots();
+	public int getSlotCount() {
+		return combinedInventories.getSlotCount();
+	}
+
+	@Override
+	public SingleSlotStorage<ItemVariant> getSlot(int slot) {
+		return combinedInventories.getSlot(slot);
 	}
 
 	@Nonnull
@@ -81,10 +87,9 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		return combinedInventories.getSlotLimit(slot);
 	}
 
-
 	@Override
-	public boolean isItemValid(int slot, ItemVariant resource, long amount) {
-		return combinedInventories.isItemValid(slot, resource, amount);
+	public boolean isItemValid(int slot, ItemVariant resource) {
+		return combinedInventories.isItemValid(slot, resource);
 	}
 
 	@Override

@@ -7,7 +7,6 @@
   "refmap": "${archivesBaseName}-refmap.json",
   "mixins": [
     "CreeperMixin",
-    "EnderDragonMixin",
     "PiglinAiMixin",
     "PlayerInventory"
   ],

@@ -33,7 +33,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 	}
 
 	private void removeUuid(ItemStack backpack) {
-		BackpackWrapperLookup.maybeGet(backpack).ifPresent(IBackpackWrapper::removeContentsUuid);
+		BackpackWrapperLookup.get(backpack).ifPresent(IBackpackWrapper::removeContentsUuid);
 	}
 
 	@Override
