@@ -5,6 +5,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackSto
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -94,7 +95,6 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			return;
 		}
 		if (entity instanceof Player player) {
-
 			InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
 				if (filter.isEmpty()) {
 					return;
@@ -106,7 +106,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		setCooldown(world, COOLDOWN);
 	}
 
-	private void tryRefillFilter(@Nonnull LivingEntity entity, SlottedStorage<ItemVariant> playerInvHandler, ItemStack filter, TargetSlot targetSlot) {
+	private void tryRefillFilter(@Nonnull LivingEntity entity, PlayerInventoryStorage playerInvHandler, ItemStack filter, TargetSlot targetSlot) {
 		if (!(entity instanceof Player player)) {
 			return;
 		}
@@ -117,24 +117,20 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		if (missingCount == 0) {
 			return;
 		}
-		SlottedStackStorage extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
-		/*ItemStack toMove = filter.copy();
-		toMove.setCount(missingCount);*/
+		Storage<ItemVariant> extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
 
 		ItemVariant resource = ItemVariant.of(filter);
 		long extracted = extractFromHandler.simulateExtract(resource, missingCount, null);
-//		ItemStack extracted = InventoryHelper.simulateExtractFromInventory(toMove, extractFromHandler, null);
-//		if (extracted.isEmpty()) {
 		if (extracted <= 0) {
 			return;
 		}
 
 		ItemStack remaining = targetSlot.filler.fill(player, playerInvHandler, resource.toStack((int) extracted));
 		if (remaining.getCount() != extracted) {
-			/*ItemStack toExtract = extracted.copy();
-			toExtract.setCount(extracted.getCount() - remaining.getCount());*/
-			InventoryHelper.extractFromInventory(resource, extracted - remaining.getCount(), extractFromHandler, null);
-//			InventoryHelper.extractFromInventory(toExtract, extractFromHandler, null);
+			try (Transaction ctx = Transaction.openOuter()) {
+				extractFromHandler.extract(resource, extracted - remaining.getCount(), ctx);
+				ctx.commit();
+			}
 		}
 	}
 
@@ -162,20 +158,23 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}, () -> stashSlot.get() > -1);
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		ItemVariant resource = ItemVariant.of(mainHandItem);
+		ItemVariant mainHandResource = ItemVariant.of(mainHandItem);
 
 		int count = mainHandItem.getCount();
-		if (hasItemInBackpack.get() && !(mainHandItem.getItem() instanceof BackpackItem)
-				&& (mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), resource))
-				|| inventoryHandler.simulateInsert(resource, count, null) == 0)) {
+		if (hasItemInBackpack.get()
+				&& !(mainHandItem.getItem() instanceof BackpackItem)
+				&& (mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), mainHandResource))
+				|| inventoryHandler.simulateInsert(mainHandResource, count, null) == 0)) {
 
-			ItemStack toExtract = filter.copy();
-			toExtract.setCount(filter.getMaxStackSize());
-			ItemStack extracted = InventoryHelper.extractFromInventory(toExtract, inventoryHandler, null);
-			if (!extracted.isEmpty()) {
-				inventoryHandler.insert(resource, count, null);
-				player.setItemInHand(InteractionHand.MAIN_HAND, extracted);
-				return true;
+			ItemVariant filterResource = ItemVariant.of(filter);
+			try (Transaction ctx = Transaction.openOuter()) {
+				long extracted = inventoryHandler.extract(filterResource, filter.getMaxStackSize(), ctx);
+				if (extracted > 0) {
+					inventoryHandler.insert(mainHandResource, count, ctx);
+					player.setItemInHand(InteractionHand.MAIN_HAND, filterResource.toStack((int) extracted));
+					ctx.commit();
+					return true;
+				}
 			}
 		}
 		return false;
@@ -276,14 +275,14 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		}
 
 		private interface MissingCountGetter {
-			int getMissingCount(Player player, SlottedStorage<ItemVariant> playerInventory, ItemStack filter);
+			int getMissingCount(Player player, PlayerInventoryStorage playerInventory, ItemStack filter);
 		}
 
 		private interface Filler {
-			ItemStack fill(Player player, SlottedStorage<ItemVariant> playerInventory, ItemStack stackToAdd);
+			ItemStack fill(Player player, PlayerInventoryStorage playerInventory, ItemStack stackToAdd);
 		}
 
-		private static ItemStack refillAnywhereInInventory(SlottedStorage<ItemVariant> playerInvHandler, ItemStack extracted) {
+		private static ItemStack refillAnywhereInInventory(PlayerInventoryStorage playerInvHandler, ItemStack extracted) {
 			ItemVariant resource = ItemVariant.of(extracted);
 			long remaining = extracted.getCount();
 

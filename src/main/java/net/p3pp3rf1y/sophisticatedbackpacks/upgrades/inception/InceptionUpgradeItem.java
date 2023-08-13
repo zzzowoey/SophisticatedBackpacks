@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
+import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeSlotChangeResult;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeItemBase;
