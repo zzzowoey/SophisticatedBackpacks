@@ -6,9 +6,9 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.IContextAwareContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
+import net.p3pp3rf1y.sophisticatedcore.util.MenuProviderHelper;
 
 import javax.annotation.Nullable;
 
