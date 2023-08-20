@@ -63,7 +63,7 @@ public class SmithingBackpackUpgradeRecipe extends LegacyUpgradeRecipe implement
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER.get();
+		return ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER;
 	}
 
 	@Override

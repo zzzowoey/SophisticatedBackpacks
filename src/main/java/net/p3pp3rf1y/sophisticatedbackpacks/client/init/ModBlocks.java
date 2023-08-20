@@ -23,8 +23,8 @@ public class ModBlocks {
 	}
 
 	private static void registerRenderers() {
-		BlockEntityRenderers.register(BACKPACK_TILE_TYPE.get(), context -> new BackpackBlockEntityRenderer());
-		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		BlockEntityRenderers.register(BACKPACK_TILE_TYPE, context -> new BackpackBlockEntityRenderer());
+		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK, NETHERITE_BACKPACK);
 	}
 
 	private static void registerBlockColorHandlers() {
@@ -35,7 +35,7 @@ public class ModBlocks {
 			return WorldHelper.getBlockEntity(blockDisplayReader, pos, BackpackBlockEntity.class)
 					.map(te -> tintIndex == 0 ? te.getBackpackWrapper().getMainColor() : te.getBackpackWrapper().getAccentColor())
 					.orElse(getDefaultColor(tintIndex));
-		}, BACKPACK.get(), IRON_BACKPACK.get(), GOLD_BACKPACK.get(), DIAMOND_BACKPACK.get(), NETHERITE_BACKPACK.get());
+		}, BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK, NETHERITE_BACKPACK);
 	}
 
 	private static int getDefaultColor(int tintIndex) {

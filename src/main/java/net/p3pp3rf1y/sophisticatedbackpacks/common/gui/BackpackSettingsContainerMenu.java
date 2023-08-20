@@ -25,7 +25,7 @@ public class BackpackSettingsContainerMenu extends SettingsContainerMenu<IBackpa
 	private CompoundTag lastSettingsNbt = null;
 
 	protected BackpackSettingsContainerMenu(int windowId, Player player, BackpackContext backpackContext) {
-		super(SETTINGS_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player));
+		super(SETTINGS_CONTAINER_TYPE, windowId, player, backpackContext.getBackpackWrapper(player));
 
 		this.backpackContext = backpackContext;
 	}

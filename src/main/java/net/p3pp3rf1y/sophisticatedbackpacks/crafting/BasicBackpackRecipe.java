@@ -38,7 +38,7 @@ public class BasicBackpackRecipe extends ShapedRecipe implements IWrapperRecipe<
 
 	@Override
 	public RecipeSerializer<?> getSerializer() {
-		return ModItems.BASIC_BACKPACK_RECIPE_SERIALIZER.get();
+		return ModItems.BASIC_BACKPACK_RECIPE_SERIALIZER;
 	}
 
 	public static class Serializer extends RecipeWrapperSerializer<ShapedRecipe, BasicBackpackRecipe> {

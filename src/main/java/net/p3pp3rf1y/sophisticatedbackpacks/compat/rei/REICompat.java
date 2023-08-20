@@ -35,13 +35,7 @@ public class REICompat implements REIServerPlugin {
             return tag;
         };
 
-        registry.register((context, stack) -> nbt.hash(context, colorTag.apply(stack)),
-                ModItems.BACKPACK.get(),
-                ModItems.IRON_BACKPACK.get(),
-                ModItems.GOLD_BACKPACK.get(),
-                ModItems.DIAMOND_BACKPACK.get(),
-                ModItems.NETHERITE_BACKPACK.get()
-        );
+        registry.register((context, stack) -> nbt.hash(context, colorTag.apply(stack)), ModItems.BACKPACKS);
     }
 
     @Override

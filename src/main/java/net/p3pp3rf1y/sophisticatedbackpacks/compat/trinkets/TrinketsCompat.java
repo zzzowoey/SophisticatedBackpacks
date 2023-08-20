@@ -10,6 +10,7 @@ import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
@@ -23,23 +24,13 @@ import java.util.function.Function;
 public class TrinketsCompat implements ICompat {
 
     private static final BackpackTrinket TRINKET_BACKPACK = new BackpackTrinket();
-    private static final ItemStack BACKPACK = new ItemStack(ModItems.BACKPACK.get());
+    private static final ItemStack BACKPACK = new ItemStack(ModItems.BACKPACK);
 
     public TrinketsCompat() {
-        TrinketsApi.registerTrinket(ModItems.BACKPACK.get(), TRINKET_BACKPACK);
-        TrinketsApi.registerTrinket(ModItems.IRON_BACKPACK.get(), TRINKET_BACKPACK);
-        TrinketsApi.registerTrinket(ModItems.GOLD_BACKPACK.get(), TRINKET_BACKPACK);
-        TrinketsApi.registerTrinket(ModItems.DIAMOND_BACKPACK.get(), TRINKET_BACKPACK);
-        TrinketsApi.registerTrinket(ModItems.NETHERITE_BACKPACK.get(), TRINKET_BACKPACK);
-
-        EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
-            TrinketRendererRegistry.registerRenderer(ModItems.BACKPACK.get(), TRINKET_BACKPACK);
-            TrinketRendererRegistry.registerRenderer(ModItems.IRON_BACKPACK.get(), TRINKET_BACKPACK);
-            TrinketRendererRegistry.registerRenderer(ModItems.GOLD_BACKPACK.get(), TRINKET_BACKPACK);
-            TrinketRendererRegistry.registerRenderer(ModItems.DIAMOND_BACKPACK.get(), TRINKET_BACKPACK);
-            TrinketRendererRegistry.registerRenderer(ModItems.NETHERITE_BACKPACK.get(), TRINKET_BACKPACK);
-        });
-
+        for (BackpackItem backpack : ModItems.BACKPACKS) {
+            TrinketsApi.registerTrinket(backpack, TRINKET_BACKPACK);
+            EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> TrinketRendererRegistry.registerRenderer(backpack, TRINKET_BACKPACK));
+        }
 
         PlayerInventoryProvider.get().addPlayerInventoryHandler(TrinketsMain.MOD_ID, this::getTrinketTags,
                 (player, identifier) -> getFromTrinketInventory(player, identifier, TrinketInventory::getContainerSize, 0),

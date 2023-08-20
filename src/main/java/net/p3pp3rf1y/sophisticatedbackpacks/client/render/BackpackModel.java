@@ -327,11 +327,11 @@ public class BackpackModel extends AgeableListModel<LivingEntity> implements IBa
 
 	private static Map<Integer, Item> getBackpackItems() {
 		return new LinkedHashMap<>(Map.of(
-				0, ModItems.BACKPACK.get(),
-				1, ModItems.IRON_BACKPACK.get(),
-				2, ModItems.GOLD_BACKPACK.get(),
-				3, ModItems.DIAMOND_BACKPACK.get(),
-				4, ModItems.NETHERITE_BACKPACK.get()
+				0, ModItems.BACKPACK,
+				1, ModItems.IRON_BACKPACK,
+				2, ModItems.GOLD_BACKPACK,
+				3, ModItems.DIAMOND_BACKPACK,
+				4, ModItems.NETHERITE_BACKPACK
 		));
 	}
 

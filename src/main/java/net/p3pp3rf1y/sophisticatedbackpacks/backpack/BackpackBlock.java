@@ -168,7 +168,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	}
 
 	private Component getBackpackDisplayName(Level world, BlockPos pos) {
-		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK.get()).getHoverName();
+		Component defaultDisplayName = new ItemStack(ModItems.BACKPACK).getHoverName();
 		return WorldHelper.getBlockEntity(world, pos, BackpackBlockEntity.class).map(te -> te.getBackpackWrapper().getBackpack().getHoverName()).orElse(defaultDisplayName);
 	}
 
@@ -262,7 +262,7 @@ public class BackpackBlock extends Block implements EntityBlock, SimpleWaterlogg
 	@Nullable
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-		return !pLevel.isClientSide ? createTickerHelper(pBlockEntityType, ModBlocks.BACKPACK_TILE_TYPE.get(), (level, blockPos, blockState, backpackBlockEntity) -> BackpackBlockEntity.serverTick(level, blockPos, backpackBlockEntity)) : null;
+		return !pLevel.isClientSide ? createTickerHelper(pBlockEntityType, ModBlocks.BACKPACK_TILE_TYPE, (level, blockPos, blockState, backpackBlockEntity) -> BackpackBlockEntity.serverTick(level, blockPos, backpackBlockEntity)) : null;
 	}
 
 	@Nullable

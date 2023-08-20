@@ -50,11 +50,11 @@ public class SBJeiPlugin implements IModPlugin {
 		IIngredientSubtypeInterpreter<ItemStack> backpackNbtInterpreter = (itemStack, context) -> BackpackWrapperLookup.get(itemStack)
 				.map(wrapper -> "{clothColor:" + wrapper.getMainColor() + ",borderColor:" + wrapper.getAccentColor() + "}")
 				.orElse(IIngredientSubtypeInterpreter.NONE);
-		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.IRON_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.GOLD_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.DIAMOND_BACKPACK.get(), backpackNbtInterpreter);
-		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.NETHERITE_BACKPACK.get(), backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.BACKPACK, backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.IRON_BACKPACK, backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.GOLD_BACKPACK, backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.DIAMOND_BACKPACK, backpackNbtInterpreter);
+		registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.NETHERITE_BACKPACK, backpackNbtInterpreter);
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class SBJeiPlugin implements IModPlugin {
 
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
-		registration.addRecipeCatalyst(new ItemStack(ModItems.CRAFTING_UPGRADE.get()), RecipeTypes.CRAFTING);
+		registration.addRecipeCatalyst(new ItemStack(ModItems.CRAFTING_UPGRADE), RecipeTypes.CRAFTING);
 	}
 
 	@Override

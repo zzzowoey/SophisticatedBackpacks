@@ -25,7 +25,7 @@ public class SophisticatedBackpacks implements ModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger(ID);
 
 	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(getRL("item_group"))
-			.icon(() -> new ItemStack(ModItems.BACKPACK.get()))
+			.icon(() -> new ItemStack(ModItems.BACKPACK))
 			.build();
 
 	private final RegistryLoader registryLoader = new RegistryLoader();

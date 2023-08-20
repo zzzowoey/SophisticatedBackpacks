@@ -1,6 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
-import io.github.fabricators_of_create.porting_lib.util.RegistryObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
@@ -25,6 +24,6 @@ public class ModItems {
 				}
 				return -1;
 			}).orElse(DEFAULT_CLOTH_COLOR);
-		}, BACKPACKS.stream().map(RegistryObject::get).toList().toArray(new BackpackItem[0]));
+		}, BACKPACKS);
 	}
 }

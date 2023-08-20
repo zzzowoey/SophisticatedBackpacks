@@ -3,6 +3,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -125,7 +126,7 @@ public class BackpackItem extends BlockItem implements IStashStorageItem, Equipa
 
 	@Nullable
 	private EverlastingBackpackItemEntity createEverlastingBackpack(Level world, ItemEntity itemEntity, ItemStack itemstack) {
-		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.get().create(world);
+		EverlastingBackpackItemEntity backpackItemEntity = ModItems.EVERLASTING_BACKPACK_ITEM_ENTITY.create(world);
 		if (backpackItemEntity != null) {
 			backpackItemEntity.setPos(itemEntity.getX(), itemEntity.getY(), itemEntity.getZ());
 			backpackItemEntity.setItem(itemstack);
@@ -202,7 +203,7 @@ public class BackpackItem extends BlockItem implements IStashStorageItem, Equipa
 			return backpack.copy();
 		}
 		return BackpackWrapperLookup.get(backpack)
-				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK.get()));
+				.map(IBackpackWrapper::cloneBackpack).orElse(new ItemStack(ModItems.BACKPACK));
 	}
 
 	protected boolean canPlace(BlockPlaceContext context, BlockState state) {
@@ -269,8 +270,14 @@ public class BackpackItem extends BlockItem implements IStashStorageItem, Equipa
 
 	@Override
 	public ItemStack stash(ItemStack storageStack, ItemStack stack) {
-		ItemVariant resource = ItemVariant.of(stack);
-		return BackpackWrapperLookup.get(storageStack).map(wrapper -> resource.toStack(stack.getCount() - (int) wrapper.getInventoryForUpgradeProcessing().insert(resource, stack.getCount(), null))).orElse(stack);
+		return BackpackWrapperLookup.get(storageStack)
+				.map(wrapper -> {
+					try (Transaction ctx = Transaction.openOuter()) {
+						long inserted = wrapper.getInventoryForUpgradeProcessing().insert(ItemVariant.of(stack), stack.getCount(), null);
+						ctx.commit();
+						return stack.copyWithCount(stack.getCount() - (int) inserted);
+					}
+				}).orElse(stack);
 	}
 
 	@Override

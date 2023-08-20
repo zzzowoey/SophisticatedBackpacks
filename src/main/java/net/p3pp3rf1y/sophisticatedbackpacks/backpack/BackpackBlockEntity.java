@@ -38,7 +38,7 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	private boolean chunkBeingUnloaded = false;
 
 	public BackpackBlockEntity(BlockPos pos, BlockState state) {
-		super(BACKPACK_TILE_TYPE.get(), pos, state);
+		super(BACKPACK_TILE_TYPE, pos, state);
 
 		ClientChunkEvents.CHUNK_UNLOAD.register(this::onClientChunkUnloaded);
 		ServerChunkEvents.CHUNK_UNLOAD.register(this::onServerChunkUnloaded);

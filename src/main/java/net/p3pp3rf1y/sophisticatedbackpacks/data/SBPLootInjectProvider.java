@@ -25,39 +25,39 @@ public class SBPLootInjectProvider extends SimpleFabricLootTableProvider {
 	public void generate(BiConsumer<ResourceLocation, LootTable.Builder> biConsumer) {
 
 		biConsumer.accept(BuiltInLootTables.SIMPLE_DUNGEON, getLootTable(92,
-				getItemLootEntry(ModItems.BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 2),
-				getItemLootEntry(ModItems.PICKUP_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.BACKPACK, 4),
+				getItemLootEntry(ModItems.IRON_BACKPACK, 2),
+				getItemLootEntry(ModItems.PICKUP_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.ABANDONED_MINESHAFT, getLootTable(89,
-				getItemLootEntry(ModItems.BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
-				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.BACKPACK, 5),
+				getItemLootEntry(ModItems.IRON_BACKPACK, 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 1),
+				getItemLootEntry(ModItems.MAGNET_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.DESERT_PYRAMID, getLootTable(89,
-				getItemLootEntry(ModItems.BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 1),
-				getItemLootEntry(ModItems.MAGNET_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.BACKPACK, 5),
+				getItemLootEntry(ModItems.IRON_BACKPACK, 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 1),
+				getItemLootEntry(ModItems.MAGNET_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.SHIPWRECK_TREASURE, getLootTable(92,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
-				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.IRON_BACKPACK, 4),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 2),
+				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.WOODLAND_MANSION, getLootTable(92,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 4),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 2),
-				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.IRON_BACKPACK, 4),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 2),
+				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.NETHER_BRIDGE, getLootTable(90,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.IRON_BACKPACK, 5),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 3),
+				getItemLootEntry(ModItems.FEEDING_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.BASTION_TREASURE, getLootTable(90,
-				getItemLootEntry(ModItems.IRON_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.FEEDING_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.IRON_BACKPACK, 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 5),
+				getItemLootEntry(ModItems.FEEDING_UPGRADE, 2)));
 		biConsumer.accept(BuiltInLootTables.END_CITY_TREASURE, getLootTable(90,
-				getItemLootEntry(ModItems.DIAMOND_BACKPACK.get(), 3),
-				getItemLootEntry(ModItems.GOLD_BACKPACK.get(), 5),
-				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE.get(), 2)));
+				getItemLootEntry(ModItems.DIAMOND_BACKPACK, 3),
+				getItemLootEntry(ModItems.GOLD_BACKPACK, 5),
+				getItemLootEntry(ModItems.ADVANCED_MAGNET_UPGRADE, 2)));
 	}
 
 	@Override

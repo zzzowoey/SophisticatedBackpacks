@@ -32,7 +32,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 	private final BackpackContext backpackContext;
 
 	public BackpackContainer(int windowId, Player player, BackpackContext backpackContext) {
-		super(BACKPACK_CONTAINER_TYPE.get(), windowId, player, backpackContext.getBackpackWrapper(player), backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
+		super(BACKPACK_CONTAINER_TYPE, windowId, player, backpackContext.getBackpackWrapper(player), backpackContext.getParentBackpackWrapper(player).orElse(NoopStorageWrapper.INSTANCE), backpackContext.getBackpackSlotIndex(), backpackContext.shouldLockBackpackSlot(player));
 		this.backpackContext = backpackContext;
 
 		storageWrapper.getContentsUuid().ifPresent(backpackUuid ->

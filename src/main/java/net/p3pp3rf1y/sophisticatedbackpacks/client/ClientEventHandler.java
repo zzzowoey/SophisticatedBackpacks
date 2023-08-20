@@ -69,7 +69,7 @@ public class ClientEventHandler {
 	}
 
 	private static void registerEntityRenderers() {
-		EntityRendererRegistry.register(EVERLASTING_BACKPACK_ITEM_ENTITY.get(), ItemEntityRenderer::new);
+		EntityRendererRegistry.register(EVERLASTING_BACKPACK_ITEM_ENTITY, ItemEntityRenderer::new);
 	}
 
 	public static void registerLayer() {

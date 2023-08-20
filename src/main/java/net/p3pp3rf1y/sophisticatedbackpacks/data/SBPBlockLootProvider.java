@@ -25,11 +25,11 @@ public class SBPBlockLootProvider extends FabricBlockLootTableProvider {
 	public void generate() {
 		Map<Block, LootTable.Builder> tables = new HashMap<>();
 
-		tables.put(ModBlocks.BACKPACK.get(), getBackpack(ModItems.BACKPACK.get()));
-		tables.put(ModBlocks.IRON_BACKPACK.get(), getBackpack(ModItems.IRON_BACKPACK.get()));
-		tables.put(ModBlocks.GOLD_BACKPACK.get(), getBackpack(ModItems.GOLD_BACKPACK.get()));
-		tables.put(ModBlocks.DIAMOND_BACKPACK.get(), getBackpack(ModItems.DIAMOND_BACKPACK.get()));
-		tables.put(ModBlocks.NETHERITE_BACKPACK.get(), getBackpack(ModItems.NETHERITE_BACKPACK.get()));
+		tables.put(ModBlocks.BACKPACK, getBackpack(ModItems.BACKPACK));
+		tables.put(ModBlocks.IRON_BACKPACK, getBackpack(ModItems.IRON_BACKPACK));
+		tables.put(ModBlocks.GOLD_BACKPACK, getBackpack(ModItems.GOLD_BACKPACK));
+		tables.put(ModBlocks.DIAMOND_BACKPACK, getBackpack(ModItems.DIAMOND_BACKPACK));
+		tables.put(ModBlocks.NETHERITE_BACKPACK, getBackpack(ModItems.NETHERITE_BACKPACK));
 
 		for (Map.Entry<Block, LootTable.Builder> e : tables.entrySet()) {
 			add(e.getKey(), e.getValue());

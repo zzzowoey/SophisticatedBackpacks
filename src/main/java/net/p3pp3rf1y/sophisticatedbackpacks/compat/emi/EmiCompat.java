@@ -49,9 +49,9 @@ public class EmiCompat implements EmiPlugin {
                     .orElse(false))
                 .orElse(false));
 
-        registry.setDefaultComparison(EmiStack.of(ModItems.BACKPACK.get()), compareColor);
+        registry.setDefaultComparison(EmiStack.of(ModItems.BACKPACK), compareColor);
 
-        registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE.get(), new EmiGridMenuInfo<>());
+        registry.addRecipeHandler(ModItems.BACKPACK_CONTAINER_TYPE, new EmiGridMenuInfo<>());
     }
 
     private static void registerCraftingRecipes(EmiRegistry registry, Collection<CraftingRecipe> recipes) {
