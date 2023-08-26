@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Either;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IGeometryLoader;
 import io.github.fabricators_of_create.porting_lib.models.geometry.IUnbakedGeometry;
 import io.github.fabricators_of_create.porting_lib.util.FluidStack;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
@@ -155,30 +156,41 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		@Override
 		public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
 			// Render function
-			context.bakedModelConsumer().accept(models.get(ModelPart.BASE), state);
-			addLeftSide(state, state.getValue(LEFT_TANK), context);
-			addRightSide(state, state.getValue(RIGHT_TANK), context);
-			addFront(state, state.getValue(BATTERY), context);
+			models.get(ModelPart.BASE).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+			addLeftSide(blockView, state, pos, null, randomSupplier, context, state.getValue(LEFT_TANK));
+			addRightSide(blockView, state, pos, null, randomSupplier, context, state.getValue(RIGHT_TANK));
+			addFront(blockView, state, pos, null, randomSupplier, context, state.getValue(BATTERY));
 		}
 
 		@Override
 		public void emitItemQuads(ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
 			// Render function
-			context.bakedModelConsumer().accept(models.get(ModelPart.BASE));
-			addLeftSide(null, tankLeft, context);
-			addRightSide(null, tankRight, context);
-			addFront(null, battery, context);
+			models.get(ModelPart.BASE).emitItemQuads(stack, randomSupplier, context);
+			addLeftSide(null,null,null, stack, randomSupplier, context, tankLeft);
+			addRightSide(null,null,null, stack, randomSupplier, context, tankRight);
+			addFront(null,null,null, stack, randomSupplier, context, battery);
 		}
 
-		private void addFront(@Nullable BlockState state, boolean battery, RenderContext context) {
+		private void emitQuads(BakedModel model, @Nullable BlockAndTintGetter blockView, @Nullable BlockState state, @Nullable BlockPos pos, @Nullable ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context) {
+			if (blockView != null) {
+				model.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+			} else {
+				model.emitItemQuads(stack, randomSupplier, context);
+			}
+		}
+
+		private void addFront(@Nullable BlockAndTintGetter blockView, @Nullable BlockState state, @Nullable BlockPos pos, @Nullable ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context, boolean battery) {
+			ModelPart part;
 			if (battery) {
 				if (batteryRenderInfo != null) {
 					addCharge(batteryRenderInfo.getChargeRatio(), context);
 				}
-				context.bakedModelConsumer().accept(models.get(ModelPart.BATTERY), state);
+				part = ModelPart.BATTERY;
 			} else {
-				context.bakedModelConsumer().accept(models.get(ModelPart.FRONT_POUCH), state);
+				part = ModelPart.FRONT_POUCH;
 			}
+
+			emitQuads(models.get(part), blockView, state, pos, stack, randomSupplier, context);
 		}
 
 		private void addCharge(float chargeRatio, RenderContext context) {
@@ -196,26 +208,32 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			emitQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), color, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f, context.getEmitter());
 		}
 
-		private void addRightSide(@Nullable BlockState state, boolean tankRight, RenderContext context) {
+		private void addRightSide(@Nullable BlockAndTintGetter blockView, @Nullable BlockState state, @Nullable BlockPos pos, @Nullable ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context, boolean tankRight) {
+			ModelPart part;
 			if (tankRight) {
 				if (rightTankRenderInfo != null) {
 					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d, context));
 				}
-				context.bakedModelConsumer().accept(models.get(ModelPart.RIGHT_TANK), state);
+				part = ModelPart.RIGHT_TANK;
 			} else {
-				context.bakedModelConsumer().accept(models.get(ModelPart.RIGHT_POUCH), state);
+				part = ModelPart.RIGHT_POUCH;
 			}
+
+			emitQuads(models.get(part), blockView, state, pos, stack, randomSupplier, context);
 		}
 
-		private void addLeftSide(@Nullable BlockState state, boolean tankLeft, RenderContext context) {
+		private void addLeftSide(@Nullable BlockAndTintGetter blockView, @Nullable BlockState state, @Nullable BlockPos pos, @Nullable ItemStack stack, Supplier<RandomSource> randomSupplier, RenderContext context, boolean tankLeft) {
+			ModelPart part;
 			if (tankLeft) {
 				if (leftTankRenderInfo != null) {
 					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d, context));
 				}
-				context.bakedModelConsumer().accept(models.get(ModelPart.LEFT_TANK), state);
+				part = ModelPart.LEFT_TANK;
 			} else {
-				context.bakedModelConsumer().accept(models.get(ModelPart.LEFT_POUCH), state);
+				part = ModelPart.LEFT_POUCH;
 			}
+
+			emitQuads(models.get(part), blockView, state, pos, stack, randomSupplier, context);
 		}
 
 		private void addFluid(FluidStack fluidStack, float ratio, double xMin, RenderContext context) {
@@ -274,7 +292,6 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		@SuppressWarnings("java:S1874") //don't have model data to pass in here and just calling getParticleTexture of baked model that doesn't need model data
 		@Override
 		public TextureAtlasSprite getParticleIcon() {
-			//noinspection deprecation
 			return models.get(ModelPart.BASE).getParticleIcon();
 		}
 
@@ -283,7 +300,6 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			return overrideList;
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public ItemTransforms getTransforms() {
 			return ITEM_TRANSFORMS;
