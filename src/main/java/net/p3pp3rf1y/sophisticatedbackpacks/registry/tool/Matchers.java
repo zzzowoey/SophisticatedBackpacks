@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage.SIDED;
+import static net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED;
 
 public class Matchers {
 	private Matchers() {}

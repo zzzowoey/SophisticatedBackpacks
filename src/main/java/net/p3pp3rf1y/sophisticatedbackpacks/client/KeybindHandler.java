@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static committee.nova.mkb.keybinding.KeyConflictContext.GUI;
-import static net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage.SIDED;
+import static net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED;
 
 public class KeybindHandler {
 	private KeybindHandler() {}

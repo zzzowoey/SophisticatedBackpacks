@@ -2,6 +2,7 @@ package net.p3pp3rf1y.sophisticatedbackpacks.common.lookup;
 
 import net.fabricmc.fabric.api.lookup.v1.item.ItemApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
@@ -9,8 +10,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks;
-import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
-import net.p3pp3rf1y.sophisticatedcore.common.lookup.ItemStorage;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.Optional;
@@ -30,7 +29,6 @@ public class BackpackWrapperLookup {
 
     static {
         BackpackWrapperLookup.ITEM.registerForItems((itemStack, context) -> IBackpackWrapper.of(itemStack), BACKPACKS);
-        ItemStorage.ITEM.registerForItems((itemStack, context) -> get(itemStack).map(IStorageWrapper::getInventoryForInputOutput).orElse(null), BACKPACKS);
 
         ItemStorage.SIDED.registerForBlockEntity((blockEntity, direction) -> {
             if (!isBlockAllowed(blockEntity, direction))
