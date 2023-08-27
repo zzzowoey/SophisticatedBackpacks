@@ -1,11 +1,10 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.refill;
 
 import com.google.common.collect.ImmutableMap;
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -35,8 +34,6 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -95,13 +92,15 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			return;
 		}
 		if (entity instanceof Player player) {
-			InventoryHelper.iterate(filterLogic.getFilterHandler(), (slot, filter) -> {
+			FilterLogic.ObservableFilterItemStackHandler filterHandler = filterLogic.getFilterHandler();
+			for (int slot = 0; slot < filterHandler.getSlotCount(); slot++) {
+				ItemStack filter = filterHandler.getStackInSlot(slot);
 				if (filter.isEmpty()) {
 					return;
 				}
 
 				tryRefillFilter(entity, PlayerInventoryStorage.of(player), filter, getTargetSlots().getOrDefault(slot, TargetSlot.ANY));
-			});
+			}
 		}
 		setCooldown(world, COOLDOWN);
 	}
@@ -144,27 +143,29 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 			return false;
 		}
 
-		AtomicInteger stashSlot = new AtomicInteger(-1);
-		AtomicBoolean hasItemInBackpack = new AtomicBoolean(false);
+		int stashSlot = -1;
+		boolean hasItemInBackpack = false;
 
 		InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
-		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
+		for (int slot = 0; slot < inventoryHandler.getSlotCount(); slot++) {
+			ItemStack stack = inventoryHandler.getSlotStack(slot);
 			if (ItemStackHelper.canItemStacksStack(stack, filter)) {
-				hasItemInBackpack.set(true);
+				hasItemInBackpack = true;
 				if (stack.getCount() <= stack.getMaxStackSize()) {
-					stashSlot.set(slot);
+					stashSlot = slot;
+					break;
 				}
 			}
-		}, () -> stashSlot.get() > -1);
+		};
 
 		ItemStack mainHandItem = player.getMainHandItem();
 		ItemVariant mainHandResource = ItemVariant.of(mainHandItem);
 
 		int count = mainHandItem.getCount();
-		if (hasItemInBackpack.get()
+		if (hasItemInBackpack
 				&& !(mainHandItem.getItem() instanceof BackpackItem)
-				&& (mainHandItem.isEmpty() || (stashSlot.get() > -1 && inventoryHandler.isItemValid(stashSlot.get(), mainHandResource))
-				|| inventoryHandler.simulateInsert(mainHandResource, count, null) == 0)) {
+				&& (mainHandItem.isEmpty() || (stashSlot > -1 && inventoryHandler.isItemValid(stashSlot, mainHandResource))
+				|| StorageUtil.simulateInsert(inventoryHandler, mainHandResource, count, null) == 0)) {
 
 			ItemVariant filterResource = ItemVariant.of(filter);
 			try (Transaction ctx = Transaction.openOuter()) {

@@ -32,7 +32,6 @@ import net.p3pp3rf1y.sophisticatedcore.settings.nosort.NoSortSettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stack.StackUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
@@ -40,13 +39,7 @@ import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
 import team.reborn.energy.api.EnergyStorage;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.IntConsumer;
 
 public class BackpackWrapper implements IBackpackWrapper {
@@ -99,7 +92,6 @@ public class BackpackWrapper implements IBackpackWrapper {
 	private final ItemStack stack;
 
 	public BackpackWrapper(ItemStack backpack) {
-		/*super(backpack, BACKPACK_WRAPPER);*/
 		stack = backpack;
 		renderInfo = new BackpackRenderInfo(backpack, () -> backpackSaveHandler);
 	}
@@ -389,12 +381,13 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	private void cloneSubbackpacks(IStorageWrapper wrapperCloned) {
 		InventoryHandler inventoryHandler = wrapperCloned.getInventoryHandler();
-		InventoryHelper.iterate(inventoryHandler, (slot, stack) -> {
+		for (int slot = 0; slot < inventoryHandler.getSlotCount(); slot++) {
+			ItemStack stack = inventoryHandler.getStackInSlot(slot);
 			if (!(stack.getItem() instanceof BackpackItem)) {
 				return;
 			}
 			inventoryHandler.setStackInSlot(slot, BackpackWrapperLookup.get(stack).map(this::cloneBackpack).orElse(ItemStack.EMPTY));
-		});
+		}
 	}
 
 	private ItemStack cloneBackpack(IBackpackWrapper originalWrapper) {

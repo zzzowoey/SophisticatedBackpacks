@@ -2,12 +2,13 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
+import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import io.github.fabricators_of_create.porting_lib.util.ToolAction;
 import io.github.fabricators_of_create.porting_lib.util.ToolActions;
-import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import me.alphamode.forgetags.Tags;
 import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -45,17 +46,11 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.FilterLogic;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
-import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -109,29 +104,31 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean tryToSwapTool(Player player, BlockState state, double mainHandItemSpeed, ItemStack mainHandItem) {
-		AtomicReference<ItemStack> selectedTool = new AtomicReference<>(ItemStack.EMPTY);
-		AtomicInteger selectedSlot = new AtomicInteger(-1);
-		AtomicDouble bestSpeed = new AtomicDouble(mainHandItemSpeed);
+		ItemStack selectedTool = ItemStack.EMPTY;
+		int selectedSlot = -1;
+		double bestSpeed = mainHandItemSpeed;
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryHandler();
-		InventoryHelper.iterate(backpackInventory, (slot, stack) -> {
+		for (int slot = 0; slot < backpackInventory.getSlotCount(); slot++) {
+			ItemStack stack = backpackInventory.getStackInSlot(slot);
 			if (stack.isEmpty()) {
-				return;
+				continue;
 			}
+
 			if (isAllowedAndGoodAtBreakingBlock(state, stack)) {
 				float destroySpeed = stack.getDestroySpeed(state);
-				if (bestSpeed.get() < destroySpeed) {
-					bestSpeed.set(destroySpeed);
-					selectedSlot.set(slot);
-					selectedTool.set(stack);
+				if (bestSpeed < destroySpeed) {
+					bestSpeed = destroySpeed;
+					selectedSlot = slot;
+					selectedTool= stack;
 				}
 			}
-		});
-		ItemStack tool = selectedTool.get();
+		}
+
 		ItemVariant mainHandItemResource = ItemVariant.of(mainHandItem);
-		ItemVariant resource = ItemVariant.of(tool);
-		if (!tool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItemResource, mainHandItem.getCount(), tool, selectedSlot.get())) {
+		if (!selectedTool.isEmpty() && hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(backpackInventory, mainHandItemResource, mainHandItem.getCount(), selectedTool, selectedSlot)) {
 			try (Transaction nested = Transaction.openOuter()) {
-				player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack((int) backpackInventory.extractSlot(selectedSlot.get(), resource, 1, nested)));
+				ItemVariant resource = ItemVariant.of(selectedTool);
+				player.setItemInHand(InteractionHand.MAIN_HAND, resource.toStack((int) backpackInventory.extractSlot(selectedSlot, resource, 1, nested)));
 				backpackInventory.insert(ItemVariant.of(mainHandItem), mainHandItem.getCount(), nested);
 				nested.commit();
 			}
@@ -142,7 +139,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean hasSpaceInBackpackOrCanPlaceInTheSlotOfSwappedTool(IItemHandlerSimpleInserter backpackInventory, ItemVariant mainHandItem, int mainHandItemCount, ItemStack tool, int selectedSlot) {
-		return (backpackInventory.simulateInsert(mainHandItem, mainHandItemCount, null) == mainHandItemCount)
+		return (StorageUtil.simulateInsert(backpackInventory, mainHandItem, mainHandItemCount, null) == mainHandItemCount)
 				|| (tool.getCount() == 1 && backpackInventory.isItemValid(selectedSlot, mainHandItem));
 	}
 
@@ -214,11 +211,12 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, mainHandItem);
 
 		IItemHandlerSimpleInserter backpackInventory = storageWrapper.getInventoryForUpgradeProcessing();
-		InventoryHelper.iterate(backpackInventory, stack -> {
+		for (int slot = 0; slot < backpackInventory.getSlotCount(); slot++) {
+			ItemStack stack = backpackInventory.getStackInSlot(slot);
 			if (filterLogic.matchesFilter(stack)) {
 				updateBestWeapons(bestAxe, bestAxeDamage, bestSword, bestSwordDamage, stack);
 			}
-		});
+		}
 
 		if (!bestSword.get().isEmpty()) {
 			return swapWeapon(player, mainHandItem, backpackInventory, bestSword.get());
@@ -358,7 +356,32 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 
 	private ItemStack findToolToSwap(IItemHandlerSimpleInserter backpackInventory, Predicate<ItemStack> isValidTool) {
 		Set<ItemStack> alreadyGivenBefore = new HashSet<>();
-		AtomicReference<ItemStack> toolFound = new AtomicReference<>(ItemStack.EMPTY);
+		for (var view : backpackInventory.nonEmptyViews()) {
+			if (view.isResourceBlank()) {
+				continue;
+			}
+
+			ItemStack stack = view.getResource().toStack((int) view.getAmount());
+			if (!hasEquivalentItem(toolCache, stack)) {
+				if (isValidTool.test(stack)) {
+					return stack;
+				}
+			} else {
+				alreadyGivenBefore.add(stack);
+			}
+		}
+
+		if (!alreadyGivenBefore.isEmpty()) {
+			while (toolCache.peek() != null) {
+				ItemStack itemStack = toolCache.poll();
+				if (hasEquivalentItem(alreadyGivenBefore, itemStack)) {
+					return itemStack;
+				}
+			}
+		}
+
+		return ItemStack.EMPTY;
+		/*AtomicReference<ItemStack> toolFound = new AtomicReference<>(ItemStack.EMPTY);
 		InventoryHelper.iterate(backpackInventory, (stack) -> {
 			if (stack.isEmpty()) {
 				return;
@@ -382,7 +405,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 				}
 			}
 		}
-		return toolFound.get();
+		return toolFound.get();*/
 	}
 
 	private boolean hasEquivalentItem(Collection<ItemStack> alreadyGivenBefore, ItemStack stack) {
