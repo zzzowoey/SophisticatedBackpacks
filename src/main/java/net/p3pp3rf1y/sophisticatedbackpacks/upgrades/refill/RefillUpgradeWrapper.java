@@ -119,7 +119,7 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		Storage<ItemVariant> extractFromHandler = storageWrapper.getInventoryForUpgradeProcessing();
 
 		ItemVariant resource = ItemVariant.of(filter);
-		long extracted = extractFromHandler.simulateExtract(resource, missingCount, null);
+		long extracted = StorageUtil.simulateExtract(extractFromHandler, resource, missingCount, null);
 		if (extracted <= 0) {
 			return;
 		}
