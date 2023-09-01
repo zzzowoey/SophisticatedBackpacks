@@ -75,27 +75,12 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.Position;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerRegistry;
 import net.p3pp3rf1y.sophisticatedcore.common.gui.UpgradeContainerType;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ContentsFilteredUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryInventoryPart;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeTab;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.BatteryUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.battery.*;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.compacting.CompactingUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.compacting.CompactingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.compacting.CompactingUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.compacting.CompactingUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoBlastingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeTab;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoCookingUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoSmeltingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.AutoSmokingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.BlastingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeTab;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.CookingUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.SmeltingUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.SmokingUpgradeItem;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.cooking.*;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.CraftingUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.CraftingUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.crafting.CraftingUpgradeTab;
@@ -126,11 +111,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeCo
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.stonecutter.StonecutterUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankInventoryPart;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeContainer;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeTab;
-import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
+import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.*;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.voiding.VoidUpgradeTab;
@@ -141,11 +122,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ModItems {
 	static List<Item> ITEMS = new ArrayList<>(); // Must be up here!
