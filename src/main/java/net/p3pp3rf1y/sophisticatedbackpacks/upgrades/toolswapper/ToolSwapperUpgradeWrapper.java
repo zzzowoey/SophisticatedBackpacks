@@ -381,31 +381,6 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		return ItemStack.EMPTY;
-		/*AtomicReference<ItemStack> toolFound = new AtomicReference<>(ItemStack.EMPTY);
-		InventoryHelper.iterate(backpackInventory, (stack) -> {
-			if (stack.isEmpty()) {
-				return;
-			}
-
-			if (!hasEquivalentItem(toolCache, stack)) {
-				if (isValidTool.test(stack)) {
-					toolFound.set(stack);
-				}
-			} else {
-				alreadyGivenBefore.add(stack);
-			}
-		}, () -> !toolFound.get().isEmpty());
-
-		if (toolFound.get().isEmpty() && !alreadyGivenBefore.isEmpty()) {
-			while (toolCache.peek() != null) {
-				ItemStack itemStack = toolCache.poll();
-				if (hasEquivalentItem(alreadyGivenBefore, itemStack)) {
-					toolFound.set(itemStack);
-					break;
-				}
-			}
-		}
-		return toolFound.get();*/
 	}
 
 	private boolean hasEquivalentItem(Collection<ItemStack> alreadyGivenBefore, ItemStack stack) {
