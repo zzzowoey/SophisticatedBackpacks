@@ -13,7 +13,7 @@ buildscript {
 plugins {
     id "fabric-loom" version "1.2.+"
 
-    id "io.github.juuxel.loom-vineflower" version "1.11.0" // Vineflower, a better decompiler
+    id "io.github.juuxel.loom-vineflower" version "1.11.+" // Vineflower, a better decompiler
     id "io.github.p03w.machete" version "1.+" // automatic jar compressing on build
 
     id "maven-publish"
@@ -117,8 +117,9 @@ def dependencies(DependencyHandler deps) {
     if (findProject(':SophisticatedCore') != null) {
         deps.implementation(deps.project(path: ':SophisticatedCore', configuration: 'namedElements'))
 
-        for (String module in project(':SophisticatedCore')['port_lib_modules'].split(",")) {
-            deps.modApi("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version")
+        String modules = project(':SophisticatedCore')['port_lib_modules']
+        for (String module in modules.split(',')) {
+            deps.modApi("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version+$minecraft_version")
         }
     } else {
         deps.modImplementation("net.p3pp3rf1y:sophisticatedcore-fabric:${sc_version}")
@@ -126,8 +127,8 @@ def dependencies(DependencyHandler deps) {
 
     deps.modApi(deps.include("committee.nova.mkb.fabric:mkb-${minecraft_version}:${mkb_mod_version}"))
 
-    for (String module in port_lib_modules.split(",")) {
-        deps.modApi(deps.include("io.github.fabricators_of_create.Porting-Lib:$module:$port_lib_version+$minecraft_version"))
+    for (String module in port_lib_modules.split(',')) {
+        deps.modApi(deps.include("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version+$minecraft_version"))
     }
 }
 
