@@ -3,10 +3,9 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
-import io.github.fabricators_of_create.porting_lib.util.ToolAction;
-import io.github.fabricators_of_create.porting_lib.util.ToolActions;
+import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
+import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
 import me.alphamode.forgetags.Tags;
-import net.fabricmc.fabric.api.tag.convention.v1.ConventionalItemTags;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -14,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -55,8 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static io.github.fabricators_of_create.porting_lib.util.ToolActions.*;
-
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.*;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {
@@ -119,7 +116,7 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 				if (bestSpeed < destroySpeed) {
 					bestSpeed = destroySpeed;
 					selectedSlot = slot;
-					selectedTool= stack;
+					selectedTool = stack;
 				}
 			}
 		}
@@ -185,9 +182,18 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 	}
 
 	private boolean canPerformToolAction(ItemStack stack) {
-		return stack.is(ItemTags.AXES) || stack.is(ItemTags.HOES)
-				|| stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS)
-				|| stack.is(ConventionalItemTags.SHEARS);
+		return canPerformAnyAction(stack, ToolActions.DEFAULT_AXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_HOE_ACTIONS)
+				|| canPerformAnyAction(stack, ToolActions.DEFAULT_PICKAXE_ACTIONS) || canPerformAnyAction(stack, ToolActions.DEFAULT_SHOVEL_ACTIONS)
+				|| canPerformAnyAction(stack, ToolActions.DEFAULT_SHEARS_ACTIONS);
+	}
+
+	private boolean canPerformAnyAction(ItemStack stack, Set<ToolAction> toolActions) {
+		for (ToolAction toolAction : toolActions) {
+			if (stack.canPerformAction(toolAction)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private boolean isSword(ItemStack stack, Player player) {
@@ -340,7 +346,6 @@ public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpg
 		}
 
 		tool = tool.copy().split(1);
-
 		try (Transaction ctx = Transaction.openOuter()) {
 			long inserted = backpackInventory.insert(ItemVariant.of(mainHandStack), mainHandStack.getCount(), ctx);
 			if (tool.getCount() == 1 || inserted == 0) {
