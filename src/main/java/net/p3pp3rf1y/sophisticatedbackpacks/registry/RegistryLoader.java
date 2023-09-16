@@ -15,7 +15,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.SwordRegistry;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.tool.ToolRegistry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 public class RegistryLoader extends SimpleJsonResourceReloadListener implements IdentifiableResourceReloadListener {
 	private static final Map<String, IRegistryDataLoader> loaders = new HashMap<>();
@@ -72,7 +78,7 @@ public class RegistryLoader extends SimpleJsonResourceReloadListener implements 
 
 	private void logIncorrectDependencies() {
 		for (DependentFile dependentFile : loadLater) {
-			SophisticatedBackpacks.LOGGER.error("Non existent or circular load after dependencies in {} - {}", dependentFile::getName, () -> String.join(",", dependentFile.getDependencies()));
+			SophisticatedBackpacks.LOGGER.error("Non existent or circular load after dependencies in {} - {}", dependentFile.getName(), String.join(",", dependentFile.getDependencies()));
 		}
 	}
 

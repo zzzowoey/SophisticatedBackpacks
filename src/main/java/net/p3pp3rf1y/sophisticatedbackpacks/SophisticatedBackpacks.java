@@ -17,12 +17,12 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SophisticatedBackpacks implements ModInitializer {
 	public static final String ID = "sophisticatedbackpacks";
-	public static final Logger LOGGER = LogManager.getLogger(ID);
+	public static final Logger LOGGER = LoggerFactory.getLogger(ID);
 
 	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(getRL("item_group"))
 			.icon(() -> new ItemStack(ModItems.BACKPACK))
