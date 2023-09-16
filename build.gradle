@@ -19,15 +19,11 @@ plugins {
     id "maven-publish"
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.mod_id
 version = project.mod_version
 group = project.maven_group
 
-if (findProject(':SophisticatedCore') != null) {
-    evaluationDependsOn(':SophisticatedCore')
+base {
+    archivesName = project.mod_id + "-" + project.minecraft_version
 }
 
 repositories {
@@ -81,7 +77,9 @@ configurations.configureEach {
 }
 
 dependencies {
-    setup(dependencies)
+    if (!project.hasProperty("noSetupDependency")) {
+        setup(dependencies)
+    }
     devEnv(dependencies)
     compat(dependencies)
     dependencies(dependencies)
@@ -185,14 +183,14 @@ loom {
 
     runs {
         datagen {
-            client()
+            inherit client
             ideConfigGenerated = true
 
             name "Data Generation"
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/generated/resources")}"
             vmArg "-Dfabric-api.datagen.modid=$mod_id"
-            vmArg "-Dmixin.debug.export=true"
+
             source sourceSets.main
             runDir "run/test_client"
         }
@@ -232,14 +230,12 @@ loom {
     useTestNG()
 }*/
 
-machete {
-    enabled = System.getenv("GITHUB_RUN_NUMBER") != null
+if (project.tasks.findByName("generateResources")) {
+    generateResources.dependsOn runDatagen
 }
 
-tasks.register('generateSources', Copy) {
-    from 'src/replaceme/java'
-    into "$buildDir/generated-src"
-    filter { line -> line.replaceAll('@MOD_VERSION@', '${project.version}') }
+machete {
+    enabled = System.getenv("GITHUB_RUN_NUMBER") != null
 }
 
 processResources {
@@ -264,24 +260,24 @@ processResources {
         expand properties
     }
 
-    filesMatching("sophisticatedbackpacks.mixins.json") {
-        expand "archivesBaseName": archivesBaseName
-    }
-
     duplicatesStrategy = DuplicatesStrategy.WARN
 }
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
+    it.options.release = 17
 }
 
 java {
     withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
-    from('/') {
-        include 'LICENSE'
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName}" }
     }
 
     manifest {
