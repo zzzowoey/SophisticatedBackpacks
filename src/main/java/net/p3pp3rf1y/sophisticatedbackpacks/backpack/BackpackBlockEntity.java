@@ -59,14 +59,22 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public void load(CompoundTag tag) {
 		super.load(tag);
 		setBackpackFromNbt(tag);
-		loadControllerPos(tag);
 
-		if (level != null && !level.isClientSide()) {
-			removeControllerPos();
-			tryToAddToController();
+		// If updateBlockRender exists we are in a update packet load
+		if (tag.contains("updateBlockRender")) {
+			if (tag.getBoolean("updateBlockRender")) {
+				WorldHelper.notifyBlockUpdate(this);
+			}
+		} else {
+			loadControllerPos(tag);
+
+			if (level != null && !level.isClientSide()) {
+				removeControllerPos();
+				tryToAddToController();
+			}
+
+			WorldHelper.notifyBlockUpdate(this);
 		}
-
-		WorldHelper.notifyBlockUpdate(this);
 	}
 
 	@Override
@@ -105,19 +113,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 	public ClientboundBlockEntityDataPacket getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}
-
-/*	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		CompoundTag tag = pkt.getTag();
-		if (tag == null) {
-			return;
-		}
-
-		setBackpackFromNbt(tag);
-		if (tag.getBoolean("updateBlockRender")) {
-			WorldHelper.notifyBlockUpdate(this);
-		}
-	}*/
 
 	public IBackpackWrapper getBackpackWrapper() {
 		return backpackWrapper;
