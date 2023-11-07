@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +70,7 @@ public class CombinedInvWrapper<S extends SlottedStackStorage> extends CombinedS
     }
 
     @Override
-    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+    public void setStackInSlot(int slot, ItemStack stack) {
         int index = getIndexForSlot(slot);
         Optional<SlottedStackStorage> handler = getHandlerFromIndex(index);
         if (handler.isEmpty()) {

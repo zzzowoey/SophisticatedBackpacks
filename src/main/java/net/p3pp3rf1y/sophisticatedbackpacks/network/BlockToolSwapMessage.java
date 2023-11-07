@@ -1,7 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -10,6 +8,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IBlockToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BlockToolSwapMessage extends SimplePacketBase {
 	private final BlockPos pos;

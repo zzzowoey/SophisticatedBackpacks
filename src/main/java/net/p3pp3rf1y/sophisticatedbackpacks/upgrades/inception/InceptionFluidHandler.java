@@ -10,10 +10,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.p3pp3rf1y.sophisticatedcore.api.IStorageFluidHandler;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class InceptionFluidHandler implements IStorageFluidHandler {
 	@Nullable
@@ -90,7 +90,7 @@ public class InceptionFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public FluidStack extract(FluidStack resource, TransactionContext ctx, boolean ignoreInOutLimit) {
-		int drained = 0;
+		long drained = 0;
 		FluidStack toDrain = resource;
 		for (IStorageFluidHandler fluidHandler : fluidHandlers) {
 			drained += fluidHandler.extract(toDrain, ctx, ignoreInOutLimit).getAmount();

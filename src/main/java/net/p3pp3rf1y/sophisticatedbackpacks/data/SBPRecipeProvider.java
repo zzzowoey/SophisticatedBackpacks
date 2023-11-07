@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
 import me.alphamode.forgetags.Tags;
+
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;

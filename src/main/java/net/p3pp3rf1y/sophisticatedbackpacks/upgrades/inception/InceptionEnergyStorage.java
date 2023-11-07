@@ -1,12 +1,12 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.inception;
 
-
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import team.reborn.energy.api.EnergyStorage;
 
-import javax.annotation.Nullable;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class InceptionEnergyStorage implements EnergyStorage {
 	@Nullable
@@ -65,7 +65,7 @@ public class InceptionEnergyStorage implements EnergyStorage {
 
 	@Override
 	public long getAmount() {
-		int totalEnergyStored = 0;
+		long totalEnergyStored = 0;
 		for (EnergyStorage storage : energyStorages) {
 			totalEnergyStored += storage.getAmount();
 		}
@@ -74,7 +74,7 @@ public class InceptionEnergyStorage implements EnergyStorage {
 
 	@Override
 	public long getCapacity() {
-		int totalMaxEnergy = 0;
+		long totalMaxEnergy = 0;
 
 		for (EnergyStorage storage : energyStorages) {
 			if (totalMaxEnergy > Integer.MAX_VALUE - storage.getCapacity()) {

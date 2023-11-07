@@ -41,7 +41,7 @@ public class ModLoot {
 		}
 
 		String chestsPrefix = "minecraft:chests/";
-		String name = id.getPath().toString();
+		String name = id.getPath();
 
 		if (name.startsWith(chestsPrefix) && CHEST_TABLES.contains(name.substring(chestsPrefix.length()))) {
 			String file = name.substring("minecraft:".length());

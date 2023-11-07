@@ -5,7 +5,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
-class BlockContext {
+public class BlockContext {
 	private final Level world;
 
 	private final BlockState state;

@@ -5,6 +5,7 @@ import committee.nova.mkb.api.IKeyBinding;
 import committee.nova.mkb.api.IKeyConflictContext;
 import committee.nova.mkb.keybinding.KeyConflictContext;
 import committee.nova.mkb.keybinding.KeyModifier;
+
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
@@ -27,7 +28,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.*;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
+import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.event.client.ClientRawInputEvent;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
@@ -113,11 +120,7 @@ public class KeybindHandler {
 
 	public static boolean handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
 		InputConstants.Key input = InputConstants.getKey(key, scancode);
-		if (((IKeyBinding)SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen)) {
-			return false;
-		}
-
-        return true;
+		return !((IKeyBinding) SORT_KEYBIND).isActiveAndMatches(input) || !tryCallSort(screen);
 	}
 
 	public static boolean handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {

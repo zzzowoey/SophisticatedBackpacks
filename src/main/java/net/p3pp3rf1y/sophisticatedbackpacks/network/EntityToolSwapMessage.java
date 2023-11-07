@@ -1,7 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,6 +9,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.api.IEntityToolSwapUpgrade;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EntityToolSwapMessage extends SimplePacketBase {
 	private final int entityId;

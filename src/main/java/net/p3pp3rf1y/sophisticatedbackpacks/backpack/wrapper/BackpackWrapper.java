@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper;
 
 import com.google.common.collect.MapMaker;
+import team.reborn.energy.api.EnergyStorage;
+
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -36,14 +38,19 @@ import net.p3pp3rf1y.sophisticatedcore.util.InventorySorter;
 import net.p3pp3rf1y.sophisticatedcore.util.LootHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.RandHelper;
-import team.reborn.energy.api.EnergyStorage;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.IntConsumer;
+import javax.annotation.Nullable;
 
 public class BackpackWrapper implements IBackpackWrapper {
-	private static Map<ItemStack, BackpackWrapper> WRAPPERS = new MapMaker().weakValues().makeMap();
+	private static final Map<ItemStack, BackpackWrapper> WRAPPERS = new MapMaker().weakValues().makeMap();
 
 	public static IBackpackWrapper of(ItemStack backpack) {
 		return WRAPPERS.computeIfAbsent(backpack, BackpackWrapper::new);

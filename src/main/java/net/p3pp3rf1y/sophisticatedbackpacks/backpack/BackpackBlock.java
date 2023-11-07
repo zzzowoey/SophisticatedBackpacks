@@ -1,6 +1,8 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 
 import com.mojang.math.Axis;
+import org.joml.Vector3f;
+
 import io.github.fabricators_of_create.porting_lib.utility.block.EntityDestroyBlock;
 import io.github.fabricators_of_create.porting_lib.utility.block.ExplosionResistanceBlock;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
@@ -59,7 +61,6 @@ import net.p3pp3rf1y.sophisticatedcore.util.FluidHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.InventoryHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
-import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 

@@ -1,6 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.command;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;

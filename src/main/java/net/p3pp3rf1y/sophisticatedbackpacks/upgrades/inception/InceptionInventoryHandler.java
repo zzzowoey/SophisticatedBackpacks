@@ -10,9 +10,11 @@ import net.p3pp3rf1y.sophisticatedcore.inventory.IItemHandlerSimpleInserter;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ITrackedContentsItemHandler;
 import net.p3pp3rf1y.sophisticatedcore.inventory.ItemStackKey;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
@@ -66,19 +68,18 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 		return combinedInventories.getSlot(slot);
 	}
 
-	@Nonnull
 	@Override
 	public ItemStack getStackInSlot(int slot) {
 		return combinedInventories.getStackInSlot(slot);
 	}
 
 	@Override
-	public long insertSlot(int slot, ItemVariant resource, long maxAmount, @Nullable TransactionContext ctx) {
+	public long insertSlot(int slot, ItemVariant resource, long maxAmount, TransactionContext ctx) {
 		return combinedInventories.insertSlot(slot, resource, maxAmount, ctx);
 	}
 
 	@Override
-	public long extractSlot(int slot, ItemVariant resource, long maxAmount, @Nullable TransactionContext ctx) {
+	public long extractSlot(int slot, ItemVariant resource, long maxAmount, TransactionContext ctx) {
 		return combinedInventories.extractSlot(slot, resource, maxAmount, ctx);
 	}
 
@@ -93,7 +94,7 @@ public class InceptionInventoryHandler implements ITrackedContentsItemHandler {
 	}
 
 	@Override
-	public long insert(ItemVariant resource, long maxAmount, @Nullable TransactionContext ctx) {
+	public long insert(ItemVariant resource, long maxAmount, TransactionContext ctx) {
 		long remaining = maxAmount;
 		for (IItemHandlerSimpleInserter handler : handlers) {
 			remaining -= handler.insert(resource, remaining, ctx);

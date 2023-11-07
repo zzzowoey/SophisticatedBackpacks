@@ -1,7 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import javax.annotation.Nullable;
-
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -9,8 +9,8 @@ import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+
+import javax.annotation.Nullable;
 
 public class SyncClientInfoMessage extends SimplePacketBase {
 	private final int slotIndex;

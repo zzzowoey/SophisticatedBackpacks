@@ -12,7 +12,6 @@ import net.p3pp3rf1y.sophisticatedcore.api.IStorageWrapper;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.tank.TankUpgradeWrapper;
 
-import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,7 +22,6 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 		this.backpackWrapper = backpackWrapper;
 	}
 
-	@Nonnull
 	private List<TankUpgradeWrapper> getAllTanks() {
 		return backpackWrapper.getUpgradeHandler().getTypeWrappers(TankUpgradeItem.TYPE);
 	}
@@ -72,7 +70,7 @@ public class BackpackFluidHandler implements IStorageFluidHandler {
 
 	@Override
 	public FluidStack extract(FluidStack resource, TransactionContext ctx, boolean ignoreInOutLimit) {
-		int drained = 0;
+		long drained = 0;
 		long toDrain = resource.getAmount();
 		for (TankUpgradeWrapper tank : getAllTanks()) {
 			if (tank.getContents().isFluidEqual(resource)) {

@@ -2,10 +2,11 @@ package net.p3pp3rf1y.sophisticatedbackpacks.upgrades.toolswapper;
 
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.AtomicDouble;
+import me.alphamode.forgetags.Tags;
+
 import io.github.fabricators_of_create.porting_lib.extensions.extensions.IShearable;
 import io.github.fabricators_of_create.porting_lib.tool.ToolAction;
 import io.github.fabricators_of_create.porting_lib.tool.ToolActions;
-import me.alphamode.forgetags.Tags;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -47,13 +48,22 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeWrapperBase;
 import net.p3pp3rf1y.sophisticatedcore.util.ItemStackHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.NBTHelper;
 
-import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
-import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.*;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.AXE_SCRAPE;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.AXE_STRIP;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.AXE_WAX_OFF;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.SHEARS_CARVE;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.SHEARS_HARVEST;
+import static io.github.fabricators_of_create.porting_lib.tool.ToolActions.SHOVEL_FLATTEN;
 
 public class ToolSwapperUpgradeWrapper extends UpgradeWrapperBase<ToolSwapperUpgradeWrapper, ToolSwapperUpgradeItem>
 		implements IBlockClickResponseUpgrade, IAttackEntityResponseUpgrade, IBlockToolSwapUpgrade, IEntityToolSwapUpgrade {

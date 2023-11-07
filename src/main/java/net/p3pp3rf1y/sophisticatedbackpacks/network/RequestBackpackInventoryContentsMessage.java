@@ -1,7 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import java.util.UUID;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,6 +8,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
+
+import java.util.UUID;
 
 public class RequestBackpackInventoryContentsMessage extends SimplePacketBase {
 	private final UUID backpackUuid;

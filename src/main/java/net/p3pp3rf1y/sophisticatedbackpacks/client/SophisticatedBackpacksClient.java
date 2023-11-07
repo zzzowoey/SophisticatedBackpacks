@@ -10,6 +10,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.ClientBackpackContentsTooltip;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 
+import javax.annotation.Nullable;
+
 @Environment(EnvType.CLIENT)
 public class SophisticatedBackpacksClient implements ClientModInitializer {
 
@@ -23,10 +25,12 @@ public class SophisticatedBackpacksClient implements ClientModInitializer {
 
 		SBPPacketHandler.getChannel().initClientListener();
 	}
+	@Nullable
 	private static ClientTooltipComponent registerTooltipComponent(TooltipComponent data) {
 		if (data instanceof BackpackItem.BackpackContentsTooltip) {
 			return new ClientBackpackContentsTooltip((BackpackItem.BackpackContentsTooltip) data);
 		}
+
 		return null;
 	}
 }
