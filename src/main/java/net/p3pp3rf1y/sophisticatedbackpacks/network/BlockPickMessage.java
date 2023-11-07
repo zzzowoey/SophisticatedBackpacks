@@ -8,8 +8,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
-import javax.annotation.Nullable;
-
 public class BlockPickMessage extends SimplePacketBase {
 	private final ItemStack filter;
 
@@ -26,23 +24,23 @@ public class BlockPickMessage extends SimplePacketBase {
 
 	@Override
 	public boolean handle(Context context) {
-		context.enqueueWork(() -> handleMessage(context.getSender(), this));
+		context.enqueueWork(() -> {
+			ServerPlayer player = context.getSender();
+			if (player == null) {
+				return;
+			}
+
+			PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
+					.map(wrapper -> {
+						for (IBlockPickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockPickResponseUpgrade.class)) {
+							if (upgrade.pickBlock(player, filter)) {
+								return true;
+							}
+						}
+						return false;
+					}).orElse(false));
+		});
 		return true;
 	}
 
-	private static void handleMessage(@Nullable ServerPlayer player, BlockPickMessage msg) {
-		if (player == null) {
-			return;
-		}
-
-		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
-				.map(wrapper -> {
-					for (IBlockPickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockPickResponseUpgrade.class)) {
-						if (upgrade.pickBlock(player, msg.filter)) {
-							return true;
-						}
-					}
-					return false;
-				}).orElse(false));
-	}
 }

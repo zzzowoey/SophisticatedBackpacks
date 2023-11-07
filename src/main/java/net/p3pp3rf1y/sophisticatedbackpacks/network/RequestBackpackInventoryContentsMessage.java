@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
+import java.util.UUID;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -8,9 +10,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackStorage;
 import net.p3pp3rf1y.sophisticatedcore.inventory.InventoryHandler;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.UpgradeHandler;
-
-import javax.annotation.Nullable;
-import java.util.UUID;
 
 public class RequestBackpackInventoryContentsMessage extends SimplePacketBase {
 	private final UUID backpackUuid;
@@ -28,27 +27,26 @@ public class RequestBackpackInventoryContentsMessage extends SimplePacketBase {
 
 	@Override
 	public boolean handle(Context context) {
-		context.enqueueWork(() -> handleMessage(context.getSender(), this));
+		context.enqueueWork(() -> {
+			ServerPlayer player = context.getSender();
+			if (player == null) {
+				return;
+			}
+
+			CompoundTag backpackContents = BackpackStorage.get().getOrCreateBackpackContents(backpackUuid);
+
+			CompoundTag inventoryContents = new CompoundTag();
+			Tag inventoryNbt = backpackContents.get(InventoryHandler.INVENTORY_TAG);
+			if (inventoryNbt != null) {
+				inventoryContents.put(InventoryHandler.INVENTORY_TAG, inventoryNbt);
+			}
+			Tag upgradeNbt = backpackContents.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
+			if (upgradeNbt != null) {
+				inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
+			}
+
+			SBPPacketHandler.sendToClient(player, new BackpackContentsMessage(backpackUuid, inventoryContents));
+		});
 		return true;
-	}
-
-	private static void handleMessage(@Nullable ServerPlayer player, RequestBackpackInventoryContentsMessage msg) {
-		if (player == null) {
-			return;
-		}
-
-		CompoundTag backpackContents = BackpackStorage.get().getOrCreateBackpackContents(msg.backpackUuid);
-
-		CompoundTag inventoryContents = new CompoundTag();
-		Tag inventoryNbt = backpackContents.get(InventoryHandler.INVENTORY_TAG);
-		if (inventoryNbt != null) {
-			inventoryContents.put(InventoryHandler.INVENTORY_TAG, inventoryNbt);
-		}
-		Tag upgradeNbt = backpackContents.get(UpgradeHandler.UPGRADE_INVENTORY_TAG);
-		if (upgradeNbt != null) {
-			inventoryContents.put(UpgradeHandler.UPGRADE_INVENTORY_TAG, upgradeNbt);
-		}
-
-		SBPPacketHandler.sendToClient(player, new BackpackContentsMessage(msg.backpackUuid, inventoryContents));
 	}
 }

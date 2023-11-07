@@ -15,8 +15,6 @@ import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 import net.p3pp3rf1y.sophisticatedcore.settings.SettingsManager;
 import net.p3pp3rf1y.sophisticatedcore.util.MenuProviderHelper;
 
-import javax.annotation.Nullable;
-
 public class AnotherPlayerBackpackOpenMessage extends SimplePacketBase {
 	private final int anotherPlayerId;
 
@@ -33,27 +31,26 @@ public class AnotherPlayerBackpackOpenMessage extends SimplePacketBase {
 
 	@Override
 	public boolean handle(Context context) {
-		context.enqueueWork(() -> handleMessage(context.getSender(), this));
+		context.enqueueWork(() -> {
+			ServerPlayer player = context.getSender();
+			if (player == null || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
+				return;
+			}
+
+			if (player.level.getEntity(anotherPlayerId) instanceof Player anotherPlayer) {
+				PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
+					if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
+
+						BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
+						player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext, backpack.getHoverName()));
+					} else {
+						player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
+					}
+					return true;
+				}, true);
+			}
+		});
 		return true;
-	}
-
-	private static void handleMessage(@Nullable ServerPlayer player, AnotherPlayerBackpackOpenMessage msg) {
-		if (player == null || Boolean.FALSE.equals(Config.SERVER.allowOpeningOtherPlayerBackpacks.get())) {
-			return;
-		}
-
-		if (player.level.getEntity(msg.anotherPlayerId) instanceof Player anotherPlayer) {
-			PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
-				if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
-
-					BackpackContext.AnotherPlayer backpackContext = new BackpackContext.AnotherPlayer(inventoryName, identifier, slot, anotherPlayer);
-					player.openMenu(MenuProviderHelper.createMenuProvider((w, bpc, pl) -> new BackpackContainer(w, pl, backpackContext), backpackContext, backpack.getHoverName()));
-				} else {
-					player.displayClientMessage(Component.translatable("gui.sophisticatedbackpacks.status.backpack_cannot_be_open_by_another_player"), true);
-				}
-				return true;
-			}, true);
-		}
 	}
 
 	private static boolean canAnotherPlayerOpenBackpack(Player anotherPlayer, ItemStack backpack) {

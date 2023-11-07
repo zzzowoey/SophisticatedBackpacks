@@ -1,15 +1,16 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.network;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
+import javax.annotation.Nullable;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.lookup.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
-
-import javax.annotation.Nullable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class SyncClientInfoMessage extends SimplePacketBase {
 	private final int slotIndex;
@@ -33,20 +34,20 @@ public class SyncClientInfoMessage extends SimplePacketBase {
 	}
 
 	@Override
+	@Environment(EnvType.CLIENT)
 	public boolean handle(Context context) {
-		context.enqueueWork(() -> handleMessage(this));
+		context.enqueueWork(() -> {
+			Player player = context.getClientPlayer();
+			if (player == null || renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
+				return;
+			}
+			ItemStack backpack = player.getInventory().items.get(slotIndex);
+			BackpackWrapperLookup.get(backpack).ifPresent(backpackWrapper -> {
+				backpackWrapper.getRenderInfo().deserializeFrom(renderInfoNbt);
+				backpackWrapper.setColumnsTaken(columnsTaken, false);
+			});
+		});
 		return true;
 	}
 
-	private static void handleMessage(SyncClientInfoMessage msg) {
-		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null || msg.renderInfoNbt == null || !(player.containerMenu instanceof BackpackContainer)) {
-			return;
-		}
-		ItemStack backpack = player.getInventory().items.get(msg.slotIndex);
-		BackpackWrapperLookup.get(backpack).ifPresent(backpackWrapper -> {
-			backpackWrapper.getRenderInfo().deserializeFrom(msg.renderInfoNbt);
-			backpackWrapper.setColumnsTaken(msg.columnsTaken, false);
-		});
-	}
 }

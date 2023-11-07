@@ -9,8 +9,6 @@ import net.p3pp3rf1y.sophisticatedbackpacks.util.InventoryInteractionHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.network.SimplePacketBase;
 
-import javax.annotation.Nullable;
-
 public class InventoryInteractionMessage extends SimplePacketBase {
 	private final BlockPos pos;
 	private final Direction face;
@@ -30,18 +28,19 @@ public class InventoryInteractionMessage extends SimplePacketBase {
 
 	@Override
 	public boolean handle(Context context) {
-		context.enqueueWork(() -> handleMessage(this, context.getSender()));
+		context.enqueueWork(() -> {
+			ServerPlayer sender = context.getSender();
+			if (sender == null) {
+				return;
+			}
+
+			PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> {
+				InventoryInteractionHelper.tryInventoryInteraction(pos, sender.level, backpack, face, sender);
+				sender.swing(InteractionHand.MAIN_HAND, true);
+				return true;
+			});
+		});
 		return true;
 	}
 
-	private static void handleMessage(InventoryInteractionMessage msg, @Nullable ServerPlayer sender) {
-		if (sender == null) {
-			return;
-		}
-		PlayerInventoryProvider.get().runOnBackpacks(sender, (backpack, inventoryName, identifier, slot) -> {
-			InventoryInteractionHelper.tryInventoryInteraction(msg.pos, sender.level, backpack, msg.face, sender);
-			sender.swing(InteractionHand.MAIN_HAND, true);
-			return true;
-		});
-	}
 }
