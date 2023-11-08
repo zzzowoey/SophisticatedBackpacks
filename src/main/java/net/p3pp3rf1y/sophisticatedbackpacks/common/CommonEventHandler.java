@@ -1,7 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -58,6 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 
 public class CommonEventHandler {
 	public void registerHandlers() {
