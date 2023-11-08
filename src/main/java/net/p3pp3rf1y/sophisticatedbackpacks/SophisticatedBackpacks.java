@@ -1,8 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -20,6 +17,9 @@ import net.p3pp3rf1y.sophisticatedbackpacks.init.ModCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.registry.RegistryLoader;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SophisticatedBackpacks implements ModInitializer {
 	public static final String ID = "sophisticatedbackpacks";
