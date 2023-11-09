@@ -1,68 +1,66 @@
 {
-  "schemaVersion": 1,
-  "id": "sophisticatedbackpacks",
-  "version": "${mod_version}",
-
-  "name": "Sophisticated Backpacks",
-  "description": "Fancy and functional backpacks.",
-
-  "license": "GNU General Public License v3.0",
-  "icon": "logo.png",
-  "authors": [
-    "P3pp3rF1y",
-    "Ridanisaurus",
-    "Salandora"
-  ],
-  "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks",
-    "issues": "https://github.com/P3pp3rF1y/SophisticatedBackpacks/issues",
-    "sources": "https://github.com/P3pp3rF1y/SophisticatedBackpacks/"
-  },
-
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks"
+    "schemaVersion": 1,
+    "id": "sophisticatedbackpacks",
+    "version": "${mod_version}",
+    "name": "Sophisticated Backpacks",
+    "description": "Fancy and functional backpacks.",
+    "license": "GNU General Public License v3.0",
+    "icon": "logo.png",
+    "authors": [
+        "P3pp3rF1y",
+        "Ridanisaurus",
+        "Salandora"
     ],
-    "client": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.client.SophisticatedBackpacksClient"
-    ],
-    "fabric-datagen": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.data.SophisticatedBackpacksData"
-    ],
-
-    "emi": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.emi.EmiCompat"
-    ],
-
-    "jei_mod_plugin": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBJeiPlugin"
-    ],
-
-    "rei_common": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.rei.REICompat"
-    ],
-    "rei_client": [
-      "net.p3pp3rf1y.sophisticatedbackpacks.compat.rei.REIClientCompat"
-    ]
-  },
-
-  "mixins": [ "sophisticatedbackpacks.mixins.json" ],
-  "accessWidener": "sophisticatedbackpacks.accesswidener",
-
-  "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric-api": ">=${fabric_version}",
-    "minecraft": "${minecraft_version}",
-    "sophisticatedcore": ">=${sc_version}",
-    "mkb": "${mkb_version}",
-    
-    "porting_lib_model_loader": ">=${port_lib_model_loader_version}",
-    "porting_lib_tool_actions": ">=${port_lib_tool_actions_version}"
-  },
-
-  "custom": {
-    "loom:injected_interfaces": {
+    "contact": {
+        "homepage": "https://www.curseforge.com/minecraft/mc-mods/sophisticated-backpacks",
+        "issues": "https://github.com/Salandora/SophisticatedBackpacks/issues",
+        "sources": "https://github.com/Salandora/SophisticatedBackpacks/"
+    },
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks"
+        ],
+        "client": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.client.SophisticatedBackpacksClient"
+        ],
+        "fabric-datagen": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.data.SophisticatedBackpacksData"
+        ],
+        "emi": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.compat.emi.EmiCompat"
+        ],
+        "jei_mod_plugin": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.compat.jei.SBJeiPlugin"
+        ],
+        "rei_common": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.compat.rei.REICompat"
+        ],
+        "rei_client": [
+            "net.p3pp3rf1y.sophisticatedbackpacks.compat.rei.REIClientCompat"
+        ]
+    },
+    "mixins": ["sophisticatedbackpacks.mixins.json"],
+    "accessWidener": "sophisticatedbackpacks.accesswidener",
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric-api": ">=${fabric_version}",
+        "minecraft": "${minecraft_version}",
+        "sophisticatedcore": ">=${sc_version}",
+        "mkb": "${mkb_version}",
+        "porting_lib_model_loader": ">=${port_lib_model_loader_version}",
+        "porting_lib_tool_actions": ">=${port_lib_tool_actions_version}"
+    },
+    "suggests": {
+        "modsmenu": "*"
+    },
+    "custom": {
+        "modmenu": {
+            "parent": {
+                "id": "sophisticatedmods",
+                "name": "Sophisticated Mods",
+                "description": "Group of P3pp3rf1y's Sophisticated Mods"
+            }
+        }
     }
-  }
 }
