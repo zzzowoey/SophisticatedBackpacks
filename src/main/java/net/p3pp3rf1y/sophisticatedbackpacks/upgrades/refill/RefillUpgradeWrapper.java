@@ -145,8 +145,6 @@ public class RefillUpgradeWrapper extends UpgradeWrapperBase<RefillUpgradeWrappe
 		int stashSlot = -1;
 		boolean hasItemInBackpack = false;
 
-		// TODO: check
-		//InventoryHandler inventoryHandler = storageWrapper.getInventoryHandler();
 		ITrackedContentsItemHandler inventoryHandler = storageWrapper.getInventoryForUpgradeProcessing();
 		for (int slot = 0; slot < inventoryHandler.getSlotCount(); slot++) {
 			ItemStack stack = inventoryHandler.getStackInSlot(slot);

@@ -137,7 +137,6 @@ public class BackpackBlockEntity extends BlockEntity implements IControllableSto
 		return backpackWrapper;
 	}
 
-	// TODO: Address this now!
 	@Nullable
 	public <T> T getCapability(BlockApiLookup<T, Direction> cap, @Nullable Direction opt) {
 		if (opt != null && level != null && Config.SERVER.noConnectionBlocks.isBlockConnectionDisallowed(level.getBlockState(getBlockPos().relative(opt)).getBlock())) {
