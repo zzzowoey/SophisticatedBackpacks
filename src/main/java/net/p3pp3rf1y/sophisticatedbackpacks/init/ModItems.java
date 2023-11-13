@@ -8,7 +8,6 @@ import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.BlockPos;
@@ -31,7 +30,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.DirectionalPlaceContext;
@@ -155,11 +153,9 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeItem;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeTab;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.xppump.XpPumpUpgradeWrapper;
-import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -226,11 +222,13 @@ public class ModItems {
 	public static final PumpUpgradeItem ADVANCED_PUMP_UPGRADE = register("advanced_pump_upgrade", () -> new PumpUpgradeItem(true, true, Config.SERVER.pumpUpgrade));
 	public static final XpPumpUpgradeItem XP_PUMP_UPGRADE = register("xp_pump_upgrade", () -> new XpPumpUpgradeItem(Config.SERVER.xpPumpUpgrade));
 
-	public static final Item UPGRADE_BASE = register("upgrade_base", () -> new Item(new Item.Properties().stacksTo(16)));
+	public static final ItemBase UPGRADE_BASE = register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
-	public static final CreativeModeTab ITEM_GROUP = FabricItemGroup.builder(SophisticatedBackpacks.getRL("item_group"))
+	@SuppressWarnings("unused")
+	public static final CreativeModeTab CREATIVE_TAB = FabricItemGroup.builder(SophisticatedBackpacks.getRL("item_group"))
 			.title(Component.translatable("itemGroup.sophisticatedbackpacks"))
 			.icon(() -> new ItemStack(ModItems.BACKPACK))
+			.displayItems((featureFlags, output) -> ITEMS.stream().filter(i -> i instanceof ItemBase).forEach(i -> ((ItemBase) i).addCreativeTabItems(output::accept)))
 			.build();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,47 +297,12 @@ public class ModItems {
 		return Registry.register(PortingLibLoot.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.getRL(id), supplier.get());
 	}
 
-	private static void registerItemGroup() {
-		ItemGroupEvents.modifyEntriesEvent(ITEM_GROUP).register(entries -> {
-			entries.acceptAll(coloredItems(ModItems.BACKPACK));
-
-			ITEMS.stream().filter(item -> item != ModItems.BACKPACK).forEach(entries::accept);
-		});
-	}
-
 	public static void register() {
-		registerItemGroup();
-
 		registerDispenseBehavior();
 		registerCauldronInteractions();
 
 		registerContainers();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(ModItems::onResourceReload);
-	}
-
-	private static Collection<ItemStack> coloredItems(Item item) {
-		if (!net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(item)) {
-			return Collections.emptyList();
-		}
-
-		List<ItemStack> items = new ArrayList<>();
-		ItemStack stack = new ItemStack(item);
-		items.add(stack);
-
-		for (DyeColor color : DyeColor.values()) {
-			stack = new ItemStack(item);
-			new BackpackWrapper(stack).setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors()));
-			items.add(stack);
-		}
-
-		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME));
-		int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, List.of(DyeColor.BLUE, DyeColor.BLACK));
-
-		stack = new ItemStack(item);
-		new BackpackWrapper(stack).setColors(clothColor, trimColor);
-		items.add(stack);
-
-		return items;
 	}
 
 	private static void onResourceReload(MinecraftServer server, CloseableResourceManager resourceManager, boolean success) {

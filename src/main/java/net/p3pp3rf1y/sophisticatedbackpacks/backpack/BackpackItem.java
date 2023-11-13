@@ -25,7 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -39,6 +39,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.p3pp3rf1y.sophisticatedbackpacks.Config;
+import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.IBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.BackpackWrapperLookup;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
@@ -54,12 +55,15 @@ import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.TranslationHelper;
 import net.p3pp3rf1y.sophisticatedcore.settings.memory.MemorySettingsCategory;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.ITickableUpgrade;
 import net.p3pp3rf1y.sophisticatedcore.upgrades.jukebox.ServerStorageSoundHandler;
+import net.p3pp3rf1y.sophisticatedcore.util.ColorHelper;
+import net.p3pp3rf1y.sophisticatedcore.util.ItemBase;
 import net.p3pp3rf1y.sophisticatedcore.util.MenuProviderHelper;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -67,7 +71,7 @@ import javax.annotation.Nullable;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
-public class BackpackItem extends BlockItem implements IStashStorageItem, Equipable {
+public class BackpackItem extends ItemBase implements IStashStorageItem, Equipable {
 	private final IntSupplier numberOfSlots;
 	private final IntSupplier numberOfUpgradeSlots;
 	private final Supplier<BackpackBlock> blockSupplier;
@@ -77,10 +81,36 @@ public class BackpackItem extends BlockItem implements IStashStorageItem, Equipa
 	}
 
 	public BackpackItem(IntSupplier numberOfSlots, IntSupplier numberOfUpgradeSlots, Supplier<BackpackBlock> blockSupplier, UnaryOperator<Properties> updateProperties) {
-		super(blockSupplier.get(), updateProperties.apply(new Properties().stacksTo(1)));
+		super(updateProperties.apply(new Properties().stacksTo(1)));
 		this.numberOfSlots = numberOfSlots;
 		this.numberOfUpgradeSlots = numberOfUpgradeSlots;
 		this.blockSupplier = blockSupplier;
+	}
+
+	@Override
+	public void addCreativeTabItems(Consumer<ItemStack> itemConsumer) {
+		super.addCreativeTabItems(itemConsumer);
+
+		if (this != ModItems.BACKPACK || !net.p3pp3rf1y.sophisticatedcore.Config.COMMON.enabledItems.isItemEnabled(this)) {
+			return;
+		}
+
+		for (DyeColor color : DyeColor.values()) {
+			ItemStack stack = new ItemStack(this);
+			new BackpackWrapper(stack).setColors(ColorHelper.getColor(color.getTextureDiffuseColors()), ColorHelper.getColor(color.getTextureDiffuseColors()));
+			itemConsumer.accept(stack);
+		}
+
+		int clothColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_CLOTH_COLOR, BackpackWrapper.DEFAULT_CLOTH_COLOR, List.of(
+				DyeColor.BLUE, DyeColor.YELLOW, DyeColor.LIME
+		));
+		int trimColor = ColorHelper.calculateColor(BackpackWrapper.DEFAULT_BORDER_COLOR, BackpackWrapper.DEFAULT_BORDER_COLOR, List.of(
+				DyeColor.BLUE, DyeColor.BLACK
+		));
+
+		ItemStack stack = new ItemStack(this);
+		new BackpackWrapper(stack).setColors(clothColor, trimColor);
+		itemConsumer.accept(stack);
 	}
 
 	@Override
@@ -138,7 +168,6 @@ public class BackpackItem extends BlockItem implements IStashStorageItem, Equipa
 			backpackItemEntity.setPos(itemEntity.getX(), itemEntity.getY(), itemEntity.getZ());
 			backpackItemEntity.setItem(itemstack);
 			backpackItemEntity.setPickUpDelay(itemEntity.pickupDelay);
-			//backpackItemEntity.setThrower(itemEntity.thrower);
 			backpackItemEntity.setThrower(itemEntity.getOwner() != null ? itemEntity.getOwner().getUUID() : null);
 			backpackItemEntity.setDeltaMovement(itemEntity.getDeltaMovement());
 		}
