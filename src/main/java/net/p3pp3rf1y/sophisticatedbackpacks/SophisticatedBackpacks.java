@@ -29,20 +29,6 @@ public class SophisticatedBackpacks implements ModInitializer {
 	public void onInitialize() {
 		Config.register();
 		commonEventHandler.registerHandlers();
-		// TODO: Check
-		/*IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-		if (FMLEnvironment.dist == Dist.CLIENT) {
-			ClientEventHandler.registerHandlers();
-			modBus.addListener(KeybindHandler::registerKeyMappings);
-			modBus.addListener(SophisticatedBackpacks::registerTooltipComponent);
-		}
-
-		modBus.addListener(SophisticatedBackpacks::setup);
-		modBus.addListener(DataGenerators::gatherData);
-		modBus.addListener(Config.SERVER::onConfigReload);
-		modBus.addListener(CapabilityBackpackWrapper::onRegister);
-		modBus.addListener(SophisticatedBackpacks::clientSetup);
-		SBPCommand.init(modBus);*/
 
 		ModCompat.initCompats();
 
