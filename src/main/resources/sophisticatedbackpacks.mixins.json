@@ -7,7 +7,7 @@
   "mixins": [
     "CreeperMixin",
     "PiglinAiMixin",
-    "PlayerInventory"
+      "PlayerInventoryMixin"
   ],
   "client": [
   ],

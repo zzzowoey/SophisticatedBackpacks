@@ -15,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 
 
 @Mixin(Inventory.class)
-public class PlayerInventory {
+public class PlayerInventoryMixin {
     @Shadow @Final public NonNullList<ItemStack> armor;
 
     @Shadow @Final public Player player;
