@@ -53,7 +53,7 @@
         "porting_lib_tool_actions": ">=${port_lib_tool_actions_version}"
     },
     "suggests": {
-        "modsmenu": "*"
+        "modmenu": "*"
     },
     "custom": {
         "modmenu": {
