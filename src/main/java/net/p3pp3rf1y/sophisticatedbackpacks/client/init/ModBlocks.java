@@ -1,16 +1,11 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.client.init;
 
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlockEntity;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrapper;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedcore.util.WorldHelper;
 
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK;
-import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.BACKPACK_TILE_TYPE;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.DIAMOND_BACKPACK;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.GOLD_BACKPACK;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.IRON_BACKPACK;
@@ -18,13 +13,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.NETHERITE_BACK
 
 public class ModBlocks {
 	public static void register() {
-		registerRenderers();
 		registerBlockColorHandlers();
-	}
-
-	private static void registerRenderers() {
-		BlockEntityRenderers.register(BACKPACK_TILE_TYPE, context -> new BackpackBlockEntityRenderer());
-		BlockRenderLayerMap.INSTANCE.putBlocks(RenderType.cutout(), BACKPACK, IRON_BACKPACK, GOLD_BACKPACK, DIAMOND_BACKPACK, NETHERITE_BACKPACK);
 	}
 
 	private static void registerBlockColorHandlers() {

@@ -3,6 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -19,6 +21,7 @@ import net.p3pp3rf1y.sophisticatedcore.upgrades.IRenderedTankUpgrade;
 
 import javax.annotation.Nullable;
 
+@Environment(EnvType.CLIENT)
 public class BackpackBlockEntityRenderer implements BlockEntityRenderer<BackpackBlockEntity> {
 	@Override
 	public void render(BackpackBlockEntity backpackBlockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
