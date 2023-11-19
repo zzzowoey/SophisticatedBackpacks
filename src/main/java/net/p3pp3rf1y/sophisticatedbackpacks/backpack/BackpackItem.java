@@ -310,7 +310,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem, Equipab
 		return BackpackWrapperLookup.get(storageStack)
 				.map(wrapper -> {
 					try (Transaction ctx = Transaction.openOuter()) {
-						long inserted = wrapper.getInventoryForUpgradeProcessing().insert(ItemVariant.of(stack), stack.getCount(), null);
+						long inserted = wrapper.getInventoryForUpgradeProcessing().insert(ItemVariant.of(stack), stack.getCount(), ctx);
 						ctx.commit();
 						return stack.copyWithCount(stack.getCount() - (int) inserted);
 					}
