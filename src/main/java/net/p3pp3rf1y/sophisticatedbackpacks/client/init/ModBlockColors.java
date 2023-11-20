@@ -11,7 +11,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.GOLD_BACKPACK;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.IRON_BACKPACK;
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModBlocks.NETHERITE_BACKPACK;
 
-public class ModBlocks {
+public class ModBlockColors {
 	public static void register() {
 		registerBlockColorHandlers();
 	}

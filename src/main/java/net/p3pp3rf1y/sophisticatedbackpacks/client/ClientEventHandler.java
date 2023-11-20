@@ -28,8 +28,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.p3pp3rf1y.sophisticatedbackpacks.SophisticatedBackpacks;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlocks;
-import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItems;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModBlockColors;
+import net.p3pp3rf1y.sophisticatedbackpacks.client.init.ModItemColors;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackBlockEntityRenderer;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackDynamicModel;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.render.BackpackItemStackRenderer;
@@ -73,8 +73,8 @@ public class ClientEventHandler {
 			}
 		});
 
-		ModBlocks.register();
-		ModItems.register();
+		ModBlockColors.register();
+		ModItemColors.register();
 	}
 
 	private static void onModelRegistry(Map<ResourceLocation, IGeometryLoader<?>> loaders) {

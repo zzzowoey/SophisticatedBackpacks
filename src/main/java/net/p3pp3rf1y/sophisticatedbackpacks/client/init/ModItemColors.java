@@ -10,7 +10,7 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.wrapper.BackpackWrap
 import static net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems.BACKPACKS;
 
 @Environment(EnvType.CLIENT)
-public class ModItems {
+public class ModItemColors {
 	public static void register() {
 		ColorProviderRegistry.ITEM.register((backpack, layer) -> {
 			if (layer > 1 || !(backpack.getItem() instanceof BackpackItem)) {
