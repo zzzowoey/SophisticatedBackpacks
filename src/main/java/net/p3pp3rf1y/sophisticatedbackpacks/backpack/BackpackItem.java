@@ -320,7 +320,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem, Equipab
 	@Override
 	public StashResult getItemStashable(ItemStack storageStack, ItemStack stack) {
 		return BackpackWrapperLookup.get(storageStack).map(wrapper -> {
-			if (StorageUtil.simulateInsert(wrapper.getInventoryForUpgradeProcessing(), ItemVariant.of(stack), stack.getCount(), null) == stack.getCount()) {
+			if (StorageUtil.simulateInsert(wrapper.getInventoryForUpgradeProcessing(), ItemVariant.of(stack), stack.getCount(), null) == 0) {
 				return StashResult.NO_SPACE;
 			}
 			if (wrapper.getInventoryHandler().getSlotTracker().getItems().contains(stack.getItem()) || wrapper.getSettingsHandler().getTypeCategory(MemorySettingsCategory.class).matchesFilter(stack)) {
