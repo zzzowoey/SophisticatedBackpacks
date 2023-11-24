@@ -61,6 +61,19 @@ import static net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackBlock.RIGHT_
 
 @Environment(EnvType.CLIENT)
 public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicModel> {
+	public static int STRIDE = DefaultVertexFormat.BLOCK.getIntegerSize();
+	public static int POSITION = findOffset(DefaultVertexFormat.ELEMENT_POSITION);
+	public static int COLOR = findOffset(DefaultVertexFormat.ELEMENT_COLOR);
+	public static int UV0 = findOffset(DefaultVertexFormat.ELEMENT_UV0);
+	public static int NORMAL = findOffset(DefaultVertexFormat.ELEMENT_NORMAL);
+
+	private static int findOffset(VertexFormatElement element)
+	{
+		// Divide by 4 because we want the int offset
+		var index = DefaultVertexFormat.BLOCK.getElements().indexOf(element);
+		return index < 0 ? -1 : DefaultVertexFormat.BLOCK.offsets.getInt(index) / 4;
+	}
+
 	private final Map<ModelPart, UnbakedModel> modelParts;
 
 	private BackpackDynamicModel(Map<ModelPart, UnbakedModel> modelParts) {
@@ -86,7 +99,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		modelParts.values().forEach(model -> model.resolveParents(modelGetter));
 	}
 
-	private static final class BackpackBakedModel implements BakedModel {
+	public static final class BackpackBakedModel implements BakedModel {
 		private static final ItemTransforms ITEM_TRANSFORMS = createItemTransforms();
 		private static final ResourceLocation BACKPACK_MODULES_TEXTURE = new ResourceLocation("sophisticatedbackpacks:block/backpack_modules");
 
@@ -141,13 +154,13 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		@Nullable
 		private IRenderedBatteryUpgrade.BatteryRenderInfo batteryRenderInfo = null;
 
-		public BackpackBakedModel(Map<ModelPart, BakedModel> models, ModelState modelTransform) {
+		private BackpackBakedModel(Map<ModelPart, BakedModel> models, ModelState modelTransform) {
 			this.models = models;
 			this.modelTransform = modelTransform;
 		}
 
 		@Override
-		public List<BakedQuad> getQuads(@org.jetbrains.annotations.Nullable BlockState state, @org.jetbrains.annotations.Nullable Direction side, RandomSource rand) {
+		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
 			List<BakedQuad> ret = new ArrayList<>(models.get(ModelPart.BASE).getQuads(state, side, rand));
 			if (state == null) {
 				addLeftSide(state, side, rand, ret, tankLeft);
@@ -183,15 +196,14 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			float minZ = 1.95f / 16f;
 			float maxX = minX + pixels / 16f;
 			float maxY = minY + 1 / 16f;
-			float[] cols = new float[] {1f, 1f, 1f, 1f};
 			TextureAtlasSprite sprite = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(BACKPACK_MODULES_TEXTURE);
-			ret.add(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), cols, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
+			ret.add(createQuad(List.of(getVector(maxX, maxY, minZ), getVector(maxX, minY, minZ), getVector(minX, minY, minZ), getVector(minX, maxY, minZ)), -1, sprite, Direction.NORTH, 14, 14 + (pixels / 2f), 6, 6.5f));
 		}
 
 		private void addRightSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, List<BakedQuad> ret, boolean tankRight) {
 			if (tankRight) {
 				if (rightTankRenderInfo != null) {
-					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d));
+					rightTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, rightTankRenderInfo.getFillRatio(), 0.6 / 16d, 3));
 				}
 				ret.addAll(models.get(ModelPart.RIGHT_TANK).getQuads(state, side, rand));
 			} else {
@@ -202,7 +214,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 		private void addLeftSide(@Nullable BlockState state, @Nullable Direction side, RandomSource rand, List<BakedQuad> ret, boolean tankLeft) {
 			if (tankLeft) {
 				if (leftTankRenderInfo != null) {
-					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d));
+					leftTankRenderInfo.getFluid().ifPresent(fluid -> addFluid(ret, fluid, leftTankRenderInfo.getFillRatio(), 12.85 / 16d, 2));
 				}
 				ret.addAll(models.get(ModelPart.LEFT_TANK).getQuads(state, side, rand));
 			} else {
@@ -210,7 +222,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			}
 		}
 
-		private void addFluid(List<BakedQuad> ret, FluidStack fluidStack, float ratio, double xMin) {
+		private void addFluid(List<BakedQuad> ret, FluidStack fluidStack, float ratio, double xMin, int tintIndex) {
 			if (Mth.equal(ratio, 0.0f)) {
 				return;
 			}
@@ -221,12 +233,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 
 			FluidVariant fluidVariant = fluidStack.getType();
 			TextureAtlasSprite still = FluidVariantRendering.getSprite(fluidVariant);
-			if (still == null) {
-				return;
-			}
 
-			int color = FluidVariantRendering.getColor(fluidVariant);
-			float[] cols = new float[] {(color >> 24 & 0xFF) / 255F, (color >> 16 & 0xFF) / 255F, (color >> 8 & 0xFF) / 255F, (color & 0xFF) / 255F};
 			float bx1 = 0;
 			float bx2 = 5;
 			float by1 = 0;
@@ -234,11 +241,12 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			float bz1 = 0;
 			float bz2 = 5;
 
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.UP, bx1, bx2, bz1, bz2));
-			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.minZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.minZ)), cols, still, Direction.NORTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ)), cols, still, Direction.SOUTH, bx1, bx2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ)), cols, still, Direction.WEST, bz1, bz2, by1, by2));
-			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), cols, still, Direction.EAST, bz1, bz2, by1, by2));
+			//noinspection DataFlowIssue
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), tintIndex, still, Direction.UP, bx1, bx2, bz1, bz2));
+			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.minZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.maxY, bounds.minZ)), tintIndex, still, Direction.NORTH, bx1, bx2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.maxZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.maxY, bounds.maxZ)), tintIndex, still, Direction.SOUTH, bx1, bx2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.minX, bounds.maxY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.minZ), getVector(bounds.minX, bounds.minY, bounds.maxZ), getVector(bounds.minX, bounds.maxY, bounds.maxZ)), tintIndex, still, Direction.WEST, bz1, bz2, by1, by2));
+			ret.add(createQuad(List.of(getVector(bounds.maxX, bounds.maxY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.maxZ), getVector(bounds.maxX, bounds.minY, bounds.minZ), getVector(bounds.maxX, bounds.maxY, bounds.minZ)), tintIndex, still, Direction.EAST, bz1, bz2, by1, by2));
 		}
 
 		private Vector3f getVector(double x, double y, double z) {
@@ -283,7 +291,7 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			return ITEM_TRANSFORMS;
 		}
 
-		private BakedQuad createQuad(List<Vector3f> vecs, float[] colors, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
+		private BakedQuad createQuad(List<Vector3f> vecs, int tintIndex, TextureAtlasSprite sprite, Direction face, float u1, float u2, float v1, float v2) {
 			Vec3i dirVec = face.getNormal();
 
 			u1 = sprite.getU0() + u1 / 4f * sprite.uvShrinkRatio();
@@ -292,55 +300,48 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 			v1 = sprite.getV0() + v1 / 4f * sprite.uvShrinkRatio();
 			v2 = sprite.getV0() + v2 / 4f * sprite.uvShrinkRatio();
 
-			return createBakedQuad(sprite, face, List.of(
-					new Vertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z(), colors[1], colors[2], colors[3], colors[0], u1, v1, dirVec.getX(), dirVec.getY(), dirVec.getZ()),
-					new Vertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z(), colors[1], colors[2], colors[3], colors[0], u1, v2, dirVec.getX(), dirVec.getY(), dirVec.getZ()),
-					new Vertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z(), colors[1], colors[2], colors[3], colors[0], u2, v2, dirVec.getX(), dirVec.getY(), dirVec.getZ()),
-					new Vertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z(), colors[1], colors[2], colors[3], colors[0], u2, v1, dirVec.getX(), dirVec.getY(), dirVec.getZ())
+			int normX = (int)(dirVec.getX() * 127.0F), normY = (int)(dirVec.getY() * 127.0F), normZ = (int)(dirVec.getZ() * 127.0F);
+			return createBakedQuad(sprite, face, tintIndex, List.of(
+					new Vertex(vecs.get(0).x(), vecs.get(0).y(), vecs.get(0).z(), u1, v1, normX, normY, normZ),
+					new Vertex(vecs.get(1).x(), vecs.get(1).y(), vecs.get(1).z(), u1, v2, normX, normY, normZ),
+					new Vertex(vecs.get(2).x(), vecs.get(2).y(), vecs.get(2).z(), u2, v2, normX, normY, normZ),
+					new Vertex(vecs.get(3).x(), vecs.get(3).y(), vecs.get(3).z(), u2, v1, normX, normY, normZ)
 			));
 		}
 
-		record Vertex(double vecX, double vecY, double vecZ, float colR, float colG, float colB, float colA, float u, float v, float normX, float normY, float normZ){
+		record Vertex(float vecX, float vecY, float vecZ, float u, float v, int normX, int normY, int normZ){
 		}
 
-		private static BakedQuad createBakedQuad(TextureAtlasSprite sprite, Direction direction, List<Vertex> vertices) {
-			int STRIDE = DefaultVertexFormat.BLOCK.getIntegerSize();
-			int POSITION = findOffset(DefaultVertexFormat.ELEMENT_POSITION);
-			int COLOR = findOffset(DefaultVertexFormat.ELEMENT_COLOR);
-			int UV0 = findOffset(DefaultVertexFormat.ELEMENT_UV0);
-			int NORMAL = findOffset(DefaultVertexFormat.ELEMENT_NORMAL);
+		private static BakedQuad createBakedQuad(TextureAtlasSprite sprite, Direction direction, int tintIndex, List<Vertex> vertices) {
 			int[] quadData = new int[STRIDE * 4];
 
-			int vertexIndex;
-			for (vertexIndex = 0; vertexIndex < vertices.size(); vertexIndex++) {
+			for (int vertexIndex = 0; vertexIndex < vertices.size(); vertexIndex++) {
 				Vertex v = vertices.get(vertexIndex);
 
 				// Process vertex
 				int vertexOffset = vertexIndex * STRIDE + POSITION;
-				quadData[vertexOffset] = Float.floatToRawIntBits((float) v.vecX);
-				quadData[vertexOffset + 1] = Float.floatToRawIntBits((float) v.vecY);
-				quadData[vertexOffset + 2] = Float.floatToRawIntBits((float) v.vecZ);
+				quadData[vertexOffset] = Float.floatToRawIntBits(v.vecX);
+				quadData[vertexOffset + 1] = Float.floatToRawIntBits(v.vecY);
+				quadData[vertexOffset + 2] = Float.floatToRawIntBits(v.vecZ);
 
-				// Process color
-				quadData[STRIDE + COLOR] = (((int)(v.colA * 255.0F) & 0xFF) << 24) | ((int)(v.colB * 255.0F) << 16) | ((int)(v.colG * 255.0F) << 8) | (int)(v.colR * 255.0F);
+				// Set color to 0xFF so when it is uses as a factor we don't end up with all 0s
+				quadData[vertexIndex * STRIDE + COLOR] = (0xFF << 24) |
+															(0xFF << 16) |
+															(0xFF << 8) |
+															0xFF;
 
 				// Process normal
-				quadData[STRIDE + NORMAL] = ((int) (v.normX * 127.0f) & 0xFF) | (((int) (v.normY * 127.0f) & 0xFF) << 8) | (((int) (v.normZ * 127.0f) & 0xFF) << 16);
+				quadData[vertexIndex * STRIDE + NORMAL] = (v.normX & 0xFF) |
+														  ((v.normY & 0xFF) << 8) |
+														  ((v.normZ & 0xFF) << 16);
 
 				// Process texture
-				int textureOffset = STRIDE + UV0;
+				int textureOffset = vertexIndex * STRIDE + UV0;
 				quadData[textureOffset] = Float.floatToRawIntBits(v.u);
 				quadData[textureOffset + 1] = Float.floatToRawIntBits(v.v);
 			}
 
-			return new BakedQuad(quadData, -1, direction, sprite, false);
-		}
-
-		private static int findOffset(VertexFormatElement element)
-		{
-			// Divide by 4 because we want the int offset
-			var index = DefaultVertexFormat.BLOCK.getElements().indexOf(element);
-			return index < 0 ? -1 : DefaultVertexFormat.BLOCK.offsets.getInt(index) / 4;
+			return new BakedQuad(quadData, tintIndex, direction, sprite, false);
 		}
 
 		private void rotate(Vector3f posIn, Matrix4f transform) {
