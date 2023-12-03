@@ -87,17 +87,28 @@ public class PlayerInventoryProvider {
 
 	public void runOnBackpacks(Player player, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
 		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers().entrySet()) {
-			PlayerInventoryHandler invHandler = entry.getValue();
-			if (onlyAccessibleByAnotherPlayer && !invHandler.isAccessibleByAnotherPlayer()) {
-				continue;
-			}
+			runOnBackpacks(player, entry.getKey(), entry.getValue(), backpackInventorySlotConsumer, onlyAccessibleByAnotherPlayer);
+		}
+	}
 
-			for (String identifier : invHandler.getIdentifiers(player, player.getLevel().getGameTime())) {
-				for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
-					ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
-					if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, entry.getKey(), identifier, slot)) {
-						return;
-					}
+	public void runOnBackpacks(Player player, String invIdentifier, BackpackInventorySlotConsumer backpackInventorySlotConsumer) {
+		runOnBackpacks(player, invIdentifier, backpackInventorySlotConsumer, false);
+	}
+
+	public void runOnBackpacks(Player player, String invIdentifier, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
+		getPlayerInventoryHandler(invIdentifier).ifPresent(invHandler -> runOnBackpacks(player, invIdentifier, invHandler, backpackInventorySlotConsumer, onlyAccessibleByAnotherPlayer));
+	}
+
+	private void runOnBackpacks(Player player, String invIdentifier, PlayerInventoryHandler invHandler, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
+		if (onlyAccessibleByAnotherPlayer && !invHandler.isAccessibleByAnotherPlayer()) {
+			return;
+		}
+
+		for (String identifier : invHandler.getIdentifiers(player, player.getLevel().getGameTime())) {
+			for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
+				ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
+				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, invIdentifier, identifier, slot)) {
+					return;
 				}
 			}
 		}
