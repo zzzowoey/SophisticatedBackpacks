@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 import io.github.fabricators_of_create.porting_lib.utility.block.EntityDestroyBlock;
 import io.github.fabricators_of_create.porting_lib.utility.block.ExplosionResistanceBlock;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -259,7 +260,10 @@ public class BackpackBlock extends BlockBase implements EntityBlock, SimpleWater
 
 	private void tryToPickup(Level world, ItemEntity itemEntity, IStorageWrapper w) {
 		ItemStack remainingStack = itemEntity.getItem().copy();
-		remainingStack = InventoryHelper.runPickupOnPickupResponseUpgrades(world, w.getUpgradeHandler(), remainingStack, null);
+		try (Transaction ctx = Transaction.openOuter()) {
+			remainingStack = InventoryHelper.runPickupOnPickupResponseUpgrades(world, w.getUpgradeHandler(), remainingStack, ctx);
+			ctx.commit();
+		}
 		if (remainingStack.getCount() < itemEntity.getItem().getCount()) {
 			itemEntity.setItem(remainingStack);
 		}
