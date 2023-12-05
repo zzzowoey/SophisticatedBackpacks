@@ -236,7 +236,7 @@ public class KeybindHandler {
 			Optional<Slot> slot = GuiHelper.getSlotUnderMouse(inventoryScreen);
 
 			if (slot.isPresent() && isSupportedPlayerInventorySlot(slot.get().index) && slot.get().getItem().getItem() instanceof BackpackItem) {
-				SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().index));
+				SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().getContainerSlot()));
 			}
 		}
 	}
