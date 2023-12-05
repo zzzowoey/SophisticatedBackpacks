@@ -87,7 +87,9 @@ public class PlayerInventoryProvider {
 
 	public void runOnBackpacks(Player player, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
 		for (Map.Entry<String, PlayerInventoryHandler> entry : getPlayerInventoryHandlers().entrySet()) {
-			runOnBackpacks(player, entry.getKey(), entry.getValue(), backpackInventorySlotConsumer, onlyAccessibleByAnotherPlayer);
+			if (runOnBackpacks(player, entry.getKey(), entry.getValue(), backpackInventorySlotConsumer, onlyAccessibleByAnotherPlayer)) {
+				return;
+			}
 		}
 	}
 
@@ -99,19 +101,21 @@ public class PlayerInventoryProvider {
 		getPlayerInventoryHandler(invIdentifier).ifPresent(invHandler -> runOnBackpacks(player, invIdentifier, invHandler, backpackInventorySlotConsumer, onlyAccessibleByAnotherPlayer));
 	}
 
-	private void runOnBackpacks(Player player, String invIdentifier, PlayerInventoryHandler invHandler, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
+	private boolean runOnBackpacks(Player player, String invIdentifier, PlayerInventoryHandler invHandler, BackpackInventorySlotConsumer backpackInventorySlotConsumer, boolean onlyAccessibleByAnotherPlayer) {
 		if (onlyAccessibleByAnotherPlayer && !invHandler.isAccessibleByAnotherPlayer()) {
-			return;
+			return false;
 		}
 
 		for (String identifier : invHandler.getIdentifiers(player, player.getLevel().getGameTime())) {
 			for (int slot = 0; slot < invHandler.getSlotCount(player, identifier); slot++) {
 				ItemStack slotStack = invHandler.getStackInSlot(player, identifier, slot);
 				if (slotStack.getItem() instanceof BackpackItem && backpackInventorySlotConsumer.accept(slotStack, invIdentifier, identifier, slot)) {
-					return;
+					return true;
 				}
 			}
 		}
+
+		return false;
 	}
 
 	public interface BackpackInventorySlotConsumer {
