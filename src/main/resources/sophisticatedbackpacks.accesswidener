@@ -18,4 +18,4 @@ accessible field net/minecraft/world/item/RecordItem BY_NAME Ljava/util/Map;
 accessible field net/minecraft/world/item/SpawnEggItem BY_ID Ljava/util/Map;
 
 accessible field net/minecraft/world/entity/item/ItemEntity pickupDelay I
-accessible field net/minecraft/world/entity/item/ItemEntity thrower Ljava/util/UUID;
+accessible field net/minecraft/world/entity/item/ItemEntity target Ljava/util/UUID;
