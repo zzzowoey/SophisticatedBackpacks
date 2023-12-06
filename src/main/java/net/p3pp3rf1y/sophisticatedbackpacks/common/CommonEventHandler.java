@@ -173,19 +173,18 @@ public class CommonEventHandler {
 		if (world.isClientSide) {
 			return InteractionResult.PASS;
 		}
-		AtomicReference<InteractionResult> result = new AtomicReference<>(InteractionResult.PASS);
+
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
 				.map(wrapper -> {
 					for (IBlockClickResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IBlockClickResponseUpgrade.class)) {
 						if (upgrade.onBlockClick(player, pos)) {
-							result.set(InteractionResult.SUCCESS);
 							return true;
 						}
 					}
 					return false;
 				}).orElse(false));
 
-		return result.get();
+		return InteractionResult.PASS;
 	}
 
 	private InteractionResult onAttackEntity(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
@@ -193,19 +192,17 @@ public class CommonEventHandler {
 			return InteractionResult.PASS;
 		}
 
-		AtomicReference<InteractionResult> result = new AtomicReference<>(InteractionResult.PASS);
 		PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryHandlerName, identifier, slot) -> BackpackWrapperLookup.get(backpack)
 				.map(wrapper -> {
 					for (IAttackEntityResponseUpgrade upgrade : wrapper.getUpgradeHandler().getWrappersThatImplement(IAttackEntityResponseUpgrade.class)) {
 						if (upgrade.onAttackEntity(player)) {
-							result.set(InteractionResult.SUCCESS);
 							return true;
 						}
 					}
 					return false;
 				}).orElse(false));
 
-		return result.get();
+		return InteractionResult.PASS;
 	}
 
 	private void onLivingSpecialSpawn(MobSpawnEvents.FinalizeSpawn event) {
