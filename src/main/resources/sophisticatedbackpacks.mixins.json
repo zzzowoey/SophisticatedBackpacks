@@ -10,6 +10,7 @@
         "PlayerInventoryMixin"
     ],
     "client": [
+        "ItemInHandRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1
