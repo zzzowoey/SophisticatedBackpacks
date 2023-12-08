@@ -15,6 +15,7 @@ public class BackpackOpenMessage extends SimplePacketBase {
 	private static final int OFFHAND_SLOT = 40;
 	private final int slotIndex;
 	private final String identifier;
+	private final String handlerName;
 
 	public BackpackOpenMessage() {
 		this(-1);
@@ -24,17 +25,23 @@ public class BackpackOpenMessage extends SimplePacketBase {
 		this(backpackSlot, "");
 	}
 
-	public BackpackOpenMessage(int backpackSlot, String identifier) {
+	public BackpackOpenMessage(int backpackSlot, String identifier, String handlerName) {
 		slotIndex = backpackSlot;
 		this.identifier = identifier;
+		this.handlerName = handlerName;
 	}
 
-	public BackpackOpenMessage(FriendlyByteBuf buffer) { this(buffer.readInt(), buffer.readUtf()); }
+	public BackpackOpenMessage(int backpackSlot, String identifier) {
+		this(backpackSlot, identifier, "");
+	}
+
+	public BackpackOpenMessage(FriendlyByteBuf buffer) { this(buffer.readInt(), buffer.readUtf(), buffer.readUtf()); }
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeInt(this.slotIndex);
 		buffer.writeUtf(this.identifier);
+		buffer.writeUtf(this.handlerName);
 	}
 
 	@Override
@@ -45,7 +52,17 @@ public class BackpackOpenMessage extends SimplePacketBase {
 				return;
 			}
 
-			if (player.containerMenu instanceof BackpackContainer backpackContainer) {
+			if (!this.handlerName.isEmpty()) {
+				int slotIndex1 = this.slotIndex;
+				if (this.slotIndex == CHEST_SLOT) {
+					slotIndex1 -= 36;
+				} else if (this.slotIndex == OFFHAND_SLOT) {
+					slotIndex1 = 0;
+				}
+				BackpackContext.Item backpackContext = new BackpackContext.Item(this.handlerName, this.identifier, slotIndex1,
+						player.containerMenu instanceof InventoryMenu || (player.containerMenu instanceof BackpackContainer backpackContainer && backpackContainer.getBackpackContext().wasOpenFromInventory()));
+				openBackpack(player, backpackContext);
+			} else if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 				BackpackContext backpackContext = backpackContainer.getBackpackContext();
 				if (slotIndex == -1) {
 					openBackpack(player, backpackContext.getParentBackpackContext());
@@ -54,18 +71,6 @@ public class BackpackOpenMessage extends SimplePacketBase {
 				}
 			} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 				BackpackContext backpackContext = contextAwareContainer.getBackpackContext();
-				openBackpack(player, backpackContext);
-			} else if (slotIndex > -1 && player.containerMenu instanceof InventoryMenu) {
-				int slotIndex1 = slotIndex;
-				String inventoryProvider = PlayerInventoryProvider.MAIN_INVENTORY;
-				if (slotIndex == CHEST_SLOT) {
-					inventoryProvider = PlayerInventoryProvider.ARMOR_INVENTORY;
-				} else if (slotIndex == OFFHAND_SLOT) {
-					inventoryProvider = PlayerInventoryProvider.OFFHAND_INVENTORY;
-					slotIndex1 = 0;
-				}
-
-				BackpackContext.Item backpackContext = new BackpackContext.Item(inventoryProvider, identifier, slotIndex1, true);
 				openBackpack(player, backpackContext);
 			} else {
 				PlayerInventoryProvider.get().runOnBackpacks(player, (backpack, inventoryName, identifier1, slot) -> {

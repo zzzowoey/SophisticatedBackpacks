@@ -15,11 +15,12 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -28,13 +29,13 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
-import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackCloseMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.InventoryInteractionMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.SBPPacketHandler;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.UpgradeToggleMessage;
+import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 import net.p3pp3rf1y.sophisticatedcore.client.gui.utils.GuiHelper;
 import net.p3pp3rf1y.sophisticatedcore.event.client.ClientRawInputEvent;
 
@@ -52,7 +53,8 @@ public class KeybindHandler {
 	private static final int KEY_X = 88;
 	private static final int KEY_UNKNOWN = -1;
 	private static final int MIDDLE_BUTTON = 2;
-	private static final int CHEST_SLOT_INDEX = 6;
+	private static final int CHEST_SLOT_INDEX = 38;
+	private static final int OFFHAND_SLOT_INDEX = 40;
 
 	private static final String KEYBIND_SOPHISTICATEDBACKPACKS_CATEGORY = "keybind.sophisticatedbackpacks.category";
 	public static final KeyMapping BACKPACK_TOGGLE_UPGRADE_5 = new KeyMapping(SBPTranslationHelper.INSTANCE.translKeybind("toggle_upgrade_5"),
@@ -118,10 +120,7 @@ public class KeybindHandler {
 
 	public static boolean handleGuiKeyPress(Screen screen, int key, int scancode, int modifiers) {
 		InputConstants.Key input = InputConstants.getKey(key, scancode);
-		if (((IKeyBinding) SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen)) {
-			return false;
-		} else if (((IKeyBinding) BACKPACK_OPEN_KEYBIND).isActiveAndMatches(input)) {
-			sendBackpackOpenOrCloseMessage();
+		if (((IKeyBinding) SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen) || ((IKeyBinding) BACKPACK_OPEN_KEYBIND).isActiveAndMatches(input) && sendBackpackOpenOrCloseMessage()) {
 			return false;
 		}
 		return true;
@@ -129,10 +128,8 @@ public class KeybindHandler {
 
 	public static boolean handleGuiMouseKeyPress(Screen screen, double mouseX, double mouseY, int button) {
 		InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(button);
-		if (((IKeyBinding)SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen)) {
+		if (((IKeyBinding)SORT_KEYBIND).isActiveAndMatches(input) && tryCallSort(screen) || ((IKeyBinding)BACKPACK_OPEN_KEYBIND).isActiveAndMatches(input) && sendBackpackOpenOrCloseMessage()) {
 			return false;
-		} else if (((IKeyBinding)BACKPACK_OPEN_KEYBIND).isActiveAndMatches(input)) {
-			sendBackpackOpenOrCloseMessage();
 		}
 
         return true;
@@ -216,33 +213,42 @@ public class KeybindHandler {
 		SBPPacketHandler.sendToServer(new InventoryInteractionMessage(pos, blockraytraceresult.getDirection()));
 	}
 
-	private static void sendBackpackOpenOrCloseMessage() {
+	private static boolean sendBackpackOpenOrCloseMessage() {
 		if (Minecraft.getInstance().screen == null) {
 			SBPPacketHandler.sendToServer(new BackpackOpenMessage());
-			return;
+			return false;
 		}
 
 		Screen screen = Minecraft.getInstance().screen;
-		if (screen instanceof BackpackScreen backpackScreen) {
-			Optional<Slot> slot = GuiHelper.getSlotUnderMouse(backpackScreen);
-			if (slot.isPresent() && slot.get().getItem().getItem() instanceof BackpackItem) {
-				if (slot.get().getItem().getCount() == 1) {
-					SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().index));
-				}
-			} else {
-				SBPPacketHandler.sendToServer(new BackpackCloseMessage());
-			}
-		} else if (screen instanceof InventoryScreen inventoryScreen) {
-			Optional<Slot> slot = GuiHelper.getSlotUnderMouse(inventoryScreen);
+		if (screen instanceof AbstractContainerScreen<?> containerScreen) {
+			Optional<Slot> slot = GuiHelper.getSlotUnderMouse(containerScreen);
 
-			if (slot.isPresent() && isSupportedPlayerInventorySlot(slot.get().index) && slot.get().getItem().getItem() instanceof BackpackItem) {
+			if (slot.isPresent() && slot.get().container instanceof Inventory) {
+				Optional<String> handlerName = getPlayerInventoryHandlerName(slot.get().index);
+
+				if (handlerName.isPresent() && slot.get().getItem().getItem() instanceof BackpackItem) {
+					SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().index, "", handlerName.get()));
+					return true;
+				}
+			}
+			if (screen instanceof BackpackScreen && slot.isPresent() && slot.get().getItem().getItem() instanceof BackpackItem && slot.get().getItem().getCount() == 1) {
 				SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().getContainerSlot()));
+				return true;
 			}
 		}
+		return false;
 	}
 
-	private static boolean isSupportedPlayerInventorySlot(int slotIndex) {
-		return slotIndex == CHEST_SLOT_INDEX || (slotIndex > 8 && slotIndex < 46);
+	private static Optional<String> getPlayerInventoryHandlerName(int slotIndex) {
+		if (slotIndex == CHEST_SLOT_INDEX) {
+			return Optional.of(PlayerInventoryProvider.ARMOR_INVENTORY);
+		} else  if (slotIndex == OFFHAND_SLOT_INDEX) {
+			return Optional.of(PlayerInventoryProvider.OFFHAND_INVENTORY);
+		} else if (slotIndex >= 0 && slotIndex < 36) {
+			return Optional.of(PlayerInventoryProvider.MAIN_INVENTORY);
+		}
+
+		return Optional.empty();
 	}
 
 	private static class BackpackKeyConflictContext implements IKeyConflictContext {
@@ -250,11 +256,7 @@ public class KeybindHandler {
 
 		@Override
 		public boolean isActive() {
-			if (!GUI.isActive()) {
-				return true;
-			}
-			Screen screen = Minecraft.getInstance().screen;
-			return screen instanceof BackpackScreen || screen instanceof InventoryScreen;
+			return !GUI.isActive() || Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>;
 		}
 
 		@Override

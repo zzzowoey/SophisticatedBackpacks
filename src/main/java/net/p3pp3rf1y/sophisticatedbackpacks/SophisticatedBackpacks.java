@@ -38,6 +38,7 @@ public class SophisticatedBackpacks implements ModInitializer {
 		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(registryLoader);
 
 		SBPPacketHandler.getChannel().initServerListener();
+		ModCompat.compatsSetup();
 	}
 
 	public static ResourceLocation getRL(String regName) {

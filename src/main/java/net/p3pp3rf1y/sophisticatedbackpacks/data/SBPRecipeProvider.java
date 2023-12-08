@@ -570,11 +570,49 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.unlockedBy("has_auto_smelting_upgrade", has(ModItems.AUTO_SMELTING_UPGRADE))
 				.save(consumer, SophisticatedBackpacks.getRL("auto_blasting_upgrade_from_auto_smelting_upgrade"));
 
+		ShapeBasedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.ANVIL_UPGRADE)
+				.pattern("ADA")
+				.pattern("IBI")
+				.pattern(" C ")
+				.define('A', Items.ANVIL)
+				.define('D', Tags.Items.GEMS_DIAMOND)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('B', ModItems.UPGRADE_BASE)
+				.define('C', Tags.Items.CHESTS_WOODEN)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE))
+				.save(consumer);
+
 		new LegacyUpgradeRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK),
 				Ingredient.of(Items.NETHERITE_INGOT), RecipeCategory.MISC, ModItems.NETHERITE_BACKPACK)
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK))
 				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK));
+
+		// addChippedUpgradeRecipes(consumer);
 	}
+
+	/*private static void addChippedUpgradeRecipes(Consumer<FinishedRecipe> consumer) {
+		addChippedUpgradeRecipe(consumer, ChippedCompat.BOTANIST_WORKBENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.BOTANIST_WORKBENCH.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.GLASSBLOWER_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.GLASSBLOWER.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.CARPENTERS_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.CARPENTERS_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.LOOM_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.LOOM_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.MASON_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.MASON_TABLE.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.ALCHEMY_BENCH_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.ALCHEMY_BENCH.get());
+		addChippedUpgradeRecipe(consumer, ChippedCompat.TINKERING_TABLE_UPGRADE.get(), earth.terrarium.chipped.common.registry.ModBlocks.TINKERING_TABLE.get());
+	}
+
+	private static void addChippedUpgradeRecipe(Consumer<FinishedRecipe> consumer, BlockTransformationUpgradeItem upgrade, Block workbench) {
+		ShapeBasedRecipeBuilder.shaped(upgrade)
+				.pattern(" W ")
+				.pattern("IBI")
+				.pattern(" R ")
+				.define('B', ModItems.UPGRADE_BASE.get())
+				.define('R', Tags.Items.DUSTS_REDSTONE)
+				.define('I', Tags.Items.INGOTS_IRON)
+				.define('W', workbench)
+				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE.get()))
+				.condition(new ModLoadedCondition(CompatModIds.CHIPPED))
+				.save(consumer);
+	}*/
 
 	private static InventoryChangeTrigger.TriggerInstance hasLeather() {
 		return inventoryTrigger(ItemPredicate.Builder.item().of(Tags.Items.LEATHER).build());
