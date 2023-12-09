@@ -26,7 +26,7 @@ public class BackpackOpenMessage extends SimplePacketBase {
 	}
 
 	public BackpackOpenMessage(int backpackSlot, String identifier, String handlerName) {
-		slotIndex = backpackSlot;
+		this.slotIndex = backpackSlot;
 		this.identifier = identifier;
 		this.handlerName = handlerName;
 	}
@@ -64,10 +64,10 @@ public class BackpackOpenMessage extends SimplePacketBase {
 				openBackpack(player, backpackContext);
 			} else if (player.containerMenu instanceof BackpackContainer backpackContainer) {
 				BackpackContext backpackContext = backpackContainer.getBackpackContext();
-				if (slotIndex == -1) {
+				if (this.slotIndex == -1) {
 					openBackpack(player, backpackContext.getParentBackpackContext());
-				} else if (backpackContainer.isStorageInventorySlot(slotIndex)) {
-					openBackpack(player, backpackContext.getSubBackpackContext(slotIndex));
+				} else if (backpackContainer.isStorageInventorySlot(this.slotIndex)) {
+					openBackpack(player, backpackContext.getSubBackpackContext(this.slotIndex));
 				}
 			} else if (player.containerMenu instanceof IContextAwareContainer contextAwareContainer) {
 				BackpackContext backpackContext = contextAwareContainer.getBackpackContext();

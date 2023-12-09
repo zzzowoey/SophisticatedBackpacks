@@ -154,9 +154,9 @@ def compat(DependencyHandler deps) {
 //    deps.modCompileOnly("vazkii.botania:Botania:${botania_version}")
 //    deps.modCompileOnly("vazkii.patchouli:Patchouli:${patchouli_version}")
 
-    deps.modCompileOnly("dev.emi:trinkets:$trinkets_version")
-    deps.modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version") // for Trinkets
-    deps.modCompileOnly("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version") // for Trinkets
+    deps.modImplementation("dev.emi:trinkets:$trinkets_version")
+    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:$cca_version") // for Trinkets
+    deps.modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:$cca_version") // for Trinkets
 
     recipeViewers(deps)
 }

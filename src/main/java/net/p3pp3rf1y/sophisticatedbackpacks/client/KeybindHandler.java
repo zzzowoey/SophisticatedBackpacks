@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
@@ -19,6 +20,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -29,6 +31,8 @@ import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.BackpackScreen;
 import net.p3pp3rf1y.sophisticatedbackpacks.client.gui.SBPTranslationHelper;
 import net.p3pp3rf1y.sophisticatedbackpacks.common.gui.BackpackContainer;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.trinkets.TrinketsCompat;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BackpackOpenMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.BlockToolSwapMessage;
 import net.p3pp3rf1y.sophisticatedbackpacks.network.EntityToolSwapMessage;
@@ -221,31 +225,40 @@ public class KeybindHandler {
 
 		Screen screen = Minecraft.getInstance().screen;
 		if (screen instanceof AbstractContainerScreen<?> containerScreen) {
-			Optional<Slot> slot = GuiHelper.getSlotUnderMouse(containerScreen);
-
-			if (slot.isPresent() && slot.get().container instanceof Inventory) {
-				Optional<String> handlerName = getPlayerInventoryHandlerName(slot.get().index);
-
-				if (handlerName.isPresent() && slot.get().getItem().getItem() instanceof BackpackItem) {
-					SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().index, "", handlerName.get()));
+			return GuiHelper.getSlotUnderMouse(containerScreen).map(slot -> {
+				if (slot.container instanceof Inventory || isTrinket(slot.container)) {
+					Optional<PlayerInventoryReturn> ret = getPlayerInventory(slot);
+					if (ret.isPresent() && slot.getItem().getItem() instanceof BackpackItem) {
+						SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.getContainerSlot(), ret.get().identifier(), ret.get().handlerName()));
+						return true;
+					}
+				}
+				if (screen instanceof BackpackScreen && slot.getItem().getItem() instanceof BackpackItem && slot.getItem().getCount() == 1) {
+					SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.getContainerSlot()));
 					return true;
 				}
-			}
-			if (screen instanceof BackpackScreen && slot.isPresent() && slot.get().getItem().getItem() instanceof BackpackItem && slot.get().getItem().getCount() == 1) {
-				SBPPacketHandler.sendToServer(new BackpackOpenMessage(slot.get().getContainerSlot()));
-				return true;
-			}
+				return false;
+			}).orElse(false);
 		}
 		return false;
 	}
 
-	private static Optional<String> getPlayerInventoryHandlerName(int slotIndex) {
+	private static boolean isTrinket(Container container) {
+		return FabricLoader.getInstance().isModLoaded(CompatModIds.TRINKETS) && TrinketsCompat.isTrinketContainer(container);
+	}
+
+	record PlayerInventoryReturn(String identifier, String handlerName) {}
+
+	private static Optional<PlayerInventoryReturn> getPlayerInventory(Slot slot) {
+		int slotIndex = slot.getContainerSlot();
 		if (slotIndex == CHEST_SLOT_INDEX) {
-			return Optional.of(PlayerInventoryProvider.ARMOR_INVENTORY);
-		} else  if (slotIndex == OFFHAND_SLOT_INDEX) {
-			return Optional.of(PlayerInventoryProvider.OFFHAND_INVENTORY);
+			return Optional.of(new PlayerInventoryReturn("", PlayerInventoryProvider.ARMOR_INVENTORY));
+		} else if (slotIndex == OFFHAND_SLOT_INDEX) {
+			return Optional.of(new PlayerInventoryReturn("", PlayerInventoryProvider.OFFHAND_INVENTORY));
+		} else if (isTrinket(slot.container)) {
+			return Optional.of(new PlayerInventoryReturn(TrinketsCompat.getIdentifierForSlot(slot.container), CompatModIds.TRINKETS));
 		} else if (slotIndex >= 0 && slotIndex < 36) {
-			return Optional.of(PlayerInventoryProvider.MAIN_INVENTORY);
+			return Optional.of(new PlayerInventoryReturn("", PlayerInventoryProvider.MAIN_INVENTORY));
 		}
 
 		return Optional.empty();

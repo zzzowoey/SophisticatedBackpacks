@@ -10,9 +10,10 @@
         "PlayerInventoryMixin"
     ],
     "client": [
+        "CreativeModeInventoryScreenSlotWrapperMixin",
         "ItemInHandRendererMixin"
     ],
     "injectors": {
         "defaultRequire": 1
-  }
+    }
 }

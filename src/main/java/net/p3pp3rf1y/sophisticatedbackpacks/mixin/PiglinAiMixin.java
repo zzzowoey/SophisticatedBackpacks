@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.p3pp3rf1y.sophisticatedbackpacks.compat.CompatModIds;
 import net.p3pp3rf1y.sophisticatedbackpacks.init.ModItems;
 import net.p3pp3rf1y.sophisticatedbackpacks.util.PlayerInventoryProvider;
 
@@ -25,7 +26,7 @@ public class PiglinAiMixin {
 	private static Iterable<ItemStack> sophisticatedbackpacks$isWeraingGold$getArmorSlots(LivingEntity instance) {
 		if (instance instanceof Player player) {
 			List<ItemStack> trinkets = Lists.newArrayList();
-			PlayerInventoryProvider.get().runOnBackpacks(player, "trinkets", (backpack, inventoryHandlerName, identifier, slot) -> trinkets.add(backpack));
+			PlayerInventoryProvider.get().runOnBackpacks(player, CompatModIds.TRINKETS, (backpack, inventoryHandlerName, identifier, slot) -> trinkets.add(backpack));
 			return Iterables.concat(instance.getArmorSlots(), trinkets);
 		}
 
