@@ -371,9 +371,9 @@ public class BackpackDynamicModel implements IUnbakedGeometry<BackpackDynamicMod
 	}
 
 	private static class BackpackItemOverrideList extends ItemOverrides {
-		private final BackpackDynamicModel.BackpackBakedModel backpackModel;
+		private final BackpackBakedModel backpackModel;
 
-		public BackpackItemOverrideList(BackpackDynamicModel.BackpackBakedModel backpackModel) {
+		public BackpackItemOverrideList(BackpackBakedModel backpackModel) {
 			this.backpackModel = backpackModel;
 		}
 

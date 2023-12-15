@@ -61,7 +61,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 			int borderColor = wrapper.getAccentColor();
 			model.render(parentModel, livingEntity, matrixStack, buffer, packedLight, clothColor, borderColor, backpack.getItem(), wrapper.getRenderInfo());
 			renderUpgrades(livingEntity, wrapper.getRenderInfo());
-			renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo(), livingEntity.getLevel());
+			renderItemShown(matrixStack, buffer, packedLight, wrapper.getRenderInfo(), livingEntity.level());
 		});
 	}
 
@@ -77,7 +77,7 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 	}
 
 	private static void renderUpgrades(LivingEntity livingEntity, RenderInfo renderInfo) {
-		if (Minecraft.getInstance().isPaused() || livingEntity.getLevel().random.nextInt(32) != 0) {
+		if (Minecraft.getInstance().isPaused() || livingEntity.level().random.nextInt(32) != 0) {
 			return;
 		}
 		renderInfo.getUpgradeRenderData().forEach((type, data) -> UpgradeRenderRegistry.getUpgradeRenderer(type).ifPresent(renderer -> renderUpgrade(renderer, livingEntity, type, data)));
@@ -96,6 +96,6 @@ public class BackpackLayerRenderer<T extends LivingEntity, M extends EntityModel
 
 	private static <T extends IUpgradeRenderData> void renderUpgrade(IUpgradeRenderer<T> renderer, LivingEntity livingEntity, UpgradeRenderDataType<?> type, IUpgradeRenderData data) {
 		//noinspection unchecked
-		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.getLevel(), livingEntity.getLevel().random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
+		type.cast(data).ifPresent(renderData -> renderer.render(livingEntity.level(), livingEntity.level().random, vector3d -> getBackpackMiddleFacePoint(livingEntity, vector3d), (T) renderData));
 	}
 }

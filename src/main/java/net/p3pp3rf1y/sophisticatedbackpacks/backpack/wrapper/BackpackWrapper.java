@@ -428,7 +428,7 @@ public class BackpackWrapper implements IBackpackWrapper {
 
 	@Override
 	public void fillWithLoot(Player playerEntity) {
-		if (playerEntity.getLevel().isClientSide) {
+		if (playerEntity.level().isClientSide) {
 			return;
 		}
 		NBTHelper.getString(stack, LOOT_TABLE_NAME_TAG).ifPresent(ltName -> fillWithLootFromTable(playerEntity, ltName));
@@ -482,8 +482,8 @@ public class BackpackWrapper implements IBackpackWrapper {
 	}
 
 	private void fillWithLootFromTable(Player playerEntity, String lootName) {
-		MinecraftServer server = playerEntity.getLevel().getServer();
-		if (server == null || !(playerEntity.getLevel() instanceof ServerLevel serverLevel)) {
+		MinecraftServer server = playerEntity.level().getServer();
+		if (server == null || !(playerEntity.level() instanceof ServerLevel serverLevel)) {
 			return;
 		}
 

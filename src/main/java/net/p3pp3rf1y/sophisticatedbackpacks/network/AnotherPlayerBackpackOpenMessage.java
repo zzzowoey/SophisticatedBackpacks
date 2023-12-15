@@ -37,7 +37,7 @@ public class AnotherPlayerBackpackOpenMessage extends SimplePacketBase {
 				return;
 			}
 
-			if (player.getLevel().getEntity(anotherPlayerId) instanceof Player anotherPlayer) {
+			if (player.level().getEntity(anotherPlayerId) instanceof Player anotherPlayer) {
 				PlayerInventoryProvider.get().runOnBackpacks(anotherPlayer, (backpack, inventoryName, identifier, slot) -> {
 					if (canAnotherPlayerOpenBackpack(anotherPlayer, backpack)) {
 

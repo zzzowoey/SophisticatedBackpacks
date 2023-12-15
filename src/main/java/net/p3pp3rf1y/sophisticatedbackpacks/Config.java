@@ -451,13 +451,13 @@ public class Config {
 	}
 
 	public static void onConfigLoad(ModConfig modConfig) {
-		for (Config.BaseConfig config : CONFIGS.values())
+		for (BaseConfig config : CONFIGS.values())
 			if (config.specification == modConfig.getSpec())
 				config.onConfigLoad();
 	}
 
 	public static void onConfigReload(ModConfig modConfig) {
-		for (Config.BaseConfig config : CONFIGS.values())
+		for (BaseConfig config : CONFIGS.values())
 			if (config.specification == modConfig.getSpec())
 				config.onConfigReload();
 	}

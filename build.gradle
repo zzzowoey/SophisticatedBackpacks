@@ -33,6 +33,12 @@ base {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        url "https://maven.jamieswhiteshirt.com/libs-release"
+        content {
+            includeGroup "com.jamieswhiteshirt"
+        }
+    }
 
     maven { url = "https://maven.quiltmc.org/repository/release" } // QM
     maven { url = 'https://maven.parchmentmc.org' } // Parchment
@@ -128,7 +134,9 @@ def dependencies(DependencyHandler deps) {
 
         def modules = project(':SophisticatedCore')['port_lib_modules'].split(',')
         for (def module in modules) {
-            deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version+$minecraft_version")
+            deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version") {
+                exclude group:"net.fabricmc.fabric-api"
+            }
         }
     } else {
         deps.modImplementation("net.p3pp3rf1y:sophisticatedcore-fabric:${sc_version}")
@@ -137,7 +145,16 @@ def dependencies(DependencyHandler deps) {
     deps.modImplementation("committee.nova.mkb.fabric:mkb-${minecraft_version}:${mkb_mod_version}")
 
     for (def module in port_lib_modules.split(',')) {
-        deps.include(deps.modApi("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version+$minecraft_version"))
+        def modules = project(':SophisticatedCore')['port_lib_modules'].split(',')
+        if (modules.contains(module)) {
+            deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version") {
+                exclude group:"net.fabricmc.fabric-api"
+            }
+        } else {
+            deps.include(deps.modApi("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version")) {
+                exclude group:"net.fabricmc.fabric-api"
+            }
+        }
     }
 }
 

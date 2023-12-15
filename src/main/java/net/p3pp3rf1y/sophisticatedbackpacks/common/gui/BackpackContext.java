@@ -161,7 +161,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.getLevel().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
+			if (!player.level().isClientSide && handlerName.equals(PlayerInventoryProvider.MAIN_INVENTORY)) {
 				IStorageWrapper backpackWrapper = getBackpackWrapper(player);
 				SBPPacketHandler.sendToClient((ServerPlayer) player, new SyncClientInfoMessage(backpackSlotIndex, backpackWrapper.getRenderInfo().getNbt(), backpackWrapper.getColumnsTaken()));
 			}
@@ -188,7 +188,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.Item(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean());
+			return new Item(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean());
 		}
 
 		@Override
@@ -230,7 +230,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
+			return new ItemSubBackpack(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readBoolean(), packetBuffer.readInt());
 		}
 
 		@Override
@@ -241,7 +241,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.Item(handlerName, identifier, backpackSlotIndex, super.wasOpenFromInventory());
+			return new Item(handlerName, identifier, backpackSlotIndex, super.wasOpenFromInventory());
 		}
 
 		@Override
@@ -274,8 +274,8 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public void onUpgradeChanged(Player player) {
-			if (!player.getLevel().isClientSide) {
-				WorldHelper.getBlockEntity(player.getLevel(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
+			if (!player.level().isClientSide) {
+				WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).ifPresent(BackpackBlockEntity::refreshRenderState);
 			}
 		}
 
@@ -291,7 +291,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public IBackpackWrapper getBackpackWrapper(Player player) {
-			return WorldHelper.getBlockEntity(player.getLevel(), pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
+			return WorldHelper.getBlockEntity(player.level(), pos, BackpackBlockEntity.class).map(BackpackBlockEntity::getBackpackWrapper).orElse(IBackpackWrapper.Noop.INSTANCE);
 		}
 
 		@Override
@@ -310,7 +310,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.Block(BlockPos.of(packetBuffer.readLong()));
+			return new Block(BlockPos.of(packetBuffer.readLong()));
 		}
 
 		@Override
@@ -320,7 +320,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public boolean canInteractWith(Player player) {
-			return player.getLevel().getBlockEntity(pos) instanceof BackpackBlockEntity
+			return player.level().getBlockEntity(pos) instanceof BackpackBlockEntity
 					&& (player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D);
 		}
 
@@ -355,7 +355,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 		}
 
 		public static BackpackContext fromBuffer(FriendlyByteBuf packetBuffer) {
-			return new BackpackContext.BlockSubBackpack(BlockPos.of(packetBuffer.readLong()), packetBuffer.readInt());
+			return new BlockSubBackpack(BlockPos.of(packetBuffer.readLong()), packetBuffer.readInt());
 		}
 
 		@Override
@@ -366,7 +366,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.Block(pos);
+			return new Block(pos);
 		}
 
 		@Override
@@ -435,7 +435,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 			int playerId = packetBuffer.readInt();
 			Player otherPlayer = (Player) level.getEntity(playerId);
 
-			return new BackpackContext.AnotherPlayer(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), Objects.requireNonNull(otherPlayer));
+			return new AnotherPlayer(packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), Objects.requireNonNull(otherPlayer));
 		}
 	}
 
@@ -471,7 +471,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 
 		@Override
 		public BackpackContext getParentBackpackContext() {
-			return new BackpackContext.AnotherPlayer(handlerName, identifier, backpackSlotIndex, otherPlayer);
+			return new AnotherPlayer(handlerName, identifier, backpackSlotIndex, otherPlayer);
 		}
 
 		@Override
@@ -488,7 +488,7 @@ public abstract class BackpackContext implements MenuProviderHelper.ContextProvi
 			int playerId = packetBuffer.readInt();
 			Player otherPlayer = (Player) level.getEntity(playerId);
 
-			return new BackpackContext.AnotherPlayerSubBackpack(Objects.requireNonNull(otherPlayer), packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
+			return new AnotherPlayerSubBackpack(Objects.requireNonNull(otherPlayer), packetBuffer.readUtf(), packetBuffer.readUtf(), packetBuffer.readInt(), packetBuffer.readInt());
 		}
 
 		@Override

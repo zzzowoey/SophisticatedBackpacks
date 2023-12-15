@@ -270,7 +270,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem, Equipab
 		}
 		BackpackWrapperLookup.get(stack).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.getLevel(), player.blockPosition()))
+						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
 		);
 		super.onArmorTick(stack, level, player);
 	}
@@ -282,7 +282,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem, Equipab
 		}
 		BackpackWrapperLookup.get(stack).ifPresent(
 				wrapper -> wrapper.getUpgradeHandler().getWrappersThatImplement(ITickableUpgrade.class)
-						.forEach(upgrade -> upgrade.tick(player, player.getLevel(), player.blockPosition()))
+						.forEach(upgrade -> upgrade.tick(player, player.level(), player.blockPosition()))
 		);
 		super.inventoryTick(stack, level, entityIn, itemSlot, isSelected);
 	}
@@ -302,7 +302,7 @@ public class BackpackItem extends ItemBase implements IStashStorageItem, Equipab
 
 	@Override
 	public Optional<TooltipComponent> getInventoryTooltip(ItemStack stack) {
-		return Optional.of(new BackpackItem.BackpackContentsTooltip(stack));
+		return Optional.of(new BackpackContentsTooltip(stack));
 	}
 
 	@Override

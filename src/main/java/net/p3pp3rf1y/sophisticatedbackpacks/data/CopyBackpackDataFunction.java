@@ -34,8 +34,8 @@ public class CopyBackpackDataFunction extends LootItemConditionalFunction {
 		return ModItems.COPY_BACKPACK_DATA;
 	}
 
-	public static CopyBackpackDataFunction.Builder builder() {
-		return new CopyBackpackDataFunction.Builder();
+	public static Builder builder() {
+		return new Builder();
 	}
 
 	public static class Serializer extends LootItemConditionalFunction.Serializer<CopyBackpackDataFunction> {
@@ -46,9 +46,9 @@ public class CopyBackpackDataFunction extends LootItemConditionalFunction {
 		}
 	}
 
-	public static class Builder extends LootItemConditionalFunction.Builder<CopyBackpackDataFunction.Builder> {
+	public static class Builder extends LootItemConditionalFunction.Builder<Builder> {
 		@Override
-		protected CopyBackpackDataFunction.Builder getThis() {
+		protected Builder getThis() {
 			return this;
 		}
 

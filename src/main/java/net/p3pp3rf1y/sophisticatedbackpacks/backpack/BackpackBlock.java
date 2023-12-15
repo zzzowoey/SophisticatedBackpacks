@@ -3,8 +3,8 @@ package net.p3pp3rf1y.sophisticatedbackpacks.backpack;
 import com.mojang.math.Axis;
 import org.joml.Vector3f;
 
-import io.github.fabricators_of_create.porting_lib.utility.block.EntityDestroyBlock;
-import io.github.fabricators_of_create.porting_lib.utility.block.ExplosionResistanceBlock;
+import io.github.fabricators_of_create.porting_lib.block.EntityDestroyBlock;
+import io.github.fabricators_of_create.porting_lib.block.ExplosionResistanceBlock;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.client.Minecraft;
@@ -38,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -81,14 +81,8 @@ public class BackpackBlock extends BlockBase implements EntityBlock, SimpleWater
 	}
 
 	public BackpackBlock(float explosionResistance) {
-		super(Properties.of(Material.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL));
+		super(Properties.of().mapColor(MapColor.WOOL).noOcclusion().strength(0.8F, explosionResistance).sound(SoundType.WOOL).pushReaction(PushReaction.DESTROY));
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, false).setValue(LEFT_TANK, false).setValue(RIGHT_TANK, false));
-	}
-
-	@SuppressWarnings("deprecation")
-	@Override
-	public PushReaction getPistonPushReaction(BlockState pState) {
-		return PushReaction.DESTROY;
 	}
 
 	@SuppressWarnings("deprecation")

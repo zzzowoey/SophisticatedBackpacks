@@ -1,14 +1,13 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.data;
 
-import me.alphamode.forgetags.Tags;
-
+import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.LegacyUpgradeRecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
@@ -581,8 +580,8 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.define('C', Tags.Items.CHESTS_WOODEN)
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE))
 				.save(consumer);
-
-		new LegacyUpgradeRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER, Ingredient.of(ModItems.DIAMOND_BACKPACK),
+		// TODO 没生效
+		new SmithingTransformRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER, Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK),
 				Ingredient.of(Items.NETHERITE_INGOT), RecipeCategory.MISC, ModItems.NETHERITE_BACKPACK)
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK))
 				.save(consumer, RegistryHelper.getItemKey(ModItems.NETHERITE_BACKPACK));

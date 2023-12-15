@@ -34,7 +34,7 @@ public class EntityToolSwapMessage extends SimplePacketBase {
 				return;
 			}
 
-			Level world = sender.getLevel();
+			Level world = sender.level();
 			Entity entity = world.getEntity(entityId);
 
 			if (entity == null) {

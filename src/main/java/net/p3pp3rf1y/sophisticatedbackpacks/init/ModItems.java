@@ -1,9 +1,5 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.init;
 
-import com.mojang.serialization.Codec;
-
-import io.github.fabricators_of_create.porting_lib.loot.IGlobalLootModifier;
-import io.github.fabricators_of_create.porting_lib.loot.PortingLibLoot;
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -60,11 +56,10 @@ import net.p3pp3rf1y.sophisticatedbackpacks.crafting.BasicBackpackRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.crafting.SmithingBackpackUpgradeRecipe;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.CopyBackpackDataFunction;
 import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootEnabledCondition;
-import net.p3pp3rf1y.sophisticatedbackpacks.data.SBLootModifierProvider;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeItem;
-import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeTab;
+import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.anvil.AnvilUpgradeWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeContainer;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeItem;
 import net.p3pp3rf1y.sophisticatedbackpacks.upgrades.deposit.DepositUpgradeTab;
@@ -230,11 +225,15 @@ public class ModItems {
 	public static final ItemBase UPGRADE_BASE = register("upgrade_base", () -> new ItemBase(new Item.Properties().stacksTo(16)));
 
 	@SuppressWarnings("unused")
-	public static final CreativeModeTab CREATIVE_TAB = FabricItemGroup.builder(SophisticatedBackpacks.getRL("item_group"))
-			.title(Component.translatable("itemGroup.sophisticatedbackpacks"))
-			.icon(() -> new ItemStack(ModItems.BACKPACK))
-			.displayItems((featureFlags, output) -> ITEMS.stream().filter(i -> i instanceof ItemBase).forEach(i -> ((ItemBase) i).addCreativeTabItems(output::accept)))
-			.build();
+	public static final CreativeModeTab CREATIVE_TAB = Registry.register(
+			BuiltInRegistries.CREATIVE_MODE_TAB,
+			SophisticatedBackpacks.getRL("item_group"),
+			FabricItemGroup.builder()
+					.icon(() -> new ItemStack(ModItems.BACKPACK))
+					.title(Component.translatable("itemGroup.sophisticatedbackpacks"))
+					.displayItems((featureFlags, output) -> ITEMS.stream().filter(i -> i instanceof ItemBase).forEach(i -> ((ItemBase) i).addCreativeTabItems(output::accept)))
+					.build()
+	);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -268,12 +267,12 @@ public class ModItems {
 
 	public static final SimpleCraftingRecipeSerializer<BackpackDyeRecipe> BACKPACK_DYE_RECIPE_SERIALIZER = registerRecipeSerializer("backpack_dye", () -> new SimpleCraftingRecipeSerializer<>(BackpackDyeRecipe::new));
 	public static final RecipeSerializer<BackpackUpgradeRecipe> BACKPACK_UPGRADE_RECIPE_SERIALIZER = registerRecipeSerializer("backpack_upgrade", BackpackUpgradeRecipe.Serializer::new);
-	public static final RecipeSerializer<SmithingBackpackUpgradeRecipe> SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = registerRecipeSerializer("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
+	public static final SmithingBackpackUpgradeRecipe.Serializer SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER = registerRecipeSerializer("smithing_backpack_upgrade", SmithingBackpackUpgradeRecipe.Serializer::new);
 	public static final RecipeSerializer<BasicBackpackRecipe> BASIC_BACKPACK_RECIPE_SERIALIZER = registerRecipeSerializer("basic_backpack", BasicBackpackRecipe.Serializer::new);
 
 	public static final LootItemFunctionType COPY_BACKPACK_DATA = registerLootFunction("copy_backpack_data", () -> new LootItemFunctionType(new CopyBackpackDataFunction.Serializer()));
 	public static final LootItemConditionType LOOT_ENABLED_CONDITION = registerLootCondition("loot_enabled", () -> new LootItemConditionType(new SBLootEnabledCondition.Serializer()));
-	public static final Codec<SBLootModifierProvider.InjectLootModifier> INJECT_LOOT = registerLootModifier("inject_loot", () -> SBLootModifierProvider.InjectLootModifier.CODEC);
+//	public static final Codec<SBLootModifierProvider.InjectLootModifier> INJECT_LOOT = registerLootModifier("inject_loot", () -> SBLootModifierProvider.InjectLootModifier.CODEC);
 
 
 	// Register
@@ -298,9 +297,9 @@ public class ModItems {
 	public static <T extends LootItemConditionType> T registerLootCondition(String id, Supplier<T> supplier) {
 		return Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, SophisticatedBackpacks.getRL(id), supplier.get());
 	}
-	public static <T extends Codec<? extends IGlobalLootModifier>> T registerLootModifier(String id, Supplier<T> supplier) {
-		return Registry.register(PortingLibLoot.GLOBAL_LOOT_MODIFIER_SERIALIZERS, SophisticatedBackpacks.getRL(id), supplier.get());
-	}
+//	public static <T extends Codec<? extends IGlobalLootModifier>> T registerLootModifier(String id, Supplier<T> supplier) {
+//		return Registry.register(PortingLibLoot.GLOBAL_LOOT_MODIFIER_SERIALIZERS.get(), SophisticatedBackpacks.getRL(id), supplier.get());
+//	}
 
 	public static void register() {
 		registerDispenseBehavior();

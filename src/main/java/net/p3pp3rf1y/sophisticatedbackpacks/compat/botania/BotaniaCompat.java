@@ -1,4 +1,4 @@
-//package net.p3pp3rf1y.sophisticatedbackpacks.compat.botania;
+package net.p3pp3rf1y.sophisticatedbackpacks.compat.botania;//package net.p3pp3rf1y.sophisticatedbackpacks.compat.botania;
 //
 //import net.p3pp3rf1y.sophisticatedcore.compat.ICompat;
 //import net.p3pp3rf1y.sophisticatedcore.upgrades.magnet.MagnetUpgradeWrapper;

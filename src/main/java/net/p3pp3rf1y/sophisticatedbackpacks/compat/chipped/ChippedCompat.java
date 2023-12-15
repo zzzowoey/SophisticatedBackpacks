@@ -1,4 +1,4 @@
-/*
+package net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped;/*
 package net.p3pp3rf1y.sophisticatedbackpacks.compat.chipped;
 
 import earth.terrarium.chipped.common.compat.jei.ChippedRecipeCategory;
