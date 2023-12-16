@@ -33,7 +33,7 @@ public class BackpackStorage extends SavedData {
 	private BackpackStorage() {}
 
 	public static BackpackStorage get() {
-		if (LogicalSidedProvider.WORKQUEUE.get(EnvType.SERVER).isSameThread()) {
+		if (!LogicalSidedProvider.WORKQUEUE.get(EnvType.CLIENT).isSameThread()) {
 			MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 			if (server != null) {
 				ServerLevel overworld = server.getLevel(Level.OVERWORLD);
