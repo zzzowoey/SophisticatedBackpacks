@@ -1,5 +1,7 @@
 package net.p3pp3rf1y.sophisticatedbackpacks.common.gui;
 
+import io.github.fabricators_of_create.porting_lib.util.LogicalSidedProvider;
+import net.fabricmc.api.EnvType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -133,7 +135,7 @@ public class BackpackContainer extends StorageContainerMenuBase<IBackpackWrapper
 
 	@Override
 	protected boolean shouldSlotItemBeDroppedFromStorage(Slot slot) {
-		return slot.getItem().getItem() instanceof BackpackItem &&
+		return !LogicalSidedProvider.WORKQUEUE.get(EnvType.CLIENT).isSameThread() && slot.getItem().getItem() instanceof BackpackItem &&
 				!storageWrapper.getInventoryHandler().isItemValid(0, slot.getItemVariant());
 	}
 }
