@@ -144,18 +144,17 @@ def dependencies(DependencyHandler deps) {
 
     deps.modImplementation("committee.nova.mkb.fabric:mkb-${minecraft_version}:${mkb_mod_version}")
 
+    def modules = project(':SophisticatedCore')['port_lib_modules'].split(',')
     for (def module in port_lib_modules.split(',')) {
-        def modules = project(':SophisticatedCore')['port_lib_modules'].split(',')
         if (modules.contains(module)) {
-            deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version") {
-                exclude group:"net.fabricmc.fabric-api"
-            }
+            deps.modImplementation("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version")
         } else {
-            deps.include(deps.modApi("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version")) {
-                exclude group:"net.fabricmc.fabric-api"
-            }
+            deps.include(deps.modApi("io.github.fabricators_of_create.Porting-Lib:${module.trim()}:$port_lib_version"))
         }
     }
+    // loot 1127 有 bug，1158 才修复，但如果用 1158 会跟现版本的 create 冲突，所以只能用修复过的 1127
+    // Porting lib 是我见过最任性的库了，同版本之间就敢大改 API，是一点不考虑兼容性啊
+    deps.include(deps.modApi(name: "loot-$port_lib_version"))
 }
 
 def compat(DependencyHandler deps) {
