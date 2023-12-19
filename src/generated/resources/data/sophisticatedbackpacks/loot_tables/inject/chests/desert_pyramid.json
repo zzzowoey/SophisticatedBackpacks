@@ -3,6 +3,11 @@
   "pools": [
     {
       "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "sophisticatedbackpacks:loot_enabled"
+        }
+      ],
       "entries": [
         {
           "type": "minecraft:item",
@@ -28,7 +33,6 @@
           "weight": 89
         }
       ],
-      "name": "main",
       "rolls": 1.0
     }
   ],

@@ -580,7 +580,6 @@ public class SBPRecipeProvider extends FabricRecipeProvider {
 				.define('C', Tags.Items.CHESTS_WOODEN)
 				.unlockedBy(HAS_UPGRADE_BASE, has(ModItems.UPGRADE_BASE))
 				.save(consumer);
-		// TODO 没生效
 		new SmithingTransformRecipeBuilder(ModItems.SMITHING_BACKPACK_UPGRADE_RECIPE_SERIALIZER, Ingredient.of(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), Ingredient.of(ModItems.DIAMOND_BACKPACK),
 				Ingredient.of(Items.NETHERITE_INGOT), RecipeCategory.MISC, ModItems.NETHERITE_BACKPACK)
 				.unlocks("has_diamond_backpack", has(ModItems.DIAMOND_BACKPACK))

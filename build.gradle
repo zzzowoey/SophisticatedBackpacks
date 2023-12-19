@@ -154,7 +154,8 @@ def dependencies(DependencyHandler deps) {
     }
     // loot 1127 有 bug，1158 才修复，但如果用 1158 会跟现版本的 create 冲突，所以只能用修复过的 1127
     // Porting lib 是我见过最任性的库了，同版本之间就敢大改 API，是一点不考虑兼容性啊
-    deps.include(deps.modApi(name: "loot-$port_lib_version"))
+    // 彻底放弃使用 Porting lib loot 了，真的一言难尽
+    // deps.include(deps.modApi(name: "loot"))
 }
 
 def compat(DependencyHandler deps) {

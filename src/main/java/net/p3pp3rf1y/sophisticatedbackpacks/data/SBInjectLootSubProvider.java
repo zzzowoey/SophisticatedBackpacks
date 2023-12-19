@@ -71,11 +71,11 @@ public class SBInjectLootSubProvider implements LootTableSubProvider {
 	}
 
 	private static LootTable.Builder getLootTable(int emptyWeight, LootPoolEntryContainer.Builder<?>... entries) {
-		LootPool.Builder pool = LootPool.lootPool().name("main").setRolls(ConstantValue.exactly(1));
+		LootPool.Builder pool = LootPool.lootPool().setRolls(ConstantValue.exactly(1));
 		for (LootPoolEntryContainer.Builder<?> entry : entries) {
 			pool.add(entry);
 		}
-		pool.add(EmptyLootItem.emptyItem().setWeight(emptyWeight));
+		pool.add(EmptyLootItem.emptyItem().setWeight(emptyWeight)).when(SBLootEnabledCondition.builder());
 		return LootTable.lootTable().withPool(pool);
 	}
 }

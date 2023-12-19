@@ -65,7 +65,6 @@ public class SmithingBackpackUpgradeRecipe extends SmithingTransformRecipe imple
 		return compose;
 	}
 
-	// TODO 检查
 	public static class Serializer extends RecipeWrapperSerializer<SmithingTransformRecipe, SmithingBackpackUpgradeRecipe> {
 		public Serializer() {
 			super(SmithingBackpackUpgradeRecipe::new, RecipeSerializer.SMITHING_TRANSFORM);
